@@ -76,8 +76,8 @@ These do not stop webpack or Django from starting. They mean a non-Polio IASO im
 
 | Location | What to do |
 |---|---|
-| `iaso/api/logs.py` | Conditional import of `Campaign` and `POLIO_PERMISSION` for audit access. Same shape as SNT metrics cleanup. Acceptable short term. Prefer a tiny registry so core does not name Polio. |
-| `iaso/api/org_units.py` | `HasOrgUnitPermission` appends `POLIO_PERMISSION` when the plugin is on. Same: conditional, but Polio-named. Replace with “extra permissions contributed by plugins” or leave it next to the SNT metrics import as known debt. |
+| `iaso/api/logs.py` | Done. `plugin_log_access` asks each plugin's `has_log_access`. Polio answers for `Campaign`. |
+| `iaso/api/org_units.py` | Done. `extra_org_unit_permissions` collects `org_unit_extra_permissions` from plugin settings. Polio contributes `POLIO_PERMISSION`. |
 | `iaso/modules.py` | `MODULE_POLIO_PROJECT`. SNT’s module constant lives here too. Leave it. |
 | `hat/assets/js/apps/Iaso/utils/permissions.ts` | Done. Polio codenames are gone. Plugin screens import `plugins/polio/js/src/constants/permissions.ts`. |
 | `hat/.../users/permissionsMessages.ts` and `en.json` / `fr.json` | Labels and tooltips for Polio permissions. SNT only has a group title in `permissionsGroupsMessages.ts`. Move Polio strings to `plugins/polio/js/src/constants/translations/`. The Users screen must keep resolving labels for plugin permissions (it already receives codename, label, module from the API). |
@@ -131,7 +131,7 @@ Embedded dashboard URLs and WHO SSO paths stay until the published URLs are read
 
 Only after the repo split is in use:
 
-- Replace the Polio branches in `logs.py` and `org_units.py` with a plugin registry.
+- Done: `logs.py` and `org_units.py` call `plugin_log_access` and `extra_org_unit_permissions`. Polio implements both in `plugin_settings.py`.
 - Generalize the beanstalk “plugin not installed” skip.
 - Collapse `is_polio_plugin_active` into `is_plugin_active("polio")`.
 - Move WHO login paths when the identity provider is updated.
