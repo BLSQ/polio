@@ -8,6 +8,7 @@
     "iaso.forms.options.emailFormat": "Veuillez encoder des adresses email valides",
     "iaso.forms.options.urlFormat": "Veuillez utiliser une URL valide ",
     "iaso.forms.options.validation": "Validation",
+    "iaso.groups.blockOfCountries": "Groupe de pays",
     "iaso.incident.inventoryUnusableMovement": "Flacons inutilisables entrés : {movement}",
     "iaso.incident.inventoryUsableMovement": "Flacons utilisables entrés : {movement}",
     "iaso.incident.missingMovement": "Flacons utilisables sortis : {movement}",

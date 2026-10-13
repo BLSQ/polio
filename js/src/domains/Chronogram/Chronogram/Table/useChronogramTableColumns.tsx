@@ -6,7 +6,7 @@ import {
     DateTimeCellRfc,
 } from '../../../../../../../../hat/assets/js/apps/Iaso/components/Cells/DateTimeCell';
 import { DisplayIfUserHasPerm } from '../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
-import * as Permission from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+import * as Permission from '../../../../constants/permissions';
 import { baseUrls } from '../../../../constants/urls';
 
 import MESSAGES from '../messages';
@@ -93,7 +93,7 @@ export const useChronogramTableColumns = (): Column[] => {
                                 url={`/${baseUrls.chronogramDetails}/chronogram_id/${settings.row.original.id}`}
                             />
                             <DisplayIfUserHasPerm
-                                permissions={[Permission.POLIO_CHRONOGRAM]}
+                                permissions={[Permission.CHRONOGRAM]}
                             >
                                 {/* @ts-ignore */}
                                 <DeleteChronogram

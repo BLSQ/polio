@@ -8,6 +8,7 @@
     "iaso.forms.options.emailFormat": "Please use correctly formatted email addresses",
     "iaso.forms.options.urlFormat": "Please use correctly formatted URL",
     "iaso.forms.options.validation": "Validation",
+    "iaso.groups.blockOfCountries": "Block of countries",
     "iaso.incident.inventoryUnusableMovement": "Unusable vials in: {movement}",
     "iaso.incident.inventoryUsableMovement": "Usable vials in: {movement}",
     "iaso.incident.missingMovement": "Usable vials out: {movement}",

@@ -16,9 +16,9 @@ import { useTabs } from '../../../../../../../../hat/assets/js/apps/Iaso/hooks/u
 import { useParamsObject } from '../../../../../../../../hat/assets/js/apps/Iaso/routing/hooks/useParamsObject';
 import { Optional } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import {
-    POLIO_SUPPLY_CHAIN_WRITE,
-    POLIO_SUPPLY_CHAIN_READ,
-} from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+    SUPPLYCHAIN_READ,
+    SUPPLYCHAIN_WRITE,
+} from '../../../../constants/permissions';
 import { baseUrls } from '../../../../constants/urls';
 import { PREALERT, VAR, VRF } from '../constants';
 import { useGetArrivalReportsDetails } from '../hooks/api/arrivalReports';
@@ -189,10 +189,7 @@ export const VaccineSupplyChainDetails: FunctionComponent = () => {
                             />
                         )}
                         <DisplayIfUserHasPerm
-                            permissions={[
-                                POLIO_SUPPLY_CHAIN_WRITE,
-                                POLIO_SUPPLY_CHAIN_READ,
-                            ]}
+                            permissions={[SUPPLYCHAIN_WRITE, SUPPLYCHAIN_READ]}
                         >
                             <Grid
                                 container

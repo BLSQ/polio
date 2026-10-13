@@ -1,11 +1,11 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import { useFormikContext } from 'formik';
 import { userHasOneOfPermissions } from '../../../../../../../../../hat/assets/js/apps/Iaso/domains/users/utils';
-import {
-    POLIO_SUPPLY_CHAIN_READ,
-    POLIO_SUPPLY_CHAIN_WRITE,
-} from '../../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
 import { useCurrentUser } from '../../../../../../../../../hat/assets/js/apps/Iaso/utils/usersUtils';
+import {
+    SUPPLYCHAIN_READ,
+    SUPPLYCHAIN_WRITE,
+} from '../../../../../constants/permissions';
 import { PREALERT } from '../../constants';
 import MESSAGES from '../../messages';
 import {
@@ -35,7 +35,7 @@ export const PreAlerts: FunctionComponent<Props> = ({
     const currentUser = useCurrentUser();
 
     const theMessage = userHasOneOfPermissions(
-        [POLIO_SUPPLY_CHAIN_READ, POLIO_SUPPLY_CHAIN_WRITE],
+        [SUPPLYCHAIN_READ, SUPPLYCHAIN_WRITE],
         currentUser,
     )
         ? MESSAGES.addPreAlert

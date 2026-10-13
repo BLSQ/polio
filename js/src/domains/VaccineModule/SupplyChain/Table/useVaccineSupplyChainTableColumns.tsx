@@ -11,12 +11,12 @@ import DeleteDialog from '../../../../../../../../hat/assets/js/apps/Iaso/compon
 import { DisplayIfUserHasPerm } from '../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
 import { userHasOneOfPermissions } from '../../../../../../../../hat/assets/js/apps/Iaso/domains/users/utils';
 import { ColumnCell } from '../../../../../../../../hat/assets/js/apps/Iaso/types/general';
-import {
-    POLIO_SUPPLY_CHAIN_WRITE,
-    POLIO_SUPPLY_CHAIN_READ,
-    POLIO_SUPPLY_CHAIN_READ_ONLY,
-} from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
 import { useCurrentUser } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/usersUtils';
+import {
+    SUPPLYCHAIN_READ,
+    SUPPLYCHAIN_READ_ONLY,
+    SUPPLYCHAIN_WRITE,
+} from '../../../../constants/permissions';
 import { baseUrls } from '../../../../constants/urls';
 import { CampaignNameWithWarning } from '../../StockManagement/StockVariation/Table/CampaignNameWithWarning';
 import { useDeleteVrf } from '../hooks/api/vrf';
@@ -146,15 +146,15 @@ export const useVaccineSupplyChainTableColumns = (): Column[] => {
                         <>
                             <DisplayIfUserHasPerm
                                 permissions={[
-                                    POLIO_SUPPLY_CHAIN_WRITE,
-                                    POLIO_SUPPLY_CHAIN_READ,
-                                    POLIO_SUPPLY_CHAIN_READ_ONLY,
+                                    SUPPLYCHAIN_WRITE,
+                                    SUPPLYCHAIN_READ,
+                                    SUPPLYCHAIN_READ_ONLY,
                                 ]}
                             >
                                 <IconButton
                                     icon={
                                         userHasOneOfPermissions(
-                                            [POLIO_SUPPLY_CHAIN_READ_ONLY],
+                                            [SUPPLYCHAIN_READ_ONLY],
                                             currentUser,
                                         )
                                             ? 'remove-red-eye'
@@ -162,7 +162,7 @@ export const useVaccineSupplyChainTableColumns = (): Column[] => {
                                     }
                                     overrideIcon={
                                         !userHasOneOfPermissions(
-                                            [POLIO_SUPPLY_CHAIN_READ_ONLY],
+                                            [SUPPLYCHAIN_READ_ONLY],
                                             currentUser,
                                         )
                                             ? EditIcon
@@ -170,7 +170,7 @@ export const useVaccineSupplyChainTableColumns = (): Column[] => {
                                     }
                                     tooltipMessage={
                                         userHasOneOfPermissions(
-                                            [POLIO_SUPPLY_CHAIN_READ_ONLY],
+                                            [SUPPLYCHAIN_READ_ONLY],
                                             currentUser,
                                         )
                                             ? MESSAGES.see
@@ -181,8 +181,8 @@ export const useVaccineSupplyChainTableColumns = (): Column[] => {
                             </DisplayIfUserHasPerm>
                             <DisplayIfUserHasPerm
                                 permissions={[
-                                    POLIO_SUPPLY_CHAIN_WRITE,
-                                    POLIO_SUPPLY_CHAIN_READ,
+                                    SUPPLYCHAIN_WRITE,
+                                    SUPPLYCHAIN_READ,
                                 ]}
                             >
                                 <DeleteDialog

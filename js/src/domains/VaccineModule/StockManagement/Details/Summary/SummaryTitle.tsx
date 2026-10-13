@@ -5,9 +5,9 @@ import { IconButton } from 'bluesquare-components';
 import { DisplayIfUserHasPerm } from '../../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
 
 import {
-    POLIO_SUPPLY_CHAIN_READ,
-    POLIO_SUPPLY_CHAIN_WRITE,
-} from '../../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+    SUPPLYCHAIN_READ,
+    SUPPLYCHAIN_WRITE,
+} from '../../../../../constants/permissions';
 import { baseUrls } from '../../../../../constants/urls';
 import MESSAGES from '../../messages';
 
@@ -20,10 +20,7 @@ export const SummaryTitle: FunctionComponent<Props> = ({ title, id }) => {
             <span>{title}</span>
             {id && (
                 <DisplayIfUserHasPerm
-                    permissions={[
-                        POLIO_SUPPLY_CHAIN_READ,
-                        POLIO_SUPPLY_CHAIN_WRITE,
-                    ]}
+                    permissions={[SUPPLYCHAIN_READ, SUPPLYCHAIN_WRITE]}
                 >
                     <IconButton
                         overrideIcon={OpenInNewIcon}

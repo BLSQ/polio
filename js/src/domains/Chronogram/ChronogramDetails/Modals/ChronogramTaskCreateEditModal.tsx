@@ -13,10 +13,10 @@ import { isEqual } from 'lodash';
 import { EditIconButton } from '../../../../../../../../hat/assets/js/apps/Iaso/components/Buttons/EditIconButton';
 import TextInput from '../../../../../../../../hat/assets/js/apps/Iaso/domains/pages/components/TextInput';
 import { userHasPermission } from '../../../../../../../../hat/assets/js/apps/Iaso/domains/users/utils';
-import * as Permission from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
 import { useCurrentUser } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/usersUtils';
 import { NumberInput } from '../../../../components/Inputs/NumberInput';
 import { SingleSelect } from '../../../../components/Inputs/SingleSelect';
+import * as Permission from '../../../../constants/permissions';
 import { ChronogramTask, Chronogram } from '../../Chronogram/types';
 import { ChronogramTaskMetaData } from '../../types';
 import { useCreateEditChronogramTask } from '../api/useCreateEditChronogramTask';
@@ -67,11 +67,11 @@ const CreateEditChronogramTaskModal: FunctionComponent<Props> = ({
 
     const currentUser = useCurrentUser();
     const userHasReadAndWritePerm = userHasPermission(
-        Permission.POLIO_CHRONOGRAM,
+        Permission.CHRONOGRAM,
         currentUser,
     );
     const userHasRestrictedWritePerm = userHasPermission(
-        Permission.POLIO_CHRONOGRAM_RESTRICTED_WRITE,
+        Permission.CHRONOGRAM_RESTRICTED_WRITE,
         currentUser,
     );
 

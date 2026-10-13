@@ -1,4 +1,5 @@
 import { Plugin } from 'Iaso/plugins/types';
+import { BlockOfCountriesField } from './src/components/BlockOfCountriesField';
 import { Disclaimer } from './src/components/Disclaimer';
 import { menu } from './src/constants/menu';
 import { redirections } from './src/constants/redirections';
@@ -33,6 +34,10 @@ const config: Plugin = {
         {
             key: 'tasks.rowAction',
             component: PolioNotificationTaskAction,
+        },
+        {
+            key: 'groups.dialogField',
+            component: BlockOfCountriesField,
         },
     ],
     // homeOffline: () => <div>OFFLINE</div>,

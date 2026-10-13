@@ -10,9 +10,9 @@ import { DisplayIfUserHasPerm } from '../../../../../../../hat/assets/js/apps/Ia
 import TopBar from '../../../../../../../hat/assets/js/apps/Iaso/components/nav/TopBarComponent';
 import { useParamsObject } from '../../../../../../../hat/assets/js/apps/Iaso/routing/hooks/useParamsObject';
 import {
-    POLIO_SUPPLY_CHAIN_READ,
-    POLIO_SUPPLY_CHAIN_WRITE,
-} from '../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+    SUPPLYCHAIN_READ,
+    SUPPLYCHAIN_WRITE,
+} from '../../../constants/permissions';
 import { baseUrls } from '../../../constants/urls';
 import { useStyles } from '../../../styles/theme';
 import { VaccineSupplyChainFilters } from './Filters/VaccineSupplyChainFilters';
@@ -45,10 +45,7 @@ export const VaccineSupplyChain: FunctionComponent = () => {
             <Box className={classes.containerFullHeightNoTabPadded}>
                 <VaccineSupplyChainFilters params={params} />
                 <DisplayIfUserHasPerm
-                    permissions={[
-                        POLIO_SUPPLY_CHAIN_WRITE,
-                        POLIO_SUPPLY_CHAIN_READ,
-                    ]}
+                    permissions={[SUPPLYCHAIN_WRITE, SUPPLYCHAIN_READ]}
                 >
                     <Grid container justifyContent="flex-end">
                         <Box mt={2}>

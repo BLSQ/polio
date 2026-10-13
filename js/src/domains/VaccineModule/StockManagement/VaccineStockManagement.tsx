@@ -5,9 +5,9 @@ import { DisplayIfUserHasPerm } from '../../../../../../../hat/assets/js/apps/Ia
 import TopBar from '../../../../../../../hat/assets/js/apps/Iaso/components/nav/TopBarComponent';
 import { useParamsObject } from '../../../../../../../hat/assets/js/apps/Iaso/routing/hooks/useParamsObject';
 import {
-    POLIO_VACCINE_STOCK_WRITE,
-    POLIO_VACCINE_STOCK_READ,
-} from '../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+    STOCK_MANAGEMENT_READ,
+    STOCK_MANAGEMENT_WRITE,
+} from '../../../constants/permissions';
 import { baseUrls } from '../../../constants/urls';
 import { useStyles } from '../../../styles/theme';
 import { CreateVaccineStock } from './CreateVaccineStock/CreateVaccineStock';
@@ -32,8 +32,8 @@ export const VaccineStockManagement: FunctionComponent = () => {
                 <VaccineStockManagementFilters params={params} />
                 <DisplayIfUserHasPerm
                     permissions={[
-                        POLIO_VACCINE_STOCK_WRITE,
-                        POLIO_VACCINE_STOCK_READ,
+                        STOCK_MANAGEMENT_WRITE,
+                        STOCK_MANAGEMENT_READ,
                     ]}
                 >
                     <Box mt={2} justifyContent="flex-end" display="flex">

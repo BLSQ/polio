@@ -7,7 +7,7 @@ import { DisplayIfUserHasPerm } from '../../../../../../../../hat/assets/js/apps
 import InputComponent from '../../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import { SearchButton } from '../../../../../../../../hat/assets/js/apps/Iaso/components/SearchButton';
 import { useFilterState } from '../../../../../../../../hat/assets/js/apps/Iaso/hooks/useFilterState';
-import * as Permission from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+import * as Permission from '../../../../constants/permissions';
 
 import { baseUrls } from '../../../../constants/urls';
 import { useGetCountries } from '../../../../hooks/useGetCountries';
@@ -129,7 +129,7 @@ export const ChronogramFilters: FunctionComponent<Props> = ({ params }) => {
                     </Box>
                 </Grid>
             </Grid>
-            <DisplayIfUserHasPerm permissions={[Permission.POLIO_CHRONOGRAM]}>
+            <DisplayIfUserHasPerm permissions={[Permission.CHRONOGRAM]}>
                 <Grid container item justifyContent="flex-end" mt={4}>
                     <Box mr={2}>
                         <Button

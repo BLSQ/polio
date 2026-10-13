@@ -9,7 +9,7 @@ import {
 } from '../../../../../../../../hat/assets/js/apps/Iaso/components/Cells/DateTimeCell';
 import { DisplayIfUserHasPerm } from '../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
 
-import * as Permission from '../../../../../../../../hat/assets/js/apps/Iaso/utils/permissions';
+import * as Permission from '../../../../constants/permissions';
 import { ChronogramTaskMetaData } from '../../types';
 import MESSAGES from '../messages';
 import { EditChronogramTaskModal } from '../Modals/ChronogramTaskCreateEditModal';
@@ -90,7 +90,7 @@ export const useChronogramDetailsTableColumn = (
                                 chronogramTask={settings.row.original}
                             />
                             <DisplayIfUserHasPerm
-                                permissions={[Permission.POLIO_CHRONOGRAM]}
+                                permissions={[Permission.CHRONOGRAM]}
                             >
                                 {/* @ts-ignore */}
                                 <DeleteChronogramTask
