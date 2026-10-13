@@ -84,7 +84,7 @@ These do not stop webpack or Django from starting. They mean a non-Polio IASO im
 | Tasks UI | Done. `ActionCell` renders every `tasks.rowAction` custom component. Polio registers `PolioNotificationTaskAction`. `GET /api/polio/notifications/for_task/<task_id>/` reads the import pk from `Task.params.kwargs`. `TaskSerializer` no longer has `polio_notification_import_id`. |
 | `GroupsDialog.tsx` | Done. The dialog renders every `groups.dialogField` custom component. Polio registers `BlockOfCountriesField`, gated on `POLIO` / `POLIO_ADMIN`. `Group.block_of_countries` stays a core column and is still saved by the dialog. |
 | `hat/dashboard/urls.py` | Five `/dashboard/polio/embedded*` routes serving the SPA shell. They do not import Polio Python. SNT mounts its extra pages from `plugins/snt_malaria/urls.py`. Move these to the plugin if the URL can be `/polio/...`, or keep thin SPA routes in core if PowerBI bookmarks are already published under `/dashboard/polio/`. Do not break existing embed URLs; add redirects if the path changes. |
-| `hat/settings.py` WHO SSO | `login_path` / `callback_path` / `token_path` are `polio/login/`, `polio/login/callback`, `polio/token/`. Live URLs. Keep them until the WHO app registration changes, then redirect. |
+| `hat/settings.py` WHO SSO | Done. Paths stay `polio/login/`, `polio/login/callback`, `polio/token/`. The WHO Entra app registration cannot be changed, so these redirect URIs stay as they are. |
 | PowerBI refresh snippet | Done. Lives at `plugins/polio/templates/iaso/pages/refresh_data_set_snippet.html`. Core pages include it with `include_optional`, so a deploy without Polio still renders. |
 | `cron.yaml` | Done. The three Polio jobs are in `plugins/polio/cron.yaml`. The root file keeps only core jobs. CI merges plugin `cron.yaml` files into the file the worker deploys. |
 | `beanstalk_worker/views.py` | Done. The Polio skip is removed. Plugin cron jobs are only scheduled on a deploy that installs that plugin. |
@@ -134,7 +134,7 @@ Only after the repo split is in use:
 - Done: `logs.py` and `org_units.py` call `plugin_log_access` and `extra_org_unit_permissions`. Polio implements both in `plugin_settings.py`.
 - Done: the Polio skip in `task_launcher` is removed. A plugin cron file is only merged on a deploy that installs that plugin.
 - Done: `is_polio_plugin_active()` stays as its own helper, like the SNT one.
-- Move WHO login paths when the identity provider is updated.
+- Done: WHO login paths stay `polio/login/`, `polio/login/callback`, and `polio/token/`. The Entra redirect URIs cannot be updated.
 
 ## Dev workflow after the split
 
