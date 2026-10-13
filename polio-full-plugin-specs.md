@@ -55,7 +55,7 @@ These are the differences that stop a SNT-style split. SNT does not have them.
 
 ### 2. Polio repo split
 
-`.gitignore` now ignores `plugins/polio`, same as SNT and SaaS. Still open: a repo that holds only that history, and dev/CI cloning it the way the SNT README describes. That is phase 3.
+`.gitignore` ignores `plugins/polio`. The history lives in `github.com/BLSQ/polio`, cloned as `plugins/polio`. The plugin README has the clone steps. Still open: CI (phase 3 steps 4–5).
 
 ### 3. Done — `plugin_settings.py`
 
@@ -121,9 +121,9 @@ Embedded dashboard URLs and WHO SSO paths stay until the published URLs are read
 
 ### Phase 3 — Split the git repo
 
-1. New repository with the history of `plugins/polio` only. Package layout stays `plugins/polio/...` when cloned (the clone directory name is `polio`).
+1. Done: `github.com/BLSQ/polio` holds the plugin history. Cloned into `plugins/polio`, package path stays `plugins.polio`.
 2. Done: `.gitignore` ignores `plugins/polio`.
-3. README section identical in spirit to SNT: clone into `plugins/`, set `PLUGINS=polio`.
+3. Done: `plugins/polio/README.md` starts with the SNT-style setup: clone IASO, clone this repo into `plugins/polio`, set `PLUGINS=polio`, then `docker compose up`.
 4. IASO CI: do not clone Polio for the default pipeline. Polio CI: clone IASO, clone this repo into `plugins/polio`, set `PLUGINS=polio`, run Polio pytest and the frontend checks.
 5. Docker: `COPY plugins/` already picks up whatever was cloned before the image build. The Polio image build clones the repo first. Document the pin (tag or SHA) the way other external plugins are pinned.
 
@@ -140,7 +140,7 @@ Only after the repo split is in use:
 
 ```bash
 cd plugins
-git clone git@github.com:BLSQ/polio.git polio   # final URL TBD
+git clone git@github.com:BLSQ/polio.git polio
 ```
 
 IASO `.env`:

@@ -1,6 +1,41 @@
-# Polio Campaign
+# Polio IASO plugin
 
-# Preparedness Spreadsheet
+This repo is the Polio plugin for IASO. It is not part of the IASO git tree. Clone it into `plugins/polio` and enable it with `PLUGINS=polio`.
+
+## Getting started
+
+1. Clone IASO:
+
+```bash
+git clone git@github.com:BLSQ/iaso.git
+```
+
+2. Inside the IASO repo, clone this repo into `plugins/`:
+
+```bash
+cd plugins
+git clone git@github.com:BLSQ/polio.git polio
+```
+
+The folder name must be `polio`. Django loads the app as `plugins.polio`.
+
+3. In the IASO `.env` (copy `.env.dist` to `.env` first if you do not have one):
+
+```
+PLUGINS=polio
+```
+
+Add `polio` to the list if other plugins are already set, for example `PLUGINS=polio,snt_malaria`.
+
+4. Start IASO:
+
+```bash
+docker compose up
+```
+
+Webpack bundles `plugins/polio/js/config.tsx` with the rest of the app. There is no separate frontend dev server. The Polio menu shows on accounts that have the Polio module enabled.
+
+## Preparedness spreadsheet
 
 Vaccination Round require some amount of preparation at different regional level
 before
