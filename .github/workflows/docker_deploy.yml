@@ -1,0 +1,46 @@
+name: Deploy polio docker
+run-name: Deploy polio docker ${{ inputs.branch }} (IASO ${{ inputs.iaso_ref }}) to ${{ inputs.environment }} by @${{ github.actor }}
+
+on:
+    workflow_dispatch:
+        inputs:
+            # Branch is chosen by default in github manual actions
+            environment:
+                description: Env (campaigns-staging) or exact server name (iaso-campaigns-web-docker, iaso-campaigns-worker-docker)
+                required: true
+                default: campaigns-staging
+                type: string
+            iaso_branch:
+                description: Core IASO branch to deploy (docker-compose, cron files; develop by default)
+                required: false
+                default: develop
+                type: string
+            polio_branch:
+                description: polio branch to deploy (docker-compose extensions)
+                required: true
+                default: develop
+                type: string
+            image_tag:
+                description: Tag to deploy (without the "blsq/polio:" prefix, e.g. "develop", "prod", "IA-4856", or "v2026.06.01")
+                required: true
+                default: develop
+                type: string
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+    packages: read
+
+jobs:
+    deploy:
+        uses: BLSQ/iaso-ci/.github/workflows/docker_deploy.yml@main
+        with:
+            iaso_branch: ${{ github.event.inputs.iaso_branch }}
+            plugin_branch: ${{ github.event.inputs.polio_branch }}
+            environment: ${{ github.event.inputs.environment }}
+            image_tag: ${{ github.event.inputs.image_tag }}
+            plugin_name: polio
+        secrets: inherit
