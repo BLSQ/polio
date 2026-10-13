@@ -183,11 +183,11 @@ e.g. `['test@bluesquarehub.com']`
 
 The file need to be readable to all.
 
-Note that the timeout in the AWS task system needed to be increased because the import take around an hour, otherwise the task got run in a loop. The EBS cron job is defined by a `cron.yaml` in root of project.
+Note that the timeout in the AWS task system needed to be increased because the import take around an hour, otherwise the task got run in a loop. The schedule is `refresh_preparedness_data_task` in `plugins/polio/cron.yaml`. CI merges that file into the root `cron.yaml` deployed to the worker.
 
 # Cron task
 
-This is now implemented via the background task system. See cron.yaml https://aws.amazon.com/premiumsupport/knowledge-center/elastic-beanstalk-cron-job-worker-tier/
+This is now implemented via the background task system. Schedules are in `plugins/polio/cron.yaml`. CI merges plugin cron files into the root `cron.yaml` the worker reads. See https://aws.amazon.com/premiumsupport/knowledge-center/elastic-beanstalk-cron-job-worker-tier/
 
 - To create a `/launch_task/<task_name>/<user_name>/` url that will be called by EBS native cron job management, where :
 - `task_name` is a fully qualified task_name = module path + task fn name, example : 'plugins.polio.tasks.refresh_preparedness_data.refresh_data'
