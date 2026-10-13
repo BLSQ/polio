@@ -87,9 +87,9 @@ These do not stop webpack or Django from starting. They mean a non-Polio IASO im
 | `hat/settings.py` WHO SSO | `login_path` / `callback_path` / `token_path` are `polio/login/`, `polio/login/callback`, `polio/token/`. Live URLs. Keep them until the WHO app registration changes, then redirect. |
 | PowerBI refresh snippet | Done. Lives at `plugins/polio/templates/iaso/pages/refresh_data_set_snippet.html`. Core pages include it with `include_optional`, so a deploy without Polio still renders. |
 | `cron.yaml` | Done. The three Polio jobs are in `plugins/polio/cron.yaml`. The root file keeps only core jobs. CI merges plugin `cron.yaml` files into the file the worker deploys. |
-| `beanstalk_worker/views.py` | Skips task names starting with `plugins.polio` when the app is not installed. Generalize to any `plugins.*` task whose app is not installed, so the worker does not name Polio. |
+| `beanstalk_worker/views.py` | Done. The Polio skip is removed. Plugin cron jobs are only scheduled on a deploy that installs that plugin. |
 | `lqas_pipeline_code` | Field on the core OpenHexa config, read by Planning sampling (`PipelineSelect.tsx`, `SamplingResultDialog.tsx`). This is core Planning, not a Polio screen. Leave it. |
-| `iaso/plugins.py` | `is_polio_plugin_active()`. SNT has the same helper. Leave it until helpers are collapsed into `is_plugin_active(name)`. |
+| `iaso/plugins.py` | Done. `is_polio_plugin_active()` stays, same shape as `is_snt_malaria_plugin_active()`. |
 
 ## Out of scope
 
@@ -132,8 +132,8 @@ Embedded dashboard URLs and WHO SSO paths stay until the published URLs are read
 Only after the repo split is in use:
 
 - Done: `logs.py` and `org_units.py` call `plugin_log_access` and `extra_org_unit_permissions`. Polio implements both in `plugin_settings.py`.
-- Generalize the beanstalk “plugin not installed” skip.
-- Collapse `is_polio_plugin_active` into `is_plugin_active("polio")`.
+- Done: the Polio skip in `task_launcher` is removed. A plugin cron file is only merged on a deploy that installs that plugin.
+- Done: `is_polio_plugin_active()` stays as its own helper, like the SNT one.
 - Move WHO login paths when the identity provider is updated.
 
 ## Dev workflow after the split
