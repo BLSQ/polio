@@ -907,5 +907,7 @@
     "iaso.polio.validation.virusNotificationAfterOutbreakDeclarationError": "La date de notification virus doit précéder la déclaration de l'épidémie",
     "iaso.projets.featureflag.submission_validation_workflow": "Web: Workflows de validation",
     "iaso.projets.featureflag.tooltip.submission_validation_workflow": "Voir et éditer les workflows de validation dans l'interface web",
-    "iaso.task.label.gotoLqasForCountry": "Voir la page LQAS"
+    "iaso.task.label.gotoLqasForCountry": "Voir la page LQAS",
+    "iaso.tasks.polioNotificationImport.details": "Détails de l'importation des notifications Polio",
+    "iaso.tasks.polioNotificationImport.errors": "{count} erreur(s). L'import des données suivantes a échoué."
 }

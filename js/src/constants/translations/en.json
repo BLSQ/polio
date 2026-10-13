@@ -906,5 +906,7 @@
     "iaso.polio.validation.onsetAfterNotificationError": "Date of onset should be before virus notification",
     "iaso.polio.validation.onsetAfterOutbreakDeclarationError": "Date of onset should be before outbreak declaration",
     "iaso.polio.validation.virusNotificationAfterOutbreakDeclarationError": "Virus notification should be before outbreak declaration",
-    "iaso.task.label.gotoLqasForCountry": "See LQAS page"
+    "iaso.task.label.gotoLqasForCountry": "See LQAS page",
+    "iaso.tasks.polioNotificationImport.details": "Polio Notifications Import Details",
+    "iaso.tasks.polioNotificationImport.errors": "{count} error(s). The following data couldn't be imported."
 }

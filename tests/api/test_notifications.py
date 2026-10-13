@@ -481,3 +481,47 @@ class NotificationViewSetTestCase(APITestCase):
         )
         response = self.client.get(f"/api/polio/notifications/{notification_import.pk}/get_import_details/")
         self.assertEqual(response.status_code, 404)
+
+    def test_action_for_task(self):
+        self.client.force_authenticate(self.user)
+        notification_import = NotificationImport.objects.create(
+            file="foo.xlsx", account=self.account, created_by=self.user, errors=[{"KEY": "value"}]
+        )
+        task = m.Task.objects.create(
+            account=self.account,
+            created_by=self.user,
+            status="SUCCESS",
+            name="create_polio_notifications_async",
+            params={"args": [], "kwargs": {"pk": notification_import.pk}},
+        )
+        response = self.client.get(f"/api/polio/notifications/for_task/{task.pk}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["id"], notification_import.pk)
+
+    def test_action_for_task_wrong_account(self):
+        self.client.force_authenticate(self.user)
+        other_account = m.Account.objects.create(name="Other task account", default_version=self.source_version)
+        notification_import = NotificationImport.objects.create(
+            file="foo.xlsx", account=self.account, created_by=self.user
+        )
+        task = m.Task.objects.create(
+            account=other_account,
+            created_by=self.user,
+            status="SUCCESS",
+            name="create_polio_notifications_async",
+            params={"kwargs": {"pk": notification_import.pk}},
+        )
+        response = self.client.get(f"/api/polio/notifications/for_task/{task.pk}/")
+        self.assertEqual(response.status_code, 404)
+
+    def test_action_for_task_without_import_pk(self):
+        self.client.force_authenticate(self.user)
+        task = m.Task.objects.create(
+            account=self.account,
+            created_by=self.user,
+            status="SUCCESS",
+            name="create_polio_notifications_async",
+            params={},
+        )
+        response = self.client.get(f"/api/polio/notifications/for_task/{task.pk}/")
+        self.assertEqual(response.status_code, 404)

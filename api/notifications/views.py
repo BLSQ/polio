@@ -1,7 +1,7 @@
 import django_filters
 
 from django.db.models import F
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from iaso.api.common import Paginator
 from iaso.models import OrgUnitType
+from iaso.models.task import Task
 from iaso.utils.encryption import calculate_md5
 from iaso.utils.virus_scan.clamav import scan_uploaded_file_for_virus
 from plugins.polio.api.notifications.filters import NotificationFilter
@@ -101,5 +102,21 @@ class NotificationViewSet(viewsets.ModelViewSet):
         """
         account = request.user.iaso_profile.account
         notification_import = get_object_or_404(NotificationImport, account=account, pk=pk)
+        serializer = NotificationImportSerializer(notification_import)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path=r"for_task/(?P<task_id>\d+)")
+    def for_task(self, request, task_id=None):
+        """Import details for a create_polio_notifications_async task.
+
+        The task API does not expose params. The import pk is stored there, so this
+        endpoint resolves it for the caller's account.
+        """
+        account = request.user.iaso_profile.account
+        task = get_object_or_404(Task, pk=task_id, account=account, name="create_polio_notifications_async")
+        import_pk = (task.params or {}).get("kwargs", {}).get("pk")
+        if import_pk is None:
+            raise Http404
+        notification_import = get_object_or_404(NotificationImport, account=account, pk=import_pk)
         serializer = NotificationImportSerializer(notification_import)
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -10,6 +10,7 @@ import {
     baseUrls,
     paramsConfig,
 } from './src/constants/urls';
+import { PolioNotificationTaskAction } from './src/domains/Notifications/TaskRowAction';
 
 const translations = {
     fr,
@@ -28,6 +29,10 @@ const config: Plugin = {
         {
             key: 'topbar.disclaimer',
             component: Disclaimer,
+        },
+        {
+            key: 'tasks.rowAction',
+            component: PolioNotificationTaskAction,
         },
     ],
     // homeOffline: () => <div>OFFLINE</div>,
