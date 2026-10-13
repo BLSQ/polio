@@ -1,3 +1,0 @@
-# *** plugin for IASO
-
-TBC
