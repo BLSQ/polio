@@ -9,6 +9,7 @@ import { menu } from './src/constants/menu';
 import { redirections } from './src/constants/redirections';
 import { routes } from './src/constants/routes';
 import en from './src/constants/translations/en.json';
+import es from './src/constants/translations/es.json';
 import fr from './src/constants/translations/fr.json';
 import {
     DASHBOARD_BASE_URL,
@@ -18,8 +19,9 @@ import {
 import { PolioNotificationTaskAction } from './src/domains/Notifications/TaskRowAction';
 
 const translations = {
-    fr,
     en,
+    es,
+    fr,
 };
 
 const config: Plugin = {
