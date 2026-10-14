@@ -1,16 +1,7 @@
 """
-URL patterns for Polio public pages
+Plugin URL patterns mounted at /polio/.
+
+Public embed pages are in dashboard_urls.py so they stay on /dashboard/polio/embedded*.
 """
 
-from django.urls import re_path
-
-from hat.dashboard.views import embeddable_iaso
-
-
-urlpatterns = [
-    re_path(r"^polio/embeddedCalendar/.*$", embeddable_iaso, name="embedded_calendar"),
-    re_path(r"^polio/embeddedVaccineRepository/.*$", embeddable_iaso, name="embedded_vaccine_repository"),
-    re_path(r"^polio/embeddedVaccineStock/.*$", embeddable_iaso, name="embedded_vaccine_stock"),
-    re_path(r"^polio/embeddedLqasCountry/.*$", embeddable_iaso, name="embedded_lqas_country"),
-    re_path(r"^polio/embeddedLqasMap/.*$", embeddable_iaso, name="embedded_lqas_map"),
-]
+urlpatterns = []
