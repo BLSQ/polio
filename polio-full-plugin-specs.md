@@ -80,15 +80,14 @@ These do not stop webpack or Django from starting. They mean a non-Polio IASO im
 | `iaso/api/org_units.py` | Done. `extra_org_unit_permissions` collects `org_unit_extra_permissions` from plugin settings. Polio contributes `POLIO_PERMISSION`. |
 | `iaso/modules.py` | `MODULE_POLIO_PROJECT`. SNT’s module constant lives here too. Leave it. |
 | `hat/assets/js/apps/Iaso/utils/permissions.ts` | Done. Polio codenames are gone. Plugin screens import `plugins/polio/js/src/constants/permissions.ts`. |
-| `hat/.../users/permissionsMessages.ts` and `en.json` / `fr.json` | Labels and tooltips for Polio permissions. SNT only has a group title in `permissionsGroupsMessages.ts`. Move Polio strings to `plugins/polio/js/src/constants/translations/`. The Users screen must keep resolving labels for plugin permissions (it already receives codename, label, module from the API). |
+| `hat/.../users/permissionsMessages.ts` and `en.json` / `fr.json` | Done for `permissionsMessages.ts`. Polio labels live in `plugins/polio/js/src/constants/translations/permissionsMessages.ts` and are merged by `usePermissionsMessages`. Screens still import the host constant, so they do not show plugin labels yet. `en.json` / `fr.json` permission strings are still in the host. |
 | Tasks UI | Done. `ActionCell` renders every `tasks.rowAction` custom component. Polio registers `PolioNotificationTaskAction`. `GET /api/polio/notifications/for_task/<task_id>/` reads the import pk from `Task.params.kwargs`. `TaskSerializer` no longer has `polio_notification_import_id`. |
 | `GroupsDialog.tsx` | Done. The dialog renders every `groups.dialogField` custom component. Polio registers `BlockOfCountriesField`, gated on `POLIO` / `POLIO_ADMIN`. `Group.block_of_countries` stays a core column and is still saved by the dialog. |
-| `hat/dashboard/urls.py` | Five `/dashboard/polio/embedded*` routes serving the SPA shell. They do not import Polio Python. SNT mounts its extra pages from `plugins/snt_malaria/urls.py`. Move these to the plugin if the URL can be `/polio/...`, or keep thin SPA routes in core if PowerBI bookmarks are already published under `/dashboard/polio/`. Do not break existing embed URLs; add redirects if the path changes. |
+| `hat/dashboard/urls.py` | Done. The five embed routes are in `plugins/polio/urls.py` and call `embeddable_iaso`, so the pages stay public. The host includes that file. `hat/dashboard/urls.py` no longer lists them. |
 | `hat/settings.py` WHO SSO | Done. Paths stay `polio/login/`, `polio/login/callback`, `polio/token/`. The WHO Entra app registration cannot be changed, so these redirect URIs stay as they are. |
 | PowerBI refresh snippet | Done. Lives at `plugins/polio/templates/iaso/pages/refresh_data_set_snippet.html`. Core pages include it with `include_optional`, so a deploy without Polio still renders. |
 | `cron.yaml` | Done. The three Polio jobs are in `plugins/polio/cron.yaml`. The root file keeps only core jobs. CI merges plugin `cron.yaml` files into the file the worker deploys. |
 | `beanstalk_worker/views.py` | Done. The Polio skip is removed. Plugin cron jobs are only scheduled on a deploy that installs that plugin. |
-| `lqas_pipeline_code` | Field on the core OpenHexa config, read by Planning sampling (`PipelineSelect.tsx`, `SamplingResultDialog.tsx`). This is core Planning, not a Polio screen. Leave it. |
 | `iaso/plugins.py` | Done. `is_polio_plugin_active()` stays, same shape as `is_snt_malaria_plugin_active()`. |
 
 ## Out of scope
@@ -117,7 +116,7 @@ These do not stop webpack or Django from starting. They mean a non-Polio IASO im
 6. Done: plugin screens import `plugins/polio/js/src/constants/permissions.ts`. Polio constants are removed from `hat/.../utils/permissions.ts`. The block-of-countries checkbox is the plugin component `groups.dialogField`.
 7. Leave `MODULE_POLIO_PROJECT` in `iaso/modules.py`.
 
-Embedded dashboard URLs and WHO SSO paths stay until the published URLs are ready to redirect.
+Embed routes live in `plugins/polio/urls.py` and stay public through `embeddable_iaso`. WHO SSO paths stay `polio/login/`, `polio/login/callback`, and `polio/token/`.
 
 ### Phase 3 — Split the git repo
 
@@ -153,7 +152,7 @@ PLUGINS=polio
 
 ## Risks
 
-- Published embed URLs (`/dashboard/polio/embedded*`) and WHO SSO paths (`/polio/login/`) are external contracts. Do not rename them in the same change as the repo split.
+- Embed pages are public via `plugins/polio/urls.py` (`embeddable_iaso`). WHO SSO paths (`/polio/login/`) stay. The Entra app registration cannot be changed.
 - Migration history assumes app label `polio` and dependency on the IASO squash. The plugin repo must keep that graph. Deployments run plugin migrations because the app is in `INSTALLED_APPS`.
 - `Group.block_of_countries` and `iaso.models.json_config.Config` stay in IASO. Polio keeps using them.
 - Core `iaso` migrations that mention `POLIO_PROJECT` in `Account.modules` choices stay in IASO. They are historical. The constant remains in `iaso/modules.py`.

@@ -1,4 +1,8 @@
 import { Plugin } from 'Iaso/plugins/types';
+import {
+    PERMISSIONS_MESSAGES,
+    PERMISSIONS_GROUPS_MESSAGES,
+} from '../js/src/constants/translations/permissionsMessages';
 import { BlockOfCountriesField } from './src/components/BlockOfCountriesField';
 import { Disclaimer } from './src/components/Disclaimer';
 import { menu } from './src/constants/menu';
@@ -25,6 +29,8 @@ const config: Plugin = {
     redirections,
     menu,
     translations,
+    permissionsMessages: PERMISSIONS_MESSAGES,
+    permissionsGroupsMessages: PERMISSIONS_GROUPS_MESSAGES,
     homeUrl: `/${DASHBOARD_BASE_URL}/campaignCategory/all`,
     customComponents: [
         {

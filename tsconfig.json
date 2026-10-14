@@ -1,7 +1,12 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "baseUrl": "../.."
+        "baseUrl": "../..",
+        "rootDir": "../..",
+        "ignoreDeprecations": "6.0",
+        "paths": {
+            "Iaso/*": ["hat/assets/js/apps/Iaso/*"]
+        }
     },
     "include": ["js/**/*"],
     "exclude": ["node_modules"]
