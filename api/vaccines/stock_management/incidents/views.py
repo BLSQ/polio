@@ -1,7 +1,9 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters
 
 from plugins.polio.api.vaccines.permissions import VaccineStockPermission
+from plugins.polio.api.vaccines.stock_management.filters import IncidentReportFilter
 from plugins.polio.api.vaccines.stock_management.incidents.serializers import IncidentReportSerializer
 from plugins.polio.api.vaccines.stock_management.subitems import VaccineStockSubitemBase
 from plugins.polio.models import IncidentReport
@@ -24,5 +26,6 @@ class IncidentReportViewSet(VaccineStockSubitemBase):
         )
     ]
     ordering_fields = ["doses_per_vial"]
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["title", "stock_correction"]
+    filterset_class = IncidentReportFilter
