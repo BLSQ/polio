@@ -91,7 +91,7 @@ export const MapComponent: FunctionComponent<Props> = ({
             />
             <TileLayer
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <Pane name={`BackgroundLayer-${name}`}>
                 {backgroundLayer?.length > 0 &&
