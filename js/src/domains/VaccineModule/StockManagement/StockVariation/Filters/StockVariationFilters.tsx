@@ -36,6 +36,21 @@ type Props = {
 
 type FilterValues = Partial<Record<StockVariationFilterKey, string>>;
 
+const COLUMN_COUNT = 4;
+
+const toColumns = (
+    fields: StockVariationFilterField[],
+): StockVariationFilterField[][] => {
+    const columns: StockVariationFilterField[][] = Array.from(
+        { length: COLUMN_COUNT },
+        () => [],
+    );
+    fields.forEach((field, index) => {
+        columns[index % COLUMN_COUNT].push(field);
+    });
+    return columns;
+};
+
 const valuesFromParams = (
     fields: StockVariationFilterField[],
     params: StockVariationParams,
@@ -56,6 +71,7 @@ export const StockVariationFilters: FunctionComponent<Props> = ({
     const { formatMessage } = useSafeIntl();
     const redirectTo = useRedirectTo();
     const fields = useMemo(() => stockVariationFilterFields[tab] ?? [], [tab]);
+    const columns = useMemo(() => toColumns(fields), [fields]);
     const pageKey = stockVariationPageKeys[tab];
 
     const urlValues = useMemo(
@@ -133,7 +149,6 @@ export const StockVariationFilters: FunctionComponent<Props> = ({
         redirectTo(baseUrls.stockVariation, {
             ...params,
             ...values,
-            // Filtering with the table on page 5 would otherwise land on an empty page.
             ...(pageKey ? { [pageKey]: '1' } : {}),
         });
     }, [pageKey, params, redirectTo, values]);
@@ -144,53 +159,50 @@ export const StockVariationFilters: FunctionComponent<Props> = ({
         return null;
     }
 
+    const renderField = (field: StockVariationFilterField) =>
+        field.type === 'date' ? (
+            <Box mt={2} key={field.urlKey}>
+                <DatePicker
+                    label={formatMessage(field.label)}
+                    currentDate={values[field.urlKey] ?? null}
+                    onChange={date =>
+                        handleChange(
+                            field.urlKey,
+                            date ? date.format(apiDateFormat) : null,
+                        )
+                    }
+                    clearable
+                    clearMessage={MESSAGES.clear}
+                />
+            </Box>
+        ) : (
+            <InputComponent
+                key={field.urlKey}
+                type={field.type}
+                clearable
+                keyValue={field.urlKey}
+                value={values[field.urlKey] ?? ''}
+                onChange={handleChange}
+                labelString={formatMessage(field.label)}
+                options={
+                    field.type === 'select' ? getOptions(field) : undefined
+                }
+                onEnterPressed={
+                    field.type === 'search' ? handleSearch : undefined
+                }
+                blockForbiddenChars={field.type === 'search'}
+                onErrorChange={
+                    field.type === 'search' ? setHasForbiddenChars : undefined
+                }
+            />
+        );
+
     return (
         <Grid container spacing={2}>
-            {fields.map(field => (
-                <Grid item xs={12} sm={6} md={3} key={field.urlKey}>
-                    {field.type === 'date' ? (
-                        <Box mt={2}>
-                            <DatePicker
-                                label={formatMessage(field.label)}
-                                currentDate={values[field.urlKey] ?? null}
-                                onChange={date =>
-                                    handleChange(
-                                        field.urlKey,
-                                        date
-                                            ? date.format(apiDateFormat)
-                                            : null,
-                                    )
-                                }
-                                clearable
-                                clearMessage={MESSAGES.clear}
-                            />
-                        </Box>
-                    ) : (
-                        <InputComponent
-                            type={field.type}
-                            clearable
-                            keyValue={field.urlKey}
-                            value={values[field.urlKey] ?? ''}
-                            onChange={handleChange}
-                            labelString={formatMessage(field.label)}
-                            options={
-                                field.type === 'select'
-                                    ? getOptions(field)
-                                    : undefined
-                            }
-                            onEnterPressed={
-                                field.type === 'search'
-                                    ? handleSearch
-                                    : undefined
-                            }
-                            blockForbiddenChars={field.type === 'search'}
-                            onErrorChange={
-                                field.type === 'search'
-                                    ? setHasForbiddenChars
-                                    : undefined
-                            }
-                        />
-                    )}
+            {columns.map((column, index) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <Grid item xs={12} md={3} key={`filter-column-${index}`}>
+                    {column.map(renderField)}
                 </Grid>
             ))}
             <Grid item xs={12}>
