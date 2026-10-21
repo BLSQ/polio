@@ -276,16 +276,10 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                                         disabled={isFieldDisabledEdit(vrfData)}
                                     />
                                 </Grid>
-                                <Grid item xs={6} md={3}>
-                                    <Field
-                                        label={formatMessage(
-                                            MESSAGES.date_vrf_submission_to_orpg,
-                                        )}
-                                        name="vrf.date_vrf_submission_to_orpg"
-                                        component={DateInput}
-                                        disabled={isFieldDisabledEdit(vrfData)}
-                                    />
-                                </Grid>
+                                {/* Hidden on purpose. date_vrf_submission_to_orpg stays
+                                    on the model and API so existing values remain
+                                    available (possible OpenHEXA use). Loaded values
+                                    stay in form state and are saved back unchanged. */}
                                 <Grid item xs={6} md={3}>
                                     <Field
                                         label={formatMessage(

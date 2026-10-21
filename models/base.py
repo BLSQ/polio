@@ -1427,6 +1427,7 @@ class VaccineRequestForm(ModelWithFile, SoftDeletableModel):
 
     # optional fields
     wastage_rate_used_on_vrf = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    # Hidden on the VRF form. Kept so existing values stay available for OpenHEXA.
     date_vrf_submission_to_orpg = models.DateField(null=True, blank=True)
     quantities_approved_by_orpg_in_doses = models.PositiveIntegerField(null=True, blank=True)
     date_rrt_orpg_approval = models.DateField(null=True, blank=True)
