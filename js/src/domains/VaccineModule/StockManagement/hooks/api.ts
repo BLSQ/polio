@@ -20,6 +20,7 @@ import {
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { commaSeparatedIdsToStringArray } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/forms';
 import { Campaign } from '../../../../constants/types';
+import { orderCampaignsByEarliestRoundStartTimestamp } from '../../../../utils';
 import {
     CAMPAIGNS_ENDPOINT,
     useGetCampaigns,
@@ -276,9 +277,6 @@ export const useGetDosesOptions = (
     });
 };
 
-const createdAtTimestamp = (campaign: Campaign): number =>
-    campaign.created_at ? moment(campaign.created_at).valueOf() : 0;
-
 type UseCampaignOptionsResult = {
     roundOptions: DropdownOptions<string>[];
     campaignOptions: DropdownOptions<string>[];
@@ -343,7 +341,7 @@ export const useCampaignOptions = (
     const campaignOptions = useMemo(() => {
         const campaignsList = ((data ?? []) as Campaign[])
             .slice()
-            .sort((a, b) => createdAtTimestamp(b) - createdAtTimestamp(a))
+            .sort(orderCampaignsByEarliestRoundStartTimestamp)
             .map(c => {
                 return { label: c.obr_name, value: c.obr_name };
             });

@@ -35,6 +35,7 @@ import {
 import { dateApiToDateRangePicker } from '../../../../../../../../../hat/assets/js/apps/Iaso/utils/dates';
 import { Campaign, Round } from '../../../../../constants/types';
 import { useGetCountries } from '../../../../../hooks/useGetCountries';
+import { orderCampaignsByEarliestRoundStartTimestamp } from '../../../../../utils';
 import {
     CAMPAIGNS_ENDPOINT,
     CampaignCategory,
@@ -178,7 +179,7 @@ export const useCampaignDropDowns = ({
         const list = [
             ...((data as Campaign[]) ?? []),
             ...((fIPVData as Campaign[]) ?? []),
-        ];
+        ].sort(orderCampaignsByEarliestRoundStartTimestamp);
 
         const selectedCampaign = list.find(c => c.obr_name === campaign);
         const campaigns = list
