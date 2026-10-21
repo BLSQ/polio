@@ -78,7 +78,7 @@ export const Filters: FunctionComponent<Props> = ({ params }) => {
     });
     const isUsable = params.usable === 'true' || params.usable === undefined;
     const { data: countries, isFetching: isLoadingCountries } =
-        useGetCountriesOptions();
+        useGetCountriesOptions(undefined, filters.country_block);
     const { data: countryBlocks, isFetching: isLoadingCountryBlocks } =
         useGetGroupDropdown({
             blockOfCountries: true,
