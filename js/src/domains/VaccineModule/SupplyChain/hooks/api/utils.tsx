@@ -41,10 +41,12 @@ export const saveTab = (
     supplyChainData: SupplyChainFormData,
 ): Promise<any>[] => {
     const toCreate: any = [];
+    const toCreateFormIndexes: number[] = [];
     const toUpdate: any = [];
+    const toUpdateFormIndexes: number[] = [];
     const toDelete: any = [];
     const promises: Promise<any>[] = [];
-    supplyChainData?.[key]?.forEach(tabData => {
+    supplyChainData?.[key]?.forEach((tabData, formIndex) => {
         const { to_delete, ...dataToPass } = tabData;
         const { lot_numbers } = dataToPass;
         if (!Array.isArray(lot_numbers)) {
@@ -58,14 +60,23 @@ export const saveTab = (
         if (tabData.id) {
             if (!to_delete) {
                 toUpdate.push(dataToPass);
+                toUpdateFormIndexes.push(formIndex);
             } else {
                 toDelete.push(dataToPass);
             }
         } else if (!to_delete) {
             // Temporary solution to handle users creating then deleting prealerts in the UI
             toCreate.push(dataToPass);
+            toCreateFormIndexes.push(formIndex);
         }
     });
+
+    // The API error list is indexed in this batch, not in the form.
+    const withFormIndexes = (request: Promise<any>, formIndexes: number[]) =>
+        request.then(result => ({
+            ...result,
+            formIndexes,
+        }));
 
     const createOrUpdateRequest = (url: string, data: any) => {
         const formData = new FormData();
@@ -126,17 +137,23 @@ export const saveTab = (
 
     if (toUpdate.length > 0) {
         promises.push(
-            createOrUpdateRequest(
-                `${apiUrl}${supplyChainData?.vrf?.id}/update_${key}/`,
-                toUpdate,
+            withFormIndexes(
+                createOrUpdateRequest(
+                    `${apiUrl}${supplyChainData?.vrf?.id}/update_${key}/`,
+                    toUpdate,
+                ),
+                toUpdateFormIndexes,
             ),
         );
     }
     if (toCreate.length > 0) {
         promises.push(
-            createOrUpdateRequest(
-                `${apiUrl}${supplyChainData?.vrf?.id}/add_${key}/`,
-                toCreate,
+            withFormIndexes(
+                createOrUpdateRequest(
+                    `${apiUrl}${supplyChainData?.vrf?.id}/add_${key}/`,
+                    toCreate,
+                ),
+                toCreateFormIndexes,
             ),
         );
     }
