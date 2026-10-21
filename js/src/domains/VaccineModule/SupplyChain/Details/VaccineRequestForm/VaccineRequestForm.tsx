@@ -185,23 +185,6 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                         </Grid>
                         <Grid item xs={6} md={3}>
                             <Field
-                                label={formatMessage(MESSAGES.vaccine)}
-                                name="vrf.vaccine_type"
-                                component={SingleSelect}
-                                disabled={
-                                    !values?.vrf?.campaign ||
-                                    isFieldDisabledEdit(vrfData)
-                                }
-                                required
-                                options={vaccines}
-                                withMarginTop
-                                isLoading={
-                                    isFetchingCountries || isFetchingDropDowns
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={6} md={3}>
-                            <Field
                                 label={formatMessage(MESSAGES.roundNumbers)}
                                 name="vrf.rounds"
                                 component={MultiSelect}
@@ -220,15 +203,29 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                         </Grid>
                         <Grid item xs={6} md={3}>
                             <Field
-                                label={formatMessage(
-                                    MESSAGES.quantities_ordered_in_doses,
-                                )}
-                                name="vrf.quantities_ordered_in_doses"
+                                label={formatMessage(MESSAGES.vaccine)}
+                                name="vrf.vaccine_type"
+                                component={SingleSelect}
+                                disabled={
+                                    !values?.vrf?.campaign ||
+                                    isFieldDisabledEdit(vrfData)
+                                }
+                                required
+                                options={vaccines}
+                                withMarginTop
+                                isLoading={
+                                    isFetchingCountries || isFetchingDropDowns
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={6} md={3}>
+                            <Field
+                                label={formatMessage(MESSAGES.targetPopulation)}
+                                name="vrf.target_population"
                                 component={NumberInput}
                                 disabled={isFieldDisabledEdit(vrfData)}
                             />
                         </Grid>
-
                         <Grid item xs={6} md={3}>
                             <Field
                                 label={formatMessage(MESSAGES.wastageRatio)}
@@ -243,8 +240,10 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                         </Grid>
                         <Grid item xs={6} md={3}>
                             <Field
-                                label={formatMessage(MESSAGES.targetPopulation)}
-                                name="vrf.target_population"
+                                label={formatMessage(
+                                    MESSAGES.quantities_ordered_in_doses,
+                                )}
+                                name="vrf.quantities_ordered_in_doses"
                                 component={NumberInput}
                                 disabled={isFieldDisabledEdit(vrfData)}
                             />
@@ -300,20 +299,6 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                                         disabled={isFieldDisabledEdit(vrfData)}
                                     />
                                 </Grid>
-                            </Grid>
-                            <Grid container item xs={12} spacing={2}>
-                                <Grid item xs={12} lg={6}>
-                                    <InputComponent
-                                        type="textarea"
-                                        keyValue="vrf.comment"
-                                        value={values?.vrf?.comment ?? ''}
-                                        // errors={errors.comment ? errors.comment : []}
-                                        label={MESSAGES.comments}
-                                        onChange={onCommentChange}
-                                        disabled={isFieldDisabledEdit(vrfData)}
-                                        withMarginTop={false}
-                                    />
-                                </Grid>
                                 <Grid item xs={6} md={3}>
                                     <Box>
                                         <DocumentUploadWithPreview
@@ -344,6 +329,20 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
                                             enableDelete
                                         />
                                     </Box>
+                                </Grid>
+                            </Grid>
+                            <Grid container item xs={12} spacing={2}>
+                                <Grid item xs={12} lg={6}>
+                                    <InputComponent
+                                        type="textarea"
+                                        keyValue="vrf.comment"
+                                        value={values?.vrf?.comment ?? ''}
+                                        // errors={errors.comment ? errors.comment : []}
+                                        label={MESSAGES.comments}
+                                        onChange={onCommentChange}
+                                        disabled={isFieldDisabledEdit(vrfData)}
+                                        withMarginTop={false}
+                                    />
                                 </Grid>
                             </Grid>
                         </>
