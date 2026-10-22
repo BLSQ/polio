@@ -278,23 +278,6 @@ export const useGetDosesOptions = (
     });
 };
 
-export const useGetFormARoundNumbers = (
-    vaccineStockId: string,
-): UseQueryResult<number[]> => {
-    return useSnackQuery({
-        queryKey: ['forma-round-numbers', vaccineStockId],
-        queryFn: () =>
-            getRequest(
-                `${modalUrl}outgoing_stock_movement/round_numbers/?vaccine_stock=${vaccineStockId}`,
-            ),
-        options: {
-            ...options,
-            select: data => data ?? [],
-            enabled: Boolean(vaccineStockId),
-        },
-    });
-};
-
 const createdAtTimestamp = (campaign: Campaign): number =>
     campaign.created_at ? moment(campaign.created_at).valueOf() : 0;
 
