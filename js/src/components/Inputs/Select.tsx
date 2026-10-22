@@ -4,7 +4,7 @@ import InputComponent from '../../../../../../hat/assets/js/apps/Iaso/components
 import { DropdownOptions } from '../../../../../../hat/assets/js/apps/Iaso/types/utils';
 
 type Props = {
-    options: DropdownOptions<number>[];
+    options: DropdownOptions<string | number>[];
     label: string;
     field: Record<string, any>;
     form: Record<string, any>;
