@@ -13,7 +13,6 @@ import { SearchButton } from '../../../../../../../../../hat/assets/js/apps/Iaso
 import { DropdownOptions } from '../../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { apiDateFormat } from '../../../../../../../../../hat/assets/js/apps/Iaso/utils/dates';
 import { baseUrls } from '../../../../../constants/urls';
-import { useGetFormARoundNumbers } from '../../hooks/api';
 import MESSAGES from '../../messages';
 import type {
     DosesPerVialDropdownItem,
@@ -26,6 +25,7 @@ import {
     stockVariationFilterFields,
     stockVariationPageKeys,
 } from '../config';
+import { useGetFormARoundNumbers } from '../hooks/useGetFormARoundNumbers';
 import { useIncidentOptions } from '../Modals/dropdownOptions';
 
 type Props = {
