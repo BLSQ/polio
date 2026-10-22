@@ -6,7 +6,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from plugins.polio.api.vaccines.permissions import OutgoingStockMovementPermission
-from plugins.polio.api.vaccines.stock_management.filters import OutgoingStockMovementFilter
+from plugins.polio.api.vaccines.stock_management.filters.outgoing_stockmovement_filters import (
+    OutgoingStockMovementFilter,
+)
 from plugins.polio.api.vaccines.stock_management.outgoingstockmovement.serializers import (
     VALIDATE_FORM_A_LIFECYCLE_CONTEXT_KEY,
     OutgoingStockMovementPatchSerializer,

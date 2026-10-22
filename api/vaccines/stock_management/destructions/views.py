@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from plugins.polio.api.vaccines.permissions import VaccineStockPermission
 from plugins.polio.api.vaccines.stock_management.destructions.serializers import DestructionReportSerializer
-from plugins.polio.api.vaccines.stock_management.filters import DestructionReportFilter
+from plugins.polio.api.vaccines.stock_management.filters.destruction_reports_filters import DestructionReportFilter
 from plugins.polio.api.vaccines.stock_management.subitems import VaccineStockSubitemBase
 from plugins.polio.models import DestructionReport, VaccineStock
 from plugins.polio.permissions import (

@@ -3,7 +3,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import filters
 
 from plugins.polio.api.vaccines.permissions import VaccineStockPermission
-from plugins.polio.api.vaccines.stock_management.filters import IncidentReportFilter
+from plugins.polio.api.vaccines.stock_management.filters.incident_reports_filters import IncidentReportFilter
 from plugins.polio.api.vaccines.stock_management.incidents.serializers import IncidentReportSerializer
 from plugins.polio.api.vaccines.stock_management.subitems import VaccineStockSubitemBase
 from plugins.polio.models import IncidentReport
