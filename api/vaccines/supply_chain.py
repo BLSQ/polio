@@ -51,6 +51,7 @@ def raise_if_po_number_taken(model, po_number, *, exclude_id=None, message):
     if queryset.exists():
         raise serializers.ValidationError({"po_number": [message]})
 
+
 PA_SET = "vaccineprealert_set"
 AR_SET = "vaccinearrivalreport_set"
 
