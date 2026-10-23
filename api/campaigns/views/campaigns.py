@@ -35,7 +35,11 @@ from plugins.polio.api.campaigns.serializers.calendar import CalendarCampaignSer
 from plugins.polio.api.campaigns.serializers.campaigns import CampaignSerializer
 from plugins.polio.api.campaigns.serializers.list import ListCampaignSerializer
 from plugins.polio.api.campaigns.serializers.retrieve import RetrieveCampaignSerializer
-from plugins.polio.api.campaigns.serializers.shared import CampaignDropDownSerializer, CampaignTypeSerializer
+from plugins.polio.api.campaigns.serializers.shared import (
+    CampaignDropdownOptionSerializer,
+    CampaignDropDownSerializer,
+    CampaignTypeSerializer,
+)
 from plugins.polio.api.preparedness.serializers import (
     CampaignPreparednessSpreadsheetSerializer,
     PreparednessPreviewSerializer,
@@ -74,7 +78,7 @@ class CampaignViewSet(ModelViewSet):
     ]
     filterset_class = CampaignFilter
 
-    ordering_fields = [
+    LIST_ORDERING_FIELDS = [
         "obr_name",
         "cvdpv2_notified_at",
         "detection_status",
@@ -82,6 +86,14 @@ class CampaignViewSet(ModelViewSet):
         "last_round_started_at",
         "country__name",
     ]
+    DROPDOWN_ORDERING_FIELDS = ["obr_name", "created_at", "country__name"]
+
+    @property
+    def ordering_fields(self):
+        if getattr(self, "action", None) == "dropdown":
+            return self.DROPDOWN_ORDERING_FIELDS
+        return self.LIST_ORDERING_FIELDS
+
     filterset_fields = {
         "country__name": ["exact"],
         "country__id": ["in"],
@@ -98,6 +110,8 @@ class CampaignViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
+        if self.action == "dropdown":
+            return CampaignDropdownOptionSerializer
         if self.request.query_params.get("fieldset") == "calendar" and self.request.method in permissions.SAFE_METHODS:
             return CalendarCampaignSerializer
         if self.request.user.is_authenticated:
@@ -113,8 +127,19 @@ class CampaignViewSet(ModelViewSet):
             return CampaignSerializer
         return AnonymousCampaignSerializer
 
+    def get_dropdown_queryset(self, user):
+        rounds_queryset = Round.objects.only("id", "number", "on_hold", "campaign_id").order_by("number")
+        return (
+            Campaign.objects.filter_for_user(user)
+            .only("id", "obr_name", "created_at")
+            .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
+            .distinct()
+        )
+
     def get_queryset(self):
         user = self.request.user
+        if self.action == "dropdown":
+            return self.get_dropdown_queryset(user)
         campaigns = Campaign.objects.all()
 
         # used for Ordering
@@ -165,6 +190,18 @@ class CampaignViewSet(ModelViewSet):
             .prefetch_related(sub_activities_group_org_units_prefetch)
         )
         return campaigns.distinct()
+
+    @action(
+        detail=False,
+        methods=["GET"],
+        serializer_class=CampaignDropdownOptionSerializer,
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def dropdown(self, request):
+        campaigns = self.filter_queryset(self.get_queryset())
+        if request.query_params.get("deletion_status") is None:
+            campaigns = campaigns.filter(deleted_at__isnull=True)
+        return Response(self.get_serializer(campaigns, many=True).data)
 
     @action(detail=False, methods=["GET"], serializer_class=CampaignTypeSerializer)
     def available_campaign_types(self, request):
