@@ -101,9 +101,7 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
     def test_deleted_campaigns_are_excluded_by_default(self):
         """DeletionFilterBackend only defaults to "active" on the list action, so the action does it."""
         self.client.force_authenticate(self.user)
-        deleted = Campaign.objects.create(
-            obr_name="Campaign-deleted", account=self.account, deleted_at=timezone.now()
-        )
+        deleted = Campaign.objects.create(obr_name="Campaign-deleted", account=self.account, deleted_at=timezone.now())
 
         data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
         self.assertNotIn(deleted.obr_name, [c["obr_name"] for c in data])
