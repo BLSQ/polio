@@ -32,16 +32,6 @@ class CampaignTypeIdAndNameSerializer(serializers.ModelSerializer):
         fields = ["id", "name"]
 
 
-class CampaignDropDownSerializer(serializers.ModelSerializer):
-    obr_name = serializers.CharField()
-    id = serializers.CharField()
-    campaign_types = CampaignTypeIdAndNameSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Campaign
-        fields = ["id", "obr_name", "campaign_types"]
-
-
 class RoundDropdownOptionSerializer(serializers.ModelSerializer):
     """Only what a round select needs: `id` as value, `number` as label, `on_hold` to gate options."""
 
@@ -53,7 +43,8 @@ class RoundDropdownOptionSerializer(serializers.ModelSerializer):
 class CampaignDropdownOptionSerializer(serializers.ModelSerializer):
     id = serializers.CharField()
     rounds = RoundDropdownOptionSerializer(many=True, read_only=True)
+    campaign_types = CampaignTypeIdAndNameSerializer(many=True, read_only=True)
 
     class Meta:
         model = Campaign
-        fields = ["id", "obr_name", "created_at", "rounds"]
+        fields = ["id", "obr_name", "created_at", "rounds", "campaign_types"]

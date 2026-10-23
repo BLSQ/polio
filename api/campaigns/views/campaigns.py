@@ -37,7 +37,6 @@ from plugins.polio.api.campaigns.serializers.list import ListCampaignSerializer
 from plugins.polio.api.campaigns.serializers.retrieve import RetrieveCampaignSerializer
 from plugins.polio.api.campaigns.serializers.shared import (
     CampaignDropdownOptionSerializer,
-    CampaignDropDownSerializer,
     CampaignTypeSerializer,
 )
 from plugins.polio.api.preparedness.serializers import (
@@ -117,11 +116,6 @@ class CampaignViewSet(ModelViewSet):
         if self.request.user.is_authenticated:
             if self.request.query_params.get("fieldset") == "list" and self.request.method in permissions.SAFE_METHODS:
                 return ListCampaignSerializer
-            if (
-                self.request.query_params.get("fieldset") == "dropdown"
-                and self.request.method in permissions.SAFE_METHODS
-            ):
-                return CampaignDropDownSerializer
             if self.action == "retrieve":
                 return RetrieveCampaignSerializer
             return CampaignSerializer
@@ -133,6 +127,7 @@ class CampaignViewSet(ModelViewSet):
             Campaign.objects.filter_for_user(user)
             .only("id", "obr_name", "created_at")
             .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
+            .prefetch_related("campaign_types")
             .distinct()
         )
 
