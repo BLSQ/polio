@@ -5,15 +5,14 @@ import { openSnackBar } from 'Iaso/components/snackBars/EventDispatcher';
 import { errorSnackBar } from 'Iaso/constants/snackBars';
 import { useAsyncInitialState } from 'Iaso/hooks/useAsyncInitialState';
 import MESSAGES from '../../../constants/messages';
-import { Campaign } from '../../../constants/types';
+import { CampaignCategory } from '../hooks/api/useGetCampaigns';
 import {
-    CampaignCategory,
-    CAMPAIGNS_ENDPOINT,
-    getURL,
-    makeCampaignQueryKey,
-    Options,
-    useGetCampaigns,
-} from '../hooks/api/useGetCampaigns';
+    CampaignDropdownOption,
+    CampaignsDropdownParams,
+    getCampaignsDropdownUrl,
+    makeCampaignsDropdownQueryKey,
+    useGetCampaignsDropdown,
+} from '../hooks/api/useGetCampaignsDropdown';
 import { useCampaignTypeNames } from './useCampaignTypeNames';
 
 type Props = {
@@ -31,10 +30,16 @@ type Props = {
 /**
  * A wrapper on AsyncSelect geared towards polio campaigns
  * The filters to apply to the campaigns API can be parametrized using the components props
- * The component will automatically pass fieldset=dropdown to limit the fields returned by the API and reformat
- * the response to be usable by AsyncSelect
+ * The component reads /api/polio/campaigns/dropdown/, the lightweight endpoint, and reformats the
+ * response to be usable by AsyncSelect
  *
  */
+
+const toAsyncSelectOption = (campaign: CampaignDropdownOption) => ({
+    label: campaign.obr_name,
+    value: campaign.id,
+    campaign_types: campaign.campaign_types,
+});
 
 export const CampaignAsyncSelect: FunctionComponent<Props> = ({
     keyValue = 'campaigns',
@@ -55,72 +60,47 @@ export const CampaignAsyncSelect: FunctionComponent<Props> = ({
         string | undefined
     >(initialValue);
 
-    const baseOptions = useMemo(() => {
+    const baseParams: CampaignsDropdownParams = useMemo(() => {
         return {
-            fieldset: 'dropdown',
-            campaignCategory,
+            campaign_category: campaignCategory,
+            campaign_types: campaignTypes,
             show_test: showTest,
         };
-    }, [campaignCategory, showTest]);
-    const options: Options = useMemo(() => {
-        return {
-            enabled: isStateSet,
-            campaignType: campaignTypes,
-            search,
-            ...baseOptions,
-        };
-    }, [campaignTypes, search, isStateSet, baseOptions]);
+    }, [campaignCategory, campaignTypes, showTest]);
 
     const fetchOptions = useCallback(
         async (query: string): Promise<any[]> => {
-            const { queryKey, params: campaignOptions } = makeCampaignQueryKey({
-                options: {
-                    enabled: true, // explicitly passing to get same query key as useGetCampaigns
-                    search: query,
-                    ...baseOptions,
-                    campaignType: campaignTypes,
-                },
+            const url = getCampaignsDropdownUrl({
+                ...baseParams,
+                search: query,
             });
-            // Return cached result if exists
-            const cachedResult = queryClient.getQueryData(queryKey);
-            if (cachedResult) {
-                return cachedResult as any;
+            const queryKey = makeCampaignsDropdownQueryKey(url);
+            const cached =
+                queryClient.getQueryData<CampaignDropdownOption[]>(queryKey);
+            if (cached) {
+                return cached.map(toAsyncSelectOption);
             }
-            const url = getURL(campaignOptions, CAMPAIGNS_ENDPOINT);
 
             try {
-                const searchResult = await getRequest(url);
-                const result = searchResult.map(option => ({
-                    label: option.obr_name,
-                    value: option.id,
-                    campaign_types: option.campaign_types,
-                }));
-                // Store result in query cache to avoid double fetching
-                queryClient.setQueryData(queryKey, result);
-                return result;
+                const searchResult: CampaignDropdownOption[] =
+                    await getRequest(url);
+                queryClient.setQueryData(queryKey, searchResult);
+                return searchResult.map(toAsyncSelectOption);
             } catch (e) {
                 openSnackBar(errorSnackBar(undefined, MESSAGES.error, e));
                 return [];
             }
         },
-        [baseOptions, campaignTypes, queryClient],
+        [baseParams, queryClient],
     );
 
-    const { data: selectedCampaigns } = useGetCampaigns(
-        options,
-        CAMPAIGNS_ENDPOINT,
-        undefined,
-        { keepPreviousData: false },
+    const { data: selectedCampaigns } = useGetCampaignsDropdown(
+        { ...baseParams, search },
+        { keepPreviousData: false, enabled: isStateSet },
     );
 
     const campaignOptions = useMemo(() => {
-        return (
-            (selectedCampaigns as Campaign[])?.map(selected => ({
-                label: selected.obr_name,
-                value: selected.id,
-                campaign_types: selected.campaign_types,
-            })) ?? []
-        );
+        return selectedCampaigns?.map(toAsyncSelectOption) ?? [];
     }, [selectedCampaigns]);
 
     const handleChangeCampaigns = useCallback(
