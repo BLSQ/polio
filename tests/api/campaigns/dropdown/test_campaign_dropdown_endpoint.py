@@ -1,12 +1,12 @@
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN, HTTP_405_METHOD_NOT_ALLOWED
 
 from iaso import models as m
 from iaso.models import Account
 from iaso.test import APITestCase
-from plugins.polio.models import Campaign
+from plugins.polio.models import Campaign, CampaignType
 from plugins.polio.tests.api.test import PolioTestCaseMixin
 
 
@@ -43,8 +43,45 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
         cls.other_campaign = Campaign.objects.create(obr_name="Campaign-other-account", account=cls.other_account)
 
     def test_requires_authentication(self):
+        """Stricter than the list endpoint, which allows anonymous reads for the embedded calendar."""
         response = self.client.get(BASE_URL)
+        self.assertIn(response.status_code, [HTTP_401_UNAUTHORIZED, HTTP_403_FORBIDDEN])
+
+    def test_anonymous_cannot_bypass_with_account_id(self):
+        """The list endpoint honours `account_id` for anonymous callers; the dropdown must not."""
+        response = self.client.get(f"{BASE_URL}?account_id={self.account.pk}")
         self.assertIn(response.status_code, [401, 403])
+
+    def test_write_methods_are_not_exposed(self):
+        self.client.force_authenticate(self.user)
+        self.assertEqual(self.client.post(BASE_URL, data={}, format="json").status_code, HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(self.client.delete(BASE_URL).status_code, HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_user_of_another_account_only_sees_its_own_campaigns(self):
+        other_user = self.create_user_with_profile(username="user-2", account=self.other_account)
+        self.client.force_authenticate(other_user)
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+        self.assertEqual([c["obr_name"] for c in data], ["Campaign-other-account"])
+
+    def test_user_restricted_to_org_units_only_sees_campaigns_in_their_hierarchy(self):
+        """`filter_for_user` restricts on country / initial_org_unit when the profile has org units."""
+        campaign_2 = self.create_campaign(
+            obr_name="Campaign-2",
+            account=self.account,
+            source_version=self.source_version,
+            country_ou_type=self.country_type,
+            district_ou_type=self.district_type,
+            country_name="Country-2",
+            district_name="District-2",
+        )[0]
+        restricted_user = self.create_user_with_profile(
+            username="user-restricted", account=self.account, org_units=[campaign_2.country]
+        )
+        self.client.force_authenticate(restricted_user)
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+        self.assertEqual([c["obr_name"] for c in data], ["Campaign-2"])
 
     def test_payload_is_minimal(self):
         self.client.force_authenticate(self.user)
@@ -54,7 +91,7 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), 1)
         campaign_data = data[0]
-        self.assertEqual(sorted(campaign_data.keys()), ["created_at", "id", "obr_name", "rounds"])
+        self.assertEqual(sorted(campaign_data.keys()), ["campaign_types", "created_at", "id", "obr_name", "rounds"])
         self.assertEqual(campaign_data["id"], str(self.campaign.id))
         self.assertEqual(campaign_data["obr_name"], "Campaign-1")
 
@@ -90,6 +127,49 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
 
         data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?show_test=true"), HTTP_200_OK)
         self.assertIn(test_campaign.obr_name, [c["obr_name"] for c in data])
+
+    def test_campaign_types_are_serialized(self):
+        """Rendered by the integrated campaigns rows, which is why they travel with the options."""
+        self.client.force_authenticate(self.user)
+        campaign_type = CampaignType.objects.create(name="Type-1")
+        self.campaign.campaign_types.set([campaign_type])
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+        campaign_types = data[0]["campaign_types"]
+        self.assertEqual(len(campaign_types), 1)
+        self.assertEqual(sorted(campaign_types[0].keys()), ["id", "name"])
+        self.assertEqual(campaign_types[0]["id"], campaign_type.pk)
+        self.assertEqual(campaign_types[0]["name"], "Type-1")
+
+    def test_campaign_types_filter(self):
+        self.client.force_authenticate(self.user)
+        campaign_type = CampaignType.objects.create(name="Type-1")
+        self.campaign.campaign_types.set([campaign_type])
+        Campaign.objects.create(obr_name="Campaign-untyped", account=self.account)
+
+        data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?campaign_types={campaign_type.pk}"), HTTP_200_OK)
+        self.assertEqual([c["obr_name"] for c in data], ["Campaign-1"])
+
+    def test_campaign_types_of_another_accounts_campaign_are_not_returned(self):
+        """CampaignType rows are global, so the only thing scoping them is the campaign they hang off."""
+        self.client.force_authenticate(self.user)
+        own_type = CampaignType.objects.create(name="Type-own")
+        other_type = CampaignType.objects.create(name="Type-other-account")
+        self.campaign.campaign_types.set([own_type])
+        self.other_campaign.campaign_types.set([other_type])
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+        returned_types = [campaign_type["name"] for campaign in data for campaign_type in campaign["campaign_types"]]
+        self.assertEqual(returned_types, ["Type-own"])
+
+    def test_filtering_on_another_accounts_campaign_type_returns_nothing(self):
+        """A global type id must not be a way to read across accounts."""
+        self.client.force_authenticate(self.user)
+        other_type = CampaignType.objects.create(name="Type-other-account")
+        self.other_campaign.campaign_types.set([other_type])
+
+        data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?campaign_types={other_type.pk}"), HTTP_200_OK)
+        self.assertEqual(data, [])
 
     def test_search_filter(self):
         self.client.force_authenticate(self.user)
@@ -156,5 +236,4 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
             len(one_campaign.captured_queries),
             "The dropdown endpoint has an N+1:\n" + "\n".join(q["sql"] for q in six_campaigns.captured_queries),
         )
-        # No prefetch chain to drift here, so an absolute ceiling is safe to pin.
         self.assertLessEqual(len(six_campaigns.captured_queries), 10)
