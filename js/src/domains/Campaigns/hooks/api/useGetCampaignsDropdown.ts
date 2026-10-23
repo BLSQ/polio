@@ -16,6 +16,7 @@ export type CampaignDropdownOption = {
     obr_name: string;
     created_at: string;
     rounds: CampaignDropdownRound[];
+    campaign_types: { id: number; name: string }[];
 };
 
 export type CampaignsDropdownParams = {
@@ -28,7 +29,9 @@ export type CampaignsDropdownParams = {
     deletion_status?: string;
 };
 
-const getUrl = (params: CampaignsDropdownParams): string => {
+export const getCampaignsDropdownUrl = (
+    params: CampaignsDropdownParams,
+): string => {
     const queryString = new URLSearchParams(
         Object.entries(params)
             .filter(([, value]) => value !== undefined && value !== '')
@@ -39,13 +42,18 @@ const getUrl = (params: CampaignsDropdownParams): string => {
         : CAMPAIGNS_DROPDOWN_ENDPOINT;
 };
 
+export const makeCampaignsDropdownQueryKey = (url: string): unknown[] => [
+    'campaigns-dropdown',
+    url,
+];
+
 export const useGetCampaignsDropdown = (
     params: CampaignsDropdownParams = {},
     queryOptions?: Record<string, any>,
 ): UseQueryResult<CampaignDropdownOption[], Error> => {
-    const url = getUrl(params);
+    const url = getCampaignsDropdownUrl(params);
     return useSnackQuery({
-        queryKey: ['campaigns-dropdown', url],
+        queryKey: makeCampaignsDropdownQueryKey(url),
         queryFn: (): Promise<CampaignDropdownOption[]> => getRequest(url),
         options: {
             keepPreviousData: true,
