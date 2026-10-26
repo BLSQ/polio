@@ -11,6 +11,7 @@ import {
     errorSnackBar,
     succesfullSnackBar,
 } from '../../../../../../../../../hat/assets/js/apps/Iaso/constants/snackBars';
+import { OrgUnit } from '../../../../../../../../../hat/assets/js/apps/Iaso/domains/orgUnits/types/orgUnit';
 import {
     FormattedApiParams,
     useApiParams,
@@ -124,11 +125,16 @@ export const useDeleteVrf = (): UseMutationResult => {
 
 export const useGetCountriesOptions = (
     enabled = true,
+    groupId?: string,
 ): { data: DropdownOptions<number>[]; isFetching: boolean } => {
-    const { data: countries, isFetching } = useGetCountries('VALID', enabled);
+    const { data: countries, isFetching } = useGetCountries(
+        'VALID',
+        enabled,
+        groupId,
+    );
     return useMemo(() => {
         const options = countries
-            ? countries.orgUnits.map(country => {
+            ? countries.orgUnits.map((country: OrgUnit) => {
                   return {
                       label: country.name,
                       value: country.id,
@@ -258,7 +264,7 @@ export const useGetVrfDetails = (id?: string): UseQueryResult => {
                 return {
                     ...data,
                     campaign: data.obr_name,
-                    rounds: data.rounds.map(r => r.number),
+                    rounds: data.rounds.map((r: Round) => r.number),
                     country: data.country_id,
                 };
             },
