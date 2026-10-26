@@ -137,6 +137,7 @@ export const useHandleSubmit = ({
     setInitialValues,
     saveForm,
     redirect,
+    onApiFieldErrors,
 }: UseHandleSubmitArgs): ((saveAll?: boolean | undefined) => void) => {
     return useMemo(() => {
         return makeHandleSubmit({
@@ -146,8 +147,17 @@ export const useHandleSubmit = ({
             setInitialValues,
             saveForm,
             redirect,
+            onApiFieldErrors,
         });
-    }, [formik, initialValues, params, redirect, saveForm, setInitialValues]);
+    }, [
+        formik,
+        initialValues,
+        onApiFieldErrors,
+        params,
+        redirect,
+        saveForm,
+        setInitialValues,
+    ]);
 };
 
 type UseWatchChangedTabsArgs = {

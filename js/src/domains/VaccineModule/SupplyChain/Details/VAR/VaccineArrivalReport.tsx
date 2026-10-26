@@ -252,7 +252,6 @@ export const VaccineArrivalReport: FunctionComponent<Props> = ({
             >
                 <Grid container columnSpacing={2}>
                     <Grid item xs={12} md={3}>
-                            {/* TODO Add errors */}
                         <Field
                             label={formatMessage(MESSAGES.po_number)}
                             name={`${VAR}[${index}].po_number`}

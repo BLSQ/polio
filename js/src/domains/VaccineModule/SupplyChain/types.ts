@@ -120,4 +120,8 @@ export type UseHandleSubmitArgs = {
     setInitialValues: React.Dispatch<SupplyChainFormData>;
     saveForm: UseMutateAsyncFunction<any, any, unknown, unknown>;
     redirect: (url: string, options: Record<string, string>) => void;
+    onApiFieldErrors: (
+        errors: Record<string, string>,
+        payload: SupplyChainFormData,
+    ) => void;
 };

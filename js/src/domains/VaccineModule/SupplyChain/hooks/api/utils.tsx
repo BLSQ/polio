@@ -41,10 +41,12 @@ export const saveTab = (
     supplyChainData: SupplyChainFormData,
 ): Promise<any>[] => {
     const toCreate: any = [];
+    const toCreateFormIndexes: number[] = [];
     const toUpdate: any = [];
+    const toUpdateFormIndexes: number[] = [];
     const toDelete: any = [];
     const promises: Promise<any>[] = [];
-    supplyChainData?.[key]?.forEach(tabData => {
+    supplyChainData?.[key]?.forEach((tabData, formIndex) => {
         const { to_delete, ...dataToPass } = tabData;
         const { lot_numbers } = dataToPass;
         if (!Array.isArray(lot_numbers)) {
@@ -58,14 +60,23 @@ export const saveTab = (
         if (tabData.id) {
             if (!to_delete) {
                 toUpdate.push(dataToPass);
+                toUpdateFormIndexes.push(formIndex);
             } else {
                 toDelete.push(dataToPass);
             }
         } else if (!to_delete) {
             // Temporary solution to handle users creating then deleting prealerts in the UI
             toCreate.push(dataToPass);
+            toCreateFormIndexes.push(formIndex);
         }
     });
+
+    // The API error list is indexed in this batch, not in the form.
+    const withFormIndexes = (request: Promise<any>, formIndexes: number[]) =>
+        request.then(result => ({
+            ...result,
+            formIndexes,
+        }));
 
     const createOrUpdateRequest = (url: string, data: any) => {
         const formData = new FormData();
@@ -107,22 +118,42 @@ export const saveTab = (
         return fetch(url, {
             method,
             body: formData,
+        }).then(async response => {
+            let body: unknown;
+            try {
+                body = await response.json();
+            } catch {
+                body = undefined;
+            }
+            return {
+                ok: response.ok,
+                status: response.status,
+                statusText: response.statusText,
+                url: response.url,
+                body,
+            };
         });
     };
 
     if (toUpdate.length > 0) {
         promises.push(
-            createOrUpdateRequest(
-                `${apiUrl}${supplyChainData?.vrf?.id}/update_${key}/`,
-                toUpdate,
+            withFormIndexes(
+                createOrUpdateRequest(
+                    `${apiUrl}${supplyChainData?.vrf?.id}/update_${key}/`,
+                    toUpdate,
+                ),
+                toUpdateFormIndexes,
             ),
         );
     }
     if (toCreate.length > 0) {
         promises.push(
-            createOrUpdateRequest(
-                `${apiUrl}${supplyChainData?.vrf?.id}/add_${key}/`,
-                toCreate,
+            withFormIndexes(
+                createOrUpdateRequest(
+                    `${apiUrl}${supplyChainData?.vrf?.id}/add_${key}/`,
+                    toCreate,
+                ),
+                toCreateFormIndexes,
             ),
         );
     }
@@ -197,6 +228,46 @@ type HandlePromiseErrorsArgs = {
     key: 'pre_alerts' | 'arrival_reports';
 };
 
+// Field errors from validate(), including nested lists:
+// {"pre_alerts": [{"po_number": ["A pre-alert with this PO number already exists."]}]}
+const collectApiErrorMessages = (body: unknown): string[] => {
+    if (typeof body === 'string' && body.trim()) {
+        return [body.trim()];
+    }
+    if (Array.isArray(body)) {
+        return body.flatMap(item => collectApiErrorMessages(item));
+    }
+    if (body && typeof body === 'object') {
+        return Object.entries(body as Record<string, unknown>).flatMap(
+            ([key, value]) => {
+                if (
+                    Array.isArray(value) &&
+                    value.every(item => typeof item === 'string')
+                ) {
+                    const text = value
+                        .map(item => item.trim())
+                        .filter(Boolean)
+                        .join(', ');
+                    if (!text) {
+                        return [];
+                    }
+                    if (key === 'non_field_errors' || key === 'detail') {
+                        return [text];
+                    }
+                    return [`${key}: ${text}`];
+                }
+                return collectApiErrorMessages(value);
+            },
+        );
+    }
+    return [];
+};
+
+const formatApiErrorBody = (body: unknown, fallback: string): string => {
+    const messages = collectApiErrorMessages(body);
+    return messages.length > 0 ? messages.join('\n') : fallback;
+};
+
 export const handlePromiseErrors = ({
     data,
     key,
@@ -208,14 +279,22 @@ export const handlePromiseErrors = ({
         openSnackBar(succesfullSnackBar(key, MESSAGES[messageKey]));
     } else {
         const failedEndpoints = failedPromises.map(item => item.value.url);
+        const errorLogFor = (
+            match: (item: ParsedSettledPromise<any>) => boolean,
+        ): string => {
+            const failed = failedPromises.find(match);
+            return formatApiErrorBody(
+                failed?.value.body ?? failed?.value,
+                failed?.value.statusText ?? failed?.value.message,
+            );
+        };
         if (failedEndpoints.find(url => url.includes('add'))) {
             const messageKey = `${key}CreateError`;
             openSnackBar(
                 errorSnackBar(
                     key,
                     MESSAGES[messageKey],
-                    failedPromises.find(item => item.value.url.includes('add'))
-                        ?.value.statusText,
+                    errorLogFor(item => item.value.url?.includes('add')),
                 ),
             );
         }
@@ -226,21 +305,21 @@ export const handlePromiseErrors = ({
                 errorSnackBar(
                     key,
                     MESSAGES[messageKey],
-                    failedPromises.find(item =>
-                        item.value.url.includes('update'),
-                    )?.value.statusText,
+                    errorLogFor(item => item.value.url?.includes('update')),
                 ),
             );
         }
-        if (failedEndpoints.find(url => url.includes('delete'))) {
+        if (failedEndpoints.find(url => url?.includes('delete'))) {
             const messageKey = `${key}DeleteError`;
             openSnackBar(
                 errorSnackBar(
                     key,
                     MESSAGES[messageKey],
-                    failedPromises.find(item =>
-                        item.value.message.includes('delete'),
-                    )?.value.statusText,
+                    errorLogFor(
+                        item =>
+                            item.value.url?.includes('delete') ||
+                            item.value.message?.includes('delete'),
+                    ),
                 ),
             );
         }

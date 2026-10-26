@@ -22,7 +22,6 @@ export const PreAlerts: FunctionComponent<Props> = ({
     className,
     items = [],
 }) => {
-    // TODO manage errors
     const { values, setFieldValue } = useFormikContext<any>();
     const vaccine = values.vrf?.vaccine_type;
     const dosesPerVaccineOptions = useDosesPerVialDropDownForVaccine(vaccine);
