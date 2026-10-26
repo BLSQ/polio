@@ -159,30 +159,18 @@ class CampaignViewSet(ModelViewSet):
         rounds_scopes_group_org_units_prefetch = Prefetch(
             "rounds__scopes__group__org_units", queryset=org_units_id_only_qs
         )
-        # The vaccine properties read sub-activity scopes for every round.
-        sub_activities_group_org_units_prefetch = Prefetch(
-            "rounds__sub_activities__scopes__group__org_units", queryset=org_units_id_only_qs
-        )
         campaigns = (
-            campaigns.select_related("initial_org_unit")
-            .prefetch_related(country_prefetch)
+            campaigns.prefetch_related(country_prefetch)
             .prefetch_related("grouped_campaigns")
-            .prefetch_related("campaign_types")
-            .prefetch_related("integrated_campaigns")
             .prefetch_related("scopes")
             .prefetch_related("scopes__group")
             .prefetch_related(scopes_group_org_units_prefetch)
             .prefetch_related("rounds")
             .prefetch_related("rounds__datelogs")
             .prefetch_related("rounds__datelogs__modified_by")
-            .prefetch_related("rounds__datelogs__reason_for_delay")
             .prefetch_related("rounds__scopes")
             .prefetch_related("rounds__scopes__group")
             .prefetch_related(rounds_scopes_group_org_units_prefetch)
-            .prefetch_related("rounds__sub_activities")
-            .prefetch_related("rounds__sub_activities__scopes")
-            .prefetch_related("rounds__sub_activities__scopes__group")
-            .prefetch_related(sub_activities_group_org_units_prefetch)
         )
         return campaigns.distinct()
 

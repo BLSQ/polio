@@ -84,10 +84,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         return _("Preparing")
 
     def get_has_data_in_budget_tool(self, campaign):
-        has_budget_steps = getattr(campaign, "has_budget_steps", None)
-        if has_budget_steps is not None:
-            return has_budget_steps
-        return campaign.budget_steps.exists()
+        return campaign.budget_steps.count() > 0
 
     def validate(self, attrs):
         data = super().validate(attrs)
