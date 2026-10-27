@@ -275,6 +275,14 @@ export const useGetDosesOptions = (
     });
 };
 
+const CampaignRoundStartedAt = (campaign: CampaignDropdownOption): number => {
+    const startDates = (campaign.rounds ?? [])
+        .map(round => round.started_at)
+        .filter((startedAt): startedAt is string => Boolean(startedAt))
+        .map(startedAt => moment(startedAt).valueOf());
+    return startDates.length > 0 ? Math.min(...startDates) : -Infinity;
+};
+
 type UseCampaignOptionsResult = {
     roundOptions: DropdownOptions<string>[];
     campaignOptions: DropdownOptions<string>[];
@@ -325,7 +333,9 @@ export const useCampaignOptions = (
     const campaignOptions = useMemo(() => {
         const campaignsList = (data ?? [])
             .slice()
-            .sort(orderCampaignsByEarliestRoundStartTimestamp)
+            .sort(
+                (a, b) => CampaignRoundStartedAt(b) - CampaignRoundStartedAt(a),
+            )
             .map(c => {
                 return { label: c.obr_name, value: c.obr_name };
             });
