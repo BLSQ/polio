@@ -1,5 +1,5 @@
 import { UseQueryResult } from 'react-query';
-import { getRequest } from '../../../../../../../../../hat/assets/js/apps/Iaso/libs/Api';
+import { getRequest } from 'Iaso/libs/Api';
 import { useSnackQuery } from '../../../../../../../../../hat/assets/js/apps/Iaso/libs/apiHooks';
 
 const modalUrl = '/api/polio/vaccine/stock/';
