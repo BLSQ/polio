@@ -275,8 +275,13 @@ export const useGetDosesOptions = (
     });
 };
 
-const createdAtTimestamp = (campaign: CampaignDropdownOption): number =>
-    campaign.created_at ? moment(campaign.created_at).valueOf() : 0;
+const CampaignRoundStartedAt = (campaign: CampaignDropdownOption): number => {
+    const startDates = (campaign.rounds ?? [])
+        .map(round => round.started_at)
+        .filter((startedAt): startedAt is string => Boolean(startedAt))
+        .map(startedAt => moment(startedAt).valueOf());
+    return startDates.length > 0 ? Math.min(...startDates) : -Infinity;
+};
 
 type UseCampaignOptionsResult = {
     roundOptions: DropdownOptions<string>[];
@@ -328,7 +333,9 @@ export const useCampaignOptions = (
     const campaignOptions = useMemo(() => {
         const campaignsList = (data ?? [])
             .slice()
-            .sort((a, b) => createdAtTimestamp(b) - createdAtTimestamp(a))
+            .sort(
+                (a, b) => CampaignRoundStartedAt(b) - CampaignRoundStartedAt(a),
+            )
             .map(c => {
                 return { label: c.obr_name, value: c.obr_name };
             });

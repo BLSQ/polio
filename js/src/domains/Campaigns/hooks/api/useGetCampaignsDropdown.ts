@@ -9,6 +9,7 @@ export type CampaignDropdownRound = {
     id: number;
     number: number;
     on_hold: boolean;
+    started_at: string | null;
 };
 
 export type CampaignDropdownOption = {
