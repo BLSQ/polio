@@ -97,8 +97,8 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
 
         rounds = campaign_data["rounds"]
         self.assertEqual(len(rounds), 3)
-        self.assertEqual(sorted(rounds[0].keys()), ["id", "number", "on_hold"])
-        # Ordered by number, which is what the round select renders.
+        self.assertEqual(sorted(rounds[0].keys()), ["id", "number", "on_hold", "started_at"])
+        self.assertEqual([r["started_at"] for r in rounds], sorted(r["started_at"] for r in rounds))
         self.assertEqual([r["number"] for r in rounds], [1, 2, 3])
         self.assertEqual(rounds[0]["id"], self.round_1.id)
 
