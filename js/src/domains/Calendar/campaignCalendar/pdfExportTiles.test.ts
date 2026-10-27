@@ -10,23 +10,6 @@ import {
 } from 'vitest';
 import tiles from 'Iaso/constants/mapTiles';
 
-/**
- * POLIO-2231: the calendar PDF export (PdfExportButton -> dom-to-pdf -> dom-to-image) does not
- * render server-side. It clones the DOM and inlines every <img> by fetching it over XHR, so a tile
- * that does not answer is logged as "cannot fetch resource: ..., status: 0" and inlined as an empty
- * data URI instead (dom-to-image's getAndEncode resolves with '' on failure, it does not throw),
- * which is why the export comes out with a blank map rather than raising.
- *
- * These tests drive the real dom-to-image inlining step over a fake XHR that models OSM's current
- * tile policy: the sharded a|b|c.tile hosts are no longer served, the single tile host is. They
- * show that the URL template we used to ship reproduces the ticket's failure and that the one we
- * ship now goes through.
- *
- * What they do not prove: how OSM actually answers today. That assumption lives in the fake XHR
- * below; no test hits the network.
- */
-
-// What CalendarMap.tsx and MapComponent.tsx shipped before the fix.
 const DEPRECATED_SHARDED_TEMPLATE =
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
@@ -80,8 +63,6 @@ class OpenStreetMapPolicyXhr {
     }
 }
 
-// jsdom never loads images, so assigning `src` fires no load event and dom-to-image's inliner,
-// which resolves on `element.onload`, would hang. Resolve it the way a browser would.
 const originalSrcDescriptor = Object.getOwnPropertyDescriptor(
     HTMLImageElement.prototype,
     'src',
