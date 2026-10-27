@@ -2,6 +2,7 @@ import React, { FunctionComponent, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
+import tiles from 'Iaso/constants/mapTiles';
 import { CloseTooltipOnMoveStart } from 'Iaso/utils/map/mapUtils';
 import { CalendarParams, MappedCampaign } from '../types';
 import { CalendarMapContainer } from './CalendarMapContainer';
@@ -52,7 +53,7 @@ export const CalendarMap: FunctionComponent<Props> = ({
                 <CloseTooltipOnMoveStart />
                 <TileLayer
                     attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    url={tiles.osm.url}
                     position="bottomleft"
                 />
                 <CalendarMapContainer
