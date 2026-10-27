@@ -162,7 +162,6 @@ class OutgoingStockMovementRoundNumbersAPITestCase(APITestCase):
 
         received = self.get_round_numbers(self.user, self.stock.pk)
 
-        # Ordering is part of the contract here, so this one compares the lists as they are.
         self.assertEqual(expected, received)
 
     def test_round_numbers_of_another_stock(self):
@@ -182,11 +181,9 @@ class OutgoingStockMovementRoundNumbersAPITestCase(APITestCase):
         self.assertCountEqual(expected, received)
 
     def test_round_numbers_does_not_cross_accounts(self):
-        expected = []
-
         received = self.get_round_numbers(self.user, self.other_account_stock.pk)
 
-        self.assertCountEqual(expected, received)
+        self.assertCountEqual([], received)
 
     def test_round_numbers_of_another_account_user_sees_only_their_own(self):
         expected = [7]
@@ -206,9 +203,7 @@ class OutgoingStockMovementRoundNumbersAPITestCase(APITestCase):
 
     def test_round_numbers_requires_permission(self):
         self.client.force_authenticate(self.user_no_perms)
-        expected = status.HTTP_403_FORBIDDEN
-
         response = self.client.get(ROUND_NUMBERS_URL, {"vaccine_stock": self.stock.pk})
         received = response.status_code
 
-        self.assertEqual(expected, received)
+        self.assertEqual(status.HTTP_403_FORBIDDEN, received)
