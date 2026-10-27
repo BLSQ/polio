@@ -37,7 +37,7 @@ class RoundDropdownOptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Round
-        fields = ["id", "number", "on_hold"]
+        fields = ["id", "number", "on_hold", "started_at"]
 
 
 class CampaignDropdownOptionSerializer(serializers.ModelSerializer):

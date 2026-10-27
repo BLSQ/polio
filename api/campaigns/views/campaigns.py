@@ -122,7 +122,9 @@ class CampaignViewSet(ModelViewSet):
         return AnonymousCampaignSerializer
 
     def get_dropdown_queryset(self, user):
-        rounds_queryset = Round.objects.only("id", "number", "on_hold", "campaign_id").order_by("number")
+        rounds_queryset = Round.objects.only("id", "number", "on_hold", "started_at", "campaign_id").order_by(
+            "started_at"
+        )
         return (
             Campaign.objects.filter_for_user(user)
             .only("id", "obr_name", "created_at")
