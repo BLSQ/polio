@@ -1,5 +1,3 @@
-from typing import List
-
 from gspread_formatting import (
     BooleanCondition,
     BooleanRule,
@@ -40,7 +38,7 @@ PERCENT_FORMAT = CellFormat(
 )
 
 
-def get_between_rule(values: List[str], text_foreground_color: Color = DARK_RED, background_color: Color = LIGHT_RED):
+def get_between_rule(values: list[str], text_foreground_color: Color = DARK_RED, background_color: Color = LIGHT_RED):
     return BooleanRule(
         condition=BooleanCondition("NUMBER_BETWEEN", values),
         format=CellFormat(
