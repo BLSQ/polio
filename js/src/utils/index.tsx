@@ -189,7 +189,14 @@ export const createSearchParamsWithArray = (
         ),
     );
 };
-export const earliestRoundStartTimestamp = (campaign: Campaign): number => {
+
+type CampaignWithRoundStartDates = {
+    rounds?: { started_at?: string | null }[];
+};
+
+export const earliestRoundStartTimestamp = (
+    campaign: CampaignWithRoundStartDates,
+): number => {
     const startTimestamps = (campaign.rounds ?? [])
         .map(round =>
             round.started_at ? moment(round.started_at).valueOf() : NaN,
@@ -204,6 +211,6 @@ export const earliestRoundStartTimestamp = (campaign: Campaign): number => {
 };
 
 export const orderCampaignsByEarliestRoundStartTimestamp = (
-    a: Campaign,
-    b: Campaign,
+    a: CampaignWithRoundStartDates,
+    b: CampaignWithRoundStartDates,
 ): number => earliestRoundStartTimestamp(b) - earliestRoundStartTimestamp(a);
