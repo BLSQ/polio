@@ -6,7 +6,7 @@ import typing
 
 from collections import defaultdict
 from datetime import date
-from typing import Any, Optional, Tuple, Union
+from typing import Any, Optional, Union
 from uuid import uuid4
 
 import django.db.models.manager
@@ -616,7 +616,7 @@ class CampaignType(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify_underscore(self.name)
-        super(CampaignType, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
 
 class CampaignQuerySet(models.QuerySet):
@@ -2057,7 +2057,7 @@ class NotificationXlsxImporter:
         self.regions_cache = None
         self.districts_cache = None
 
-    def build_org_unit_caches(self) -> Tuple[defaultdict, defaultdict, defaultdict]:
+    def build_org_unit_caches(self) -> tuple[defaultdict, defaultdict, defaultdict]:
         from plugins.polio.api.common import make_orgunits_cache
 
         districts = (

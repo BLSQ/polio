@@ -198,7 +198,7 @@ class VaccineStockManagementViewSet(ModelViewSet):
             )
 
             response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
-            response["Content-Disposition"] = "attachment; filename=%s" % filename + ".xlsx"
+            response["Content-Disposition"] = f"attachment; filename={filename}" + ".xlsx"
             workbook.save(response)
             return response
 
@@ -256,7 +256,7 @@ class VaccineStockManagementViewSet(ModelViewSet):
             )
 
             response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
-            response["Content-Disposition"] = "attachment; filename=%s" % filename + ".xlsx"
+            response["Content-Disposition"] = f"attachment; filename={filename}" + ".xlsx"
             workbook.save(response)
             return response
 

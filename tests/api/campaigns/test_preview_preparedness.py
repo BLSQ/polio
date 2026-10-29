@@ -1,6 +1,5 @@
 import datetime
 
-from typing import List
 from unittest import mock
 
 from django.contrib.auth.models import User
@@ -26,7 +25,7 @@ class PreviewPreparednessAPITestCase(APITestCase):
     yoda: User
     org_unit: m.OrgUnit
     child_org_unit: m.OrgUnit
-    org_units: List[m.OrgUnit]
+    org_units: list[m.OrgUnit]
     luke: User
     account: m.Account
 

@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from functools import lru_cache
 from logging import getLogger
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 from uuid import UUID
 
 import pandas as pd
@@ -112,7 +112,7 @@ def handle_country(forms, country: OrgUnit, campaign_qs) -> DataFrame:
     """For each submission try to match the Zone with a campaign and a matching orgunit in scope"""
 
     # Cache for orgunits per campaign
-    cache_campaign_find_func: Dict[UUID, Callable[[Any], Any]] = {}
+    cache_campaign_find_func: dict[UUID, Callable[[Any], Any]] = {}
 
     df = DataFrame.from_records(forms)
     # Add fields to speed up detection of campaign day
@@ -298,7 +298,7 @@ class FormAStocksViewSetV2(viewsets.ViewSet):
     @action(detail=False)
     def scopes(self, request):
         country = request.GET.get("country", "")
-        cache_key = "form_a_scopes%s" % country
+        cache_key = f"form_a_scopes{country}"
         r = cache.get(cache_key)
         if not r:
             campaigns = Campaign.objects.filter(deleted_at=None).all()
