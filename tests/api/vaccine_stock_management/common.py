@@ -236,9 +236,5 @@ class StockVariationFiltersAPIBase(APITestCase):
 
     def assertBadRequest(self, url, **query_params):
         self.client.force_authenticate(self.user)
-        expected = status.HTTP_400_BAD_REQUEST
-
         response = self.client.get(url, {"vaccine_stock": self.stock.pk, **query_params})
-        received = response.status_code
-
-        self.assertEqual(expected, received, response.content)
+        self.assertJSONResponse(response, status.HTTP_400_BAD_REQUEST)
