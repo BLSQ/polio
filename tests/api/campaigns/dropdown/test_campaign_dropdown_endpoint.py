@@ -6,7 +6,15 @@ from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_403_F
 from iaso import models as m
 from iaso.models import Account
 from iaso.test import APITestCase
-from plugins.polio.models import Campaign, CampaignType
+from plugins.polio.models import (
+    VACCINES,
+    Campaign,
+    CampaignScope,
+    CampaignType,
+    RoundScope,
+    SubActivity,
+    SubActivityScope,
+)
 from plugins.polio.tests.api.test import PolioTestCaseMixin
 
 
@@ -91,13 +99,27 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
         self.assertIsInstance(data, list)
         self.assertEqual(len(data), 1)
         campaign_data = data[0]
-        self.assertEqual(sorted(campaign_data.keys()), ["campaign_types", "created_at", "id", "obr_name", "rounds"])
+        self.assertEqual(
+            sorted(campaign_data.keys()),
+            [
+                "campaign_types",
+                "created_at",
+                "id",
+                "obr_name",
+                "rounds",
+                "separate_scopes_per_round",
+                "vaccines",
+            ],
+        )
         self.assertEqual(campaign_data["id"], str(self.campaign.id))
         self.assertEqual(campaign_data["obr_name"], "Campaign-1")
 
         rounds = campaign_data["rounds"]
         self.assertEqual(len(rounds), 3)
-        self.assertEqual(sorted(rounds[0].keys()), ["id", "number", "on_hold", "started_at"])
+        self.assertEqual(
+            sorted(rounds[0].keys()),
+            ["ended_at", "has_scope", "id", "number", "on_hold", "started_at", "vaccines"],
+        )
         self.assertEqual([r["started_at"] for r in rounds], sorted(r["started_at"] for r in rounds))
         self.assertEqual([r["number"] for r in rounds], [1, 2, 3])
         self.assertEqual(rounds[0]["id"], self.round_1.id)
@@ -106,6 +128,118 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
         self.client.force_authenticate(self.user)
         response = self.client.get(BASE_URL)
         data = self.assertJSONResponse(response, HTTP_200_OK)
+        self.assertEqual([c["obr_name"] for c in data], ["Campaign-1"])
+
+    def test_rounds_inherit_the_campaign_vaccines_when_scopes_are_not_split(self):
+        self.client.force_authenticate(self.user)
+        self.assertFalse(self.campaign.separate_scopes_per_round)
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+
+        self.assertEqual(data[0]["vaccines"], [VACCINES[0][0]])
+        for round_data in data[0]["rounds"]:
+            self.assertEqual(round_data["vaccines"], [VACCINES[0][0]])
+            self.assertFalse(round_data["has_scope"])
+
+    def test_rounds_use_their_own_scopes_when_scopes_are_split(self):
+        self.client.force_authenticate(self.user)
+        self.campaign.separate_scopes_per_round = True
+        self.campaign.save()
+        round_scope = RoundScope.objects.create(round=self.round_2, vaccine=VACCINES[2][0])
+        round_scope.group.org_units.add(self.district)
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+        rounds_by_number = {round_data["number"]: round_data for round_data in data[0]["rounds"]}
+
+        self.assertEqual(rounds_by_number[2]["vaccines"], [VACCINES[2][0]])
+        self.assertTrue(rounds_by_number[2]["has_scope"])
+        self.assertEqual(rounds_by_number[1]["vaccines"], [])
+        self.assertFalse(rounds_by_number[1]["has_scope"])
+
+    def test_scopes_without_org_units_name_no_round_vaccine(self):
+        self.client.force_authenticate(self.user)
+        self.campaign.scopes.all().delete()
+        CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[1][0])
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+
+        self.assertEqual(data[0]["vaccines"], [])
+        self.assertEqual([r["vaccines"] for r in data[0]["rounds"]], [[], [], []])
+
+    def test_combined_vaccines_are_split(self):
+        self.client.force_authenticate(self.user)
+        self.campaign.scopes.all().delete()
+        combined_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[3][0])
+        combined_scope.group.org_units.add(self.district)
+
+        data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+
+        self.assertEqual(data[0]["vaccines"], sorted([VACCINES[1][0], VACCINES[2][0]]))
+
+    def test_vaccines_match_the_model_properties(self):
+        self.client.force_authenticate(self.user)
+
+        for separate_scopes_per_round in [False, True]:
+            with self.subTest(separate_scopes_per_round=separate_scopes_per_round):
+                self.campaign.separate_scopes_per_round = separate_scopes_per_round
+                self.campaign.save()
+                # One pass per scope mode, so clear everything first: `RoundScope` is unique
+                # per (round, vaccine) and leftovers from the previous pass would collide.
+                self.campaign.scopes.all().delete()
+                RoundScope.objects.filter(round__campaign=self.campaign).delete()
+                # Cascades to the sub-activities' own scopes.
+                SubActivity.objects.filter(round__campaign=self.campaign).delete()
+
+                campaign_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[0][0])
+                campaign_scope.group.org_units.add(self.district)
+                combined_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[3][0])
+                combined_scope.group.org_units.add(self.district)
+                CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[2][0])
+
+                round_scope = RoundScope.objects.create(round=self.round_2, vaccine=VACCINES[1][0])
+                round_scope.group.org_units.add(self.district)
+                RoundScope.objects.create(round=self.round_3, vaccine=VACCINES[2][0])
+
+                sub_activity = SubActivity.objects.create(round=self.round_1, name="Mop up")
+                sub_activity_scope = SubActivityScope.objects.create(subactivity=sub_activity, vaccine=VACCINES[2][0])
+                sub_activity_scope.group.org_units.add(self.district)
+
+                data = self.assertJSONResponse(self.client.get(BASE_URL), HTTP_200_OK)
+                campaign_data = next(c for c in data if c["obr_name"] == self.campaign.obr_name)
+
+                campaign = Campaign.objects.get(pk=self.campaign.pk)
+                self.assertEqual(campaign_data["vaccines"], campaign.single_vaccines_extended_list)
+                self.assertTrue(campaign_data["vaccines"])
+
+                rounds_by_number = {r["number"]: r for r in campaign_data["rounds"]}
+                for round in campaign.rounds.all():
+                    with self.subTest(round=round.number):
+                        self.assertEqual(
+                            rounds_by_number[round.number]["vaccines"],
+                            round.single_vaccine_list_extended,
+                        )
+
+    def test_has_scopes_filter(self):
+        self.client.force_authenticate(self.user)
+        CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[1][0])
+        Campaign.objects.create(obr_name="Campaign-without-scope", account=self.account)
+        per_round = Campaign.objects.create(
+            obr_name="Campaign-per-round-scopes", account=self.account, separate_scopes_per_round=True
+        )
+
+        data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?has_scopes=true"), HTTP_200_OK)
+        self.assertCountEqual([c["obr_name"] for c in data], ["Campaign-1", per_round.obr_name])
+
+        data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?has_scopes=false"), HTTP_200_OK)
+        self.assertEqual([c["obr_name"] for c in data], ["Campaign-without-scope"])
+
+    def test_has_scopes_filter_does_not_duplicate_campaigns(self):
+        self.client.force_authenticate(self.user)
+        CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[1][0])
+        CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[2][0])
+
+        data = self.assertJSONResponse(self.client.get(f"{BASE_URL}?has_scopes=true"), HTTP_200_OK)
+
         self.assertEqual([c["obr_name"] for c in data], ["Campaign-1"])
 
     def test_country_name_filter(self):
@@ -236,4 +370,6 @@ class CampaignDropdownEndpointTestCase(APITestCase, PolioTestCaseMixin):
             len(one_campaign.captured_queries),
             "The dropdown endpoint has an N+1:\n" + "\n".join(q["sql"] for q in six_campaigns.captured_queries),
         )
-        self.assertLessEqual(len(six_campaigns.captured_queries), 10)
+        # One per prefetch (rounds, campaign types, campaign scopes, round scopes, sub-activities,
+        # sub-activity scopes) plus the campaigns themselves, auth and the org unit restriction.
+        self.assertLessEqual(len(six_campaigns.captured_queries), 14)
