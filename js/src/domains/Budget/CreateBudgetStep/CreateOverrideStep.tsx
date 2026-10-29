@@ -242,17 +242,17 @@ const CreateOverrideStep: FunctionComponent<Props> = ({
                                 <Typography>
                                     {formatMessage(MESSAGES.emailWillBeSentTo)}
                                 </Typography>
-                                {recipientTeams?.map(team => {
+                                {recipientTeams?.map(({label}) => {
                                     return (
                                         <Box
                                             mt={1}
                                             mr={1}
                                             mb={1}
                                             display="inline-block"
-                                            key={team}
+                                            key={label}
                                         >
                                             <Chip
-                                                label={team}
+                                                label={label}
                                                 variant="outlined"
                                                 color="secondary"
                                             />
