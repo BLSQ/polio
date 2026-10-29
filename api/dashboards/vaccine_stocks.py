@@ -144,11 +144,11 @@ def handle_ona_request_with_key(request, key, country_id=None):
         config = get_object_or_404(Config, slug="refresh_error_mailing_list")
         mails = config.content["mails"].split(",")  # format should be: {"mails": "a@a.b,b@b.a"}
         for country in stats["7days"]["failure"]:
-            new_line = "\n%d\t%s" % (stats["7days"]["failure"][country], country)
+            new_line = f"\n{stats['7days']['failure'][country]}\t{country}"
             email_text += new_line
         email_text += f"\n\nForms correctly handled in {key.upper()} for the last 7 days\n"
         for country in stats["7days"]["ok"]:
-            new_line = "\n%d\t%s" % (stats["7days"]["ok"][country], country)
+            new_line = f"\n{stats['7days']['ok'][country]}\t{country}"
             email_text += new_line
         send_mail(
             f"Recent errors for {key.upper()}",
