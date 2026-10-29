@@ -43,6 +43,10 @@ import {
     useGetCampaigns,
 } from '../../../../Campaigns/hooks/api/useGetCampaigns';
 import {
+    CampaignDropdownRound,
+    useGetCampaignsDropdown,
+} from '../../../../Campaigns/hooks/api/useGetCampaignsDropdown';
+import {
     apiUrl,
     fipvVaccineOptions,
     singleVaccinesList,
@@ -169,73 +173,82 @@ export const useCampaignDropDowns = ({
         campaignType: 'polio',
         show_test: false,
     };
-
-    const { data, isFetching } = useGetCampaigns(options, CAMPAIGNS_ENDPOINT);
+    const { data, isFetching } = useGetCampaignsDropdown(
+        {
+            country__id__in: options.countries,
+            campaign_types: options.campaignType,
+            campaign_category: options.campaignCategory,
+            show_test: options.show_test,
+            has_scopes: true,
+        },
+        { enabled: options.enabled },
+    );
     const { data: fIPVData } = useGetCampaigns(
         { ...options, campaignType: 'fIPV' },
         CAMPAIGNS_ENDPOINT,
     );
     return useMemo(() => {
+        const polioCampaigns = data ?? [];
+        const fipvCampaigns = (fIPVData as Campaign[]) ?? [];
         const list = [
-            ...((data as Campaign[]) ?? []),
-            ...((fIPVData as Campaign[]) ?? []),
+            ...polioCampaigns,
+            ...fipvCampaigns.filter(
+                c => c.separate_scopes_per_round || (c.scopes ?? []).length > 0,
+            ),
         ].sort(orderCampaignsByEarliestRoundStartTimestamp);
 
-        const selectedCampaign = list.find(c => c.obr_name === campaign);
-        const campaigns = list
-            .filter(
-                c => c.separate_scopes_per_round || (c.scopes ?? []).length > 0,
-            )
-
-            .map(c => ({
-                label: c.obr_name,
-                value: c.obr_name,
-            }));
-        const fipvCampaigns = (fIPVData as Campaign[]) ?? [];
-        const isFipvCampaign = Boolean(
-            selectedCampaign &&
-            fipvCampaigns.some(c => c.obr_name === selectedCampaign.obr_name),
+        const campaigns = list.map(c => ({
+            label: c.obr_name,
+            value: c.obr_name,
+        }));
+        const selectedFipvCampaign = fipvCampaigns.find(
+            c => c.obr_name === campaign,
+        );
+        const isFipvCampaign = Boolean(selectedFipvCampaign);
+        const selectedCampaign = polioCampaigns.find(
+            c => c.obr_name === campaign,
         );
         let vaccines;
         if (isFipvCampaign) {
             vaccines = fipvVaccineOptions;
         } else {
-            vaccines =
-                selectedCampaign?.single_vaccines
-                    ?.split(',')
-                    .map(vaccineName => vaccineName.trim())
-                    .filter(Boolean)
-                    .map(vaccineName => ({
-                        label: vaccineName,
-                        value: vaccineName,
-                    })) ?? [];
+            vaccines = (selectedCampaign?.vaccines ?? []).map(vaccineName => ({
+                label: vaccineName,
+                value: vaccineName,
+            }));
             if (vaccines.length === 0) {
                 vaccines = singleVaccinesList;
             }
         }
 
-        const rounds = vaccine
-            ? (selectedCampaign?.rounds ?? [])
-                  .filter(
-                      round =>
-                          round.vaccine_names_extended.includes(vaccine) ||
-                          fipvCampaigns.some(
-                              c => c.obr_name === selectedCampaign?.obr_name,
-                          ),
-                  )
-                  .filter(
-                      round =>
-                          (selectedCampaign?.separate_scopes_per_round &&
-                              (round?.scopes ?? []).length > 0) ||
-                          (!selectedCampaign?.separate_scopes_per_round &&
-                              (selectedCampaign?.scopes ?? []).length > 0),
-                  )
-                  .map(round => ({
-                      label: `Round ${round.number}`,
-                      value: `${round.number}`,
-                      original: round,
-                  }))
-            : [];
+        const toRoundOption = (round: Round | CampaignDropdownRound) => ({
+            label: `Round ${round.number}`,
+            value: `${round.number}`,
+            original: round,
+        });
+        const rounds = (() => {
+            if (!vaccine) return [];
+            if (isFipvCampaign) {
+                return (selectedFipvCampaign?.rounds ?? [])
+                    .filter(
+                        round =>
+                            (selectedFipvCampaign?.separate_scopes_per_round &&
+                                (round?.scopes ?? []).length > 0) ||
+                            (!selectedFipvCampaign?.separate_scopes_per_round &&
+                                (selectedFipvCampaign?.scopes ?? []).length >
+                                    0),
+                    )
+                    .map(toRoundOption);
+            }
+            return (selectedCampaign?.rounds ?? [])
+                .filter(round => round.vaccines.includes(vaccine))
+                .filter(
+                    round =>
+                        !selectedCampaign?.separate_scopes_per_round ||
+                        round.has_scope,
+                )
+                .map(toRoundOption);
+        })();
         return {
             campaigns,
             vaccines,
