@@ -1,4 +1,3 @@
-
 from gspread_formatting import (
     BooleanCondition,
     BooleanRule,

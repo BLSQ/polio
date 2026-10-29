@@ -1,4 +1,3 @@
-
 from django.db.models import F, Q, QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect
