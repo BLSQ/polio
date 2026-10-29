@@ -14,6 +14,7 @@ import {
     useRedirectToReplace,
 } from 'bluesquare-components';
 import { useFormik, FormikProvider } from 'formik';
+import { useApiTeamsDropdownList } from '../../../../../../../hat/assets/js/apps/Iaso/api/teams';
 import InputComponent from '../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import {
     useApiErrorValidation,
@@ -24,7 +25,6 @@ import MESSAGES from '../../../constants/messages';
 import { baseUrls } from '../../../constants/urls';
 import { useUserHasTeam } from '../../../hooks/useGetTeams';
 import { useGetWorkflowStatesForDropdown } from '../hooks/api/useGetBudget';
-import { useGetRecipientTeams } from '../hooks/api/useGetEmailRecipients';
 import { useSaveOverrideStep } from '../hooks/api/useSaveOverrideStep';
 import { useOverrideStepValidation } from '../hooks/validation';
 import { AddMultipleLinks } from '../MultipleLinks/AddMultipleLinks';
@@ -57,7 +57,7 @@ const CreateOverrideStep: FunctionComponent<Props> = ({
 }) => {
     const currentUser = useCurrentUser();
     const redirectToReplace = useRedirectToReplace();
-    const { data: userHasTeam } = useUserHasTeam(currentUser?.user_id);
+    const userHasTeam = useUserHasTeam(currentUser?.user_id);
     const { formatMessage } = useSafeIntl();
     const { mutateAsync: saveOverrideStep } = useSaveOverrideStep();
     const classes = useStyles();
@@ -72,7 +72,9 @@ const CreateOverrideStep: FunctionComponent<Props> = ({
         redirectToReplace(baseUrls.budgetDetails, trimmedParams);
     }, [params, redirectToReplace]);
 
-    const { data: recipientTeams } = useGetRecipientTeams(recipients);
+    const { data: recipientTeams } = useApiTeamsDropdownList({
+        ...(recipients ? { ids: recipients } : {}),
+    });
     const { data: possibleStates, isLoading: possibleStatesIsLoading } =
         useGetWorkflowStatesForDropdown();
 
