@@ -140,18 +140,18 @@ def handle_ona_request_with_key(request, key, country_id=None):
     res = convert_dicts_to_table(res)
 
     if len(stats["7days"]["failure"]) > 1:  # let's send an email if there are recent failures
-        email_text = "Forms not appearing in %s for the last 7 days \n" % key.upper()
+        email_text = f"Forms not appearing in {key.upper()} for the last 7 days \n"
         config = get_object_or_404(Config, slug="refresh_error_mailing_list")
         mails = config.content["mails"].split(",")  # format should be: {"mails": "a@a.b,b@b.a"}
         for country in stats["7days"]["failure"]:
             new_line = "\n%d\t%s" % (stats["7days"]["failure"][country], country)
             email_text += new_line
-        email_text += "\n\nForms correctly handled in %s for the last 7 days\n" % key.upper()
+        email_text += f"\n\nForms correctly handled in {key.upper()} for the last 7 days\n"
         for country in stats["7days"]["ok"]:
             new_line = "\n%d\t%s" % (stats["7days"]["ok"][country], country)
             email_text += new_line
         send_mail(
-            "Recent errors for %s" % (key.upper(),),
+            f"Recent errors for {key.upper()}",
             email_text,
             settings.DEFAULT_FROM_EMAIL,
             mails,
