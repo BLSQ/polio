@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 # Move to typing import Literal when upgrading to python 3.8
-from typing import List, Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
 from django.db.models import Q, QuerySet
 
@@ -19,8 +19,8 @@ FieldName = Literal["comment", "amount", "attachments"]
 class Transition:
     label: str
     key: str
-    required_fields: List[str] = field(default_factory=list)
-    displayed_fields: List[str] = field(default_factory=list)
+    required_fields: list[str] = field(default_factory=list)
+    displayed_fields: list[str] = field(default_factory=list)
     from_node: str = "-"
     to_node: str = "-"
     teams_ids_can_transition: Union[list, None] = None  # if none unrestricted
@@ -30,7 +30,7 @@ class Transition:
     reason_not_allowed: Optional[str] = None
     color: Optional[str] = None  # one of primary, red, green
     # mail_template_slug, [team_ids]
-    emails_to_send: List[Tuple[str, List[int]]] = field(default_factory=list)
+    emails_to_send: list[tuple[str, list[int]]] = field(default_factory=list)
 
 
 @dataclass
@@ -39,7 +39,7 @@ class Node:
     key: str
     # Hack for the widget. So we can mark node as completed when passing via other field
     # must be in the same category
-    mark_nodes_as_completed: List[str] = field(default_factory=list)
+    mark_nodes_as_completed: list[str] = field(default_factory=list)
     category_key: str = ""
     order: int = 0
     mandatory: bool = False
@@ -49,14 +49,14 @@ class Node:
 class Category:
     label: str
     key: str
-    nodes: Optional[List[Node]] = None  # Added at workflow init
+    nodes: Optional[list[Node]] = None  # Added at workflow init
 
 
 @dataclass
 class Workflow:
-    transitions: List[Transition]
-    nodes: List[Node]
-    categories: List[Category]
+    transitions: list[Transition]
+    nodes: list[Node]
+    categories: list[Category]
     _transitions_dict = None
 
     def get_node_by_key(self, key):
@@ -112,7 +112,7 @@ def next_transitions(transitions, current_node_key):
     return nexts
 
 
-def effective_teams(c: "plugins.polio.models.Campaign", team_ids: List[int]) -> "QuerySet[Team]":
+def effective_teams(c: "plugins.polio.models.Campaign", team_ids: list[int]) -> "QuerySet[Team]":
     """Leaf teams with actual users for this campaign's country
 
     Certain step of the Workflow are to be done by specific team from a Country, which can only do these steps for

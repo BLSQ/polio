@@ -2,7 +2,6 @@ import datetime
 import json
 
 from io import StringIO
-from typing import Dict, List
 from unittest import mock, skip
 
 from django.contrib.auth.models import Permission
@@ -28,7 +27,7 @@ class BudgetProcessViewSetTestCase(APITestCase):
 
     maxDiff = None
 
-    def jsonListContains(self, actual: List[Dict], expected: List[Dict]):
+    def jsonListContains(self, actual: list[dict], expected: list[dict]):
         """
         Check that each dict in the expect list is contained as a subset of a dict in actual.
         """

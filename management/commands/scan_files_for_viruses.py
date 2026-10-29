@@ -1,6 +1,6 @@
 import argparse
 
-from typing import Optional, Tuple
+from typing import Optional
 
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -26,7 +26,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(f"--{SCAN_ALL_ARG}", default=False, action=argparse.BooleanOptionalAction)
 
-    def _scan_files(self, clazz: type[ModelWithFile], name: str, scan_all: bool) -> Tuple[int, int, int]:
+    def _scan_files(self, clazz: type[ModelWithFile], name: str, scan_all: bool) -> tuple[int, int, int]:
         queryset = clazz.objects.filter(~Q(file_scan_status=VirusScanStatus.INFECTED))
         if not scan_all:
             queryset = queryset.filter(file_scan_status=VirusScanStatus.PENDING)
