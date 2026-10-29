@@ -1,6 +1,6 @@
 from enum import Enum
 from logging import getLogger
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from gspread.utils import absolute_range_name, rowcol_to_a1
 
@@ -226,7 +226,7 @@ def get_regional_level_preparedness(spread: CachedSpread, exclusions):
         region_districts = sheet.get_line_start(start_region[0], start_region[1])
         # ignore last column since it the comments
         region_districts = region_districts[:-1]
-        districts_indicators: Dict[str, Any] = {}
+        districts_indicators: dict[str, Any] = {}
 
         # noinspection SpellCheckingInspection
         for _rownum, colnum, name in region_districts:
@@ -318,8 +318,8 @@ def get_regional_level_preparedness_v2(spread: CachedSpread, exclusions):
         region_districts = sheet.get_line_start(start_region[0], start_region[1])
         # ignore last column since it is the comments
         region_districts = region_districts[:-1]
-        districts_indicators: Dict[str, Any] = {}
-        region_indicators: Dict[str, Any] = {}
+        districts_indicators: dict[str, Any] = {}
+        region_indicators: dict[str, Any] = {}
         for _, indicator_key, _, kind in indicators:
             range_name = f"regional_{indicator_key}"
             regional_name_range = absolute_range_name(sheet.title, range_name).replace("''", "'")

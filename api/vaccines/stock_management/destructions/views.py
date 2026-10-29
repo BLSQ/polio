@@ -1,9 +1,11 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from plugins.polio.api.vaccines.permissions import VaccineStockPermission
+from plugins.polio.api.vaccines.stock_management.destructions.filters import DestructionReportFilter
 from plugins.polio.api.vaccines.stock_management.destructions.serializers import DestructionReportSerializer
 from plugins.polio.api.vaccines.stock_management.subitems import VaccineStockSubitemBase
 from plugins.polio.models import DestructionReport, VaccineStock
@@ -26,8 +28,9 @@ class DestructionReportViewSet(VaccineStockSubitemBase):
         )
     ]
     ordering_fields = ["doses_per_vial"]
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["action"]
+    filterset_class = DestructionReportFilter
 
     @action(detail=False, methods=["GET"])
     def check_duplicate(self, request):

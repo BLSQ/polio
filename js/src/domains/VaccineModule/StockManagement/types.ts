@@ -37,6 +37,36 @@ export type StockVariationSearchKey =
     | 'destructionSearch'
     | 'incidentSearch';
 
+export type formaFilterKey =
+    | 'formaStatus'
+    | 'formaRound'
+    | 'formaDosesPerVial'
+    | 'formaReceptionDateFrom'
+    | 'formaReceptionDateTo'
+    | 'formaReportDateFrom'
+    | 'formaReportDateTo';
+
+export type destructionFilterKey =
+    | 'destructionDosesPerVial'
+    | 'destructionDateFrom'
+    | 'destructionDateTo'
+    | 'destructionRrtDateFrom'
+    | 'destructionRrtDateTo';
+
+export type incidentFilterKey =
+    | 'incidentStockCorrection'
+    | 'incidentDosesPerVial'
+    | 'incidentDateFrom'
+    | 'incidentDateTo'
+    | 'incidentRrtDateFrom'
+    | 'incidentRrtDateTo';
+
+export type StockVariationFilterKey =
+    | StockVariationSearchKey
+    | formaFilterKey
+    | destructionFilterKey
+    | incidentFilterKey;
+
 export type StockVariationPageKey =
     | 'formaPage'
     | 'destructionPage'
@@ -49,14 +79,32 @@ export type StockVariationParams = {
     formaPage: string; // number as string
     formaOrder: string;
     formaSearch?: string;
+    formaStatus?: string;
+    formaRound?: string; // number as string
+    formaDosesPerVial?: string; // number as string
+    formaReceptionDateFrom?: string; // YYYY-MM-DD
+    formaReceptionDateTo?: string; // YYYY-MM-DD
+    formaReportDateFrom?: string; // YYYY-MM-DD
+    formaReportDateTo?: string; // YYYY-MM-DD
     destructionPageSize: string; // number as string
     destructionPage: string; // number as string
     destructionOrder: string;
     destructionSearch?: string;
+    destructionDosesPerVial?: string; // number as string
+    destructionDateFrom?: string; // YYYY-MM-DD
+    destructionDateTo?: string; // YYYY-MM-DD
+    destructionRrtDateFrom?: string; // YYYY-MM-DD
+    destructionRrtDateTo?: string; // YYYY-MM-DD
     incidentPageSize: string; // number as string
     incidentPage: string; // number as string
     incidentOrder: string;
     incidentSearch?: string;
+    incidentStockCorrection?: string;
+    incidentDosesPerVial?: string; // number as string
+    incidentDateFrom?: string; // YYYY-MM-DD
+    incidentDateTo?: string; // YYYY-MM-DD
+    incidentRrtDateFrom?: string; // YYYY-MM-DD
+    incidentRrtDateTo?: string; // YYYY-MM-DD
     unusableVialsOrder: string; // number as string
     usableVialsPageSize: string; // number as string
     usableVialsPage: string; // number as string
