@@ -1,6 +1,11 @@
 import { FormikErrors, FormikProps, FormikTouched } from 'formik';
+import { cloneDeep, set } from 'lodash';
 import { baseUrls } from '../../../../constants/urls';
 import { VRF } from '../constants';
+import {
+    collectSupplyChainFieldErrors,
+    supplyChainSaveFailed,
+} from '../hooks/api/apiFieldErrors';
 import {
     PreAlert,
     SupplyChainFormData,
@@ -145,6 +150,23 @@ export const makeNewFormikValues = ({
     };
 };
 
+export const applyApiFieldErrors = (
+    formik: FormikProps<SupplyChainFormData>,
+    fieldErrors: Record<string, string>,
+): void => {
+    if (Object.keys(fieldErrors).length === 0) {
+        return;
+    }
+    const errors = cloneDeep(formik.errors);
+    const touched = cloneDeep(formik.touched);
+    Object.entries(fieldErrors).forEach(([path, message]) => {
+        set(errors, path, message);
+        set(touched, path, true);
+    });
+    formik.setTouched(touched, false);
+    formik.setErrors(errors);
+};
+
 export const makeHandleSubmit =
     ({
         formik,
@@ -153,49 +175,61 @@ export const makeHandleSubmit =
         setInitialValues,
         saveForm,
         redirect,
+        onApiFieldErrors,
     }: UseHandleSubmitArgs): ((saveAll?: boolean) => void) =>
     (saveAll = false): void => {
-        formik.submitForm();
-        saveForm(
-            { ...formik.values, saveAll },
-            {
-                onSuccess: (data, variables: SupplyChainFormData) => {
-                    // if POST request on vrf, redirect to replace so we leave the create screen and move to the details screen
-                    if (!params.id) {
-                        redirect(baseUrls.vaccineSupplyChainDetails, {
-                            ...params,
-                            id: data.vrf[0].value.id,
-                        });
-                    } else if (variables.saveAll) {
-                        const newInitialValues =
-                            makeNewInitialStateAfterSaveAll({
-                                initialValues,
-                                changedTabs: variables.changedTabs,
-                                variables,
+        // Wait for client validation to finish so its setErrors cannot
+        // overwrite the API field errors applied in onSuccess.
+        formik.submitForm().finally(() => {
+            saveForm(
+                { ...formik.values, saveAll },
+                {
+                    onSuccess: (data, variables: SupplyChainFormData) => {
+                        const fieldErrors = collectSupplyChainFieldErrors(data);
+                        const failed = supplyChainSaveFailed(data);
+                        if (failed) {
+                            onApiFieldErrors(fieldErrors, variables);
+                            applyApiFieldErrors(formik, fieldErrors);
+                            return;
+                        }
+                        onApiFieldErrors({}, variables);
+                        // if POST request on vrf, redirect to replace so we leave the create screen and move to the details screen
+                        if (!params.id) {
+                            redirect(baseUrls.vaccineSupplyChainDetails, {
+                                ...params,
+                                id: data.vrf[0].value.id,
                             });
-                        setInitialValues(newInitialValues);
-                        formik.setErrors({});
-                        formik.setTouched({});
-                    } else {
-                        const {
-                            newInitialValues,
-                            newErrors,
-                            newTouched,
-                            newValues,
-                        } = makeNewFormikValues({
-                            variables,
-                            initialValues,
-                            formik,
-                        });
-                        setInitialValues(newInitialValues);
-                        formik.setErrors(newErrors);
-                        formik.setTouched(newTouched);
-                        formik.setValues(newValues);
-                    }
+                        } else if (variables.saveAll) {
+                            const newInitialValues =
+                                makeNewInitialStateAfterSaveAll({
+                                    initialValues,
+                                    changedTabs: variables.changedTabs,
+                                    variables,
+                                });
+                            setInitialValues(newInitialValues);
+                            formik.setErrors({});
+                            formik.setTouched({});
+                        } else {
+                            const {
+                                newInitialValues,
+                                newErrors,
+                                newTouched,
+                                newValues,
+                            } = makeNewFormikValues({
+                                variables,
+                                initialValues,
+                                formik,
+                            });
+                            setInitialValues(newInitialValues);
+                            formik.setErrors(newErrors);
+                            formik.setTouched(newTouched);
+                            formik.setValues(newValues);
+                        }
+                    },
+                    onSettled: () => {
+                        formik.setSubmitting(false);
+                    },
                 },
-                onSettled: () => {
-                    formik.setSubmitting(false);
-                },
-            },
-        );
+            );
+        });
     };

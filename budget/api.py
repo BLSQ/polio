@@ -1,5 +1,3 @@
-from typing import Type
-
 from django.db.models import F, Q, QuerySet
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -201,7 +199,7 @@ class BudgetStepViewSet(ModelViewSet):
     # filter perms on campaign
     ordering = "-created_at"
 
-    def get_serializer_class(self) -> Type[serializers.BaseSerializer]:
+    def get_serializer_class(self) -> type[serializers.BaseSerializer]:
         if self.request.method == "patch":
             return UpdateBudgetStepSerializer
         return BudgetStepSerializer

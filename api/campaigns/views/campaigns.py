@@ -1,6 +1,6 @@
 from datetime import datetime
 from time import gmtime, strftime
-from typing import Any, List, Union
+from typing import Any, Union
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -217,7 +217,7 @@ class CampaignViewSet(ModelViewSet):
         xlsx_file = generate_xlsx_campaigns_calendar(filename, calendar_data)
 
         response = HttpResponse(content_type=CONTENT_TYPE_XLSX)
-        response["Content-Disposition"] = "attachment; filename=%s" % filename + ".xlsx"
+        response["Content-Disposition"] = f"attachment; filename={filename}" + ".xlsx"
         xlsx_file.save(response)
         return response
 
@@ -268,7 +268,7 @@ class CampaignViewSet(ModelViewSet):
         )
         start_to_name = "--start-to-" + round_start_to.strftime("%d-%m-%Y") if round_start_to else ""
 
-        filename = "%s%s%s" % (
+        filename = "{}{}{}".format(
             "all-rounds-scopes",
             start_from_name,
             start_to_name,
@@ -284,7 +284,7 @@ class CampaignViewSet(ModelViewSet):
             streaming_content=(iter_items(org_units_list, Echo(), columns, self.get_row)), content_type=CONTENT_TYPE_CSV
         )
         filename = filename + ".csv"
-        response["Content-Disposition"] = "attachment; filename=%s" % filename
+        response["Content-Disposition"] = f"attachment; filename={filename}"
 
         return response
 
@@ -303,7 +303,7 @@ class CampaignViewSet(ModelViewSet):
         campaign = round.campaign
         org_units_list = self.get_org_units_list(round, campaign)
 
-        filename = "%s-%s--%s--%s-%s" % (
+        filename = "{}-{}--{}--{}-{}".format(
             "campaign",
             campaign.obr_name,
             "R" + str(round.number),
@@ -316,7 +316,7 @@ class CampaignViewSet(ModelViewSet):
             streaming_content=(iter_items(org_units_list, Echo(), columns, self.get_row)), content_type=CONTENT_TYPE_CSV
         )
         filename = filename + ".csv"
-        response["Content-Disposition"] = "attachment; filename=%s" % filename
+        response["Content-Disposition"] = f"attachment; filename={filename}"
 
         return response
 
@@ -384,7 +384,7 @@ class CampaignViewSet(ModelViewSet):
             item["cost"] = int(float(round.cost)) if (round.cost and (float(round.cost) > 0)) else ""
             data.append(item)
 
-        filename = "%s-%s--%s" % (
+        filename = "{}-{}--{}".format(
             "campaigns",
             "rounds",
             strftime("%Y-%m-%d-%H-%M", gmtime()),
@@ -395,7 +395,7 @@ class CampaignViewSet(ModelViewSet):
             content_type=CONTENT_TYPE_CSV,
         )
         filename = filename + ".csv"
-        response["Content-Disposition"] = "attachment; filename=%s" % filename
+        response["Content-Disposition"] = f"attachment; filename={filename}"
 
         return response
 
@@ -575,7 +575,7 @@ class CampaignViewSet(ModelViewSet):
         return self.loop_on_rounds(self, rounds)
 
     @staticmethod
-    def loop_on_rounds(self: "CampaignViewSet", rounds: Union[QuerySet, List[Round]]) -> list:
+    def loop_on_rounds(self: "CampaignViewSet", rounds: Union[QuerySet, list[Round]]) -> list:
         """
         Returns formatted rounds
 

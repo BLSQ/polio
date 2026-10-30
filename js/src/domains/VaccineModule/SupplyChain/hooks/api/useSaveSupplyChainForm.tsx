@@ -3,6 +3,7 @@ import { useSnackMutation } from '../../../../../../../../../hat/assets/js/apps/
 
 import { PREALERT, VAR, VRF } from '../../constants';
 import { SupplyChainFormData, SupplyChainResponse } from '../../types';
+import { supplyChainSaveFailed } from './apiFieldErrors';
 import {
     handlePromiseErrors,
     normalizePromiseResult,
@@ -91,6 +92,9 @@ export const useSaveVaccineSupplyChainForm = (): UseMutationResult<
                 data: SupplyChainResponse,
                 variables: SupplyChainFormData,
             ) => {
+                // A failed tab must keep the values the user just sent.
+                // Refetching would reset the form and clear the field error.
+                const keepLocalValues = supplyChainSaveFailed(data);
                 if (variables.saveAll && data) {
                     if (data.pre_alerts) {
                         const { pre_alerts } = data;
@@ -99,7 +103,9 @@ export const useSaveVaccineSupplyChainForm = (): UseMutationResult<
                             data: pre_alerts,
                             key: PREALERT,
                         });
-                        queryClient.invalidateQueries('preAlertDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries('preAlertDetails');
+                        }
                     }
                     if (data.arrival_reports) {
                         const { arrival_reports } = data;
@@ -107,13 +113,19 @@ export const useSaveVaccineSupplyChainForm = (): UseMutationResult<
                             data: arrival_reports,
                             key: VAR,
                         });
-                        queryClient.invalidateQueries('arrivalReportsDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries(
+                                'arrivalReportsDetails',
+                            );
+                        }
                     }
                     if (data.vrf) {
                         const { vrf } = data;
                         handleVrfPromiseErrors(vrf);
                         queryClient.invalidateQueries('getVrfList');
-                        queryClient.invalidateQueries('getVrfDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries('getVrfDetails');
+                        }
                     }
                 } else {
                     if (variables.activeTab === PREALERT && data.pre_alerts) {
@@ -122,7 +134,9 @@ export const useSaveVaccineSupplyChainForm = (): UseMutationResult<
                             data: pre_alerts,
                             key: PREALERT,
                         });
-                        queryClient.invalidateQueries('preAlertDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries('preAlertDetails');
+                        }
                     }
                     if (variables.activeTab === VAR && data.arrival_reports) {
                         const { arrival_reports } = data;
@@ -130,13 +144,19 @@ export const useSaveVaccineSupplyChainForm = (): UseMutationResult<
                             data: arrival_reports,
                             key: VAR,
                         });
-                        queryClient.invalidateQueries('arrivalReportsDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries(
+                                'arrivalReportsDetails',
+                            );
+                        }
                     }
                     if (variables.activeTab === VRF && data.vrf) {
                         const { vrf } = data;
                         handleVrfPromiseErrors(vrf);
                         queryClient.invalidateQueries('getVrfList');
-                        queryClient.invalidateQueries('getVrfDetails');
+                        if (!keepLocalValues) {
+                            queryClient.invalidateQueries('getVrfDetails');
+                        }
                     }
                 }
             },

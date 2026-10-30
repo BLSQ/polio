@@ -49,7 +49,11 @@ export const VaccineArrivalReports: FunctionComponent<Props> = ({
                 return (
                     <VaccineArrivalReport
                         index={index}
-                        key={`vaccine-report-${item?.id ?? item?.po_number ?? index}`}
+                        key={
+                            item?.id != null
+                                ? `vaccine-report-${item.id}`
+                                : `vaccine-report-new-${index}`
+                        }
                         dosesForVaccineOptions={dosesPerVaccineOptions}
                     />
                 );

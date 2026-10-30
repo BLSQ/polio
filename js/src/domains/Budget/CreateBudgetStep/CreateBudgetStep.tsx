@@ -15,6 +15,7 @@ import {
 } from 'bluesquare-components';
 import { useFormik, FormikProvider } from 'formik';
 import { isEqual } from 'lodash';
+import { useApiTeamsDropdownList } from '../../../../../../../hat/assets/js/apps/Iaso/api/teams';
 import InputComponent from '../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import {
     useApiErrorValidation,
@@ -24,7 +25,6 @@ import { useCurrentUser } from '../../../../../../../hat/assets/js/apps/Iaso/uti
 import MESSAGES from '../../../constants/messages';
 import { baseUrls } from '../../../constants/urls';
 import { useUserHasTeam } from '../../../hooks/useGetTeams';
-import { useGetRecipientTeams } from '../hooks/api/useGetEmailRecipients';
 import { useSaveBudgetStep } from '../hooks/api/useSaveBudgetStep';
 import { useBudgetStepValidation } from '../hooks/validation';
 import { AddMultipleLinks } from '../MultipleLinks/AddMultipleLinks';
@@ -63,7 +63,7 @@ const CreateBudgetStep: FunctionComponent<Props> = ({
 }) => {
     const currentUser = useCurrentUser();
     const redirectToReplace = useRedirectToReplace();
-    const { data: userHasTeam } = useUserHasTeam(currentUser?.user_id);
+    const userHasTeam = useUserHasTeam(currentUser?.user_id);
     const { formatMessage } = useSafeIntl();
     const { mutateAsync: saveBudgetStep } = useSaveBudgetStep();
     const classes = useStyles();
@@ -79,7 +79,9 @@ const CreateBudgetStep: FunctionComponent<Props> = ({
         redirectToReplace(baseUrls.budgetDetails, trimmedParams);
     }, [params, redirectToReplace]);
 
-    const { data: recipientTeams } = useGetRecipientTeams(recipients);
+    const { data: recipientTeams } = useApiTeamsDropdownList({
+        ...(recipients ? { ids: recipients } : {}),
+    });
 
     const {
         apiErrors,
@@ -270,17 +272,17 @@ const CreateBudgetStep: FunctionComponent<Props> = ({
                                 <Typography>
                                     {formatMessage(MESSAGES.emailWillBeSentTo)}
                                 </Typography>
-                                {recipientTeams?.map(team => {
+                                {recipientTeams?.map(({ label }) => {
                                     return (
                                         <Box
                                             mt={1}
                                             mr={1}
                                             mb={1}
                                             display="inline-block"
-                                            key={team}
+                                            key={label}
                                         >
                                             <Chip
-                                                label={team}
+                                                label={label}
                                                 variant="outlined"
                                                 color="secondary"
                                             />

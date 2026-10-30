@@ -1,4 +1,9 @@
-import React, { FunctionComponent, useCallback } from 'react';
+import React, {
+    FunctionComponent,
+    useCallback,
+    useEffect,
+    useState,
+} from 'react';
 import { Box, Grid } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import {
@@ -8,7 +13,7 @@ import {
     useRedirectToReplace,
 } from 'bluesquare-components';
 import classnames from 'classnames';
-import { FormikProvider, useFormik } from 'formik';
+import { FormikProvider, useFormik, yupToFormErrors } from 'formik';
 import { DisplayIfUserHasPerm } from '../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
 import TopBar from '../../../../../../../../hat/assets/js/apps/Iaso/components/nav/TopBarComponent';
 import { useObjectState } from '../../../../../../../../hat/assets/js/apps/Iaso/hooks/useObjectState';
@@ -89,10 +94,23 @@ export const VaccineSupplyChainDetails: FunctionComponent = () => {
 
     const { mutateAsync: saveForm, isLoading: isSaving } =
         useSaveVaccineSupplyChainForm();
+    const [apiErrorState, setApiErrorState] = useState<{
+        errors: Record<string, string>;
+        payload?: SupplyChainFormData;
+    }>({ errors: {} });
+    const onApiFieldErrors = useCallback(
+        (errors: Record<string, string>, payload: SupplyChainFormData) => {
+            setApiErrorState({ errors, payload });
+        },
+        [],
+    );
 
     const title = useTopBarTitle(vrfDetails as VrfType);
 
-    const validationSchema = useSupplyChainFormValidator();
+    const validationSchema = useSupplyChainFormValidator(
+        apiErrorState.errors,
+        apiErrorState.payload,
+    );
 
     const formik = useFormik<SupplyChainFormData>({
         initialValues,
@@ -103,6 +121,33 @@ export const VaccineSupplyChainDetails: FunctionComponent = () => {
         validationSchema,
     });
     const { setFieldValue, values } = formik;
+
+    // Re-apply after the schema has the API errors. Direct schema.validate
+    // so a stale run can be ignored; Formik's validateForm always writes errors.
+    useEffect(() => {
+        if (Object.keys(apiErrorState.errors).length === 0) {
+            return undefined;
+        }
+        let cancelled = false;
+        validationSchema
+            .validate(formik.values, { abortEarly: false })
+            .then(() => {
+                if (!cancelled) {
+                    formik.setErrors({});
+                }
+            })
+            .catch(error => {
+                if (cancelled || error?.name !== 'ValidationError') {
+                    return;
+                }
+                formik.setErrors(yupToFormErrors(error));
+            });
+        return () => {
+            cancelled = true;
+        };
+        // The schema object is rebuilt every render; rerun only for a new API snapshot.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [apiErrorState]);
 
     const isLoading =
         isFetchingArrivalReports || isFetchingPreAlerts || isFetching;
@@ -134,6 +179,7 @@ export const VaccineSupplyChainDetails: FunctionComponent = () => {
             setInitialValues,
             saveForm,
             redirect,
+            onApiFieldErrors,
         });
 
     // Using formik's enableReinitialize would cause touched, errors etc to reset when changing tabs

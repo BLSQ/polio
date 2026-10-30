@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { isEqual } from 'lodash';
+import { useApiTeamsDropdownList } from 'Iaso/api/teams';
 import ConfirmCancelDialogComponent from 'Iaso/components/dialogs/ConfirmCancelDialogComponent';
 import { UserAsyncSelect } from 'Iaso/components/filters/UserAsyncSelect';
 import InputComponent from 'Iaso/components/forms/InputComponent';
 import { TeamType } from 'Iaso/domains/teams/constants';
-import { useGetTeamsDropdown } from 'Iaso/domains/teams/hooks/requests/useGetTeams';
 import { useFormState } from 'Iaso/hooks/form';
 import { commaSeparatedIdsToArray } from 'Iaso/utils/forms';
 import MESSAGES from '../../../constants/messages';
@@ -45,8 +45,8 @@ export const CountryNotificationsConfigModal = ({
     );
     const { mutateAsync } = usePutCountryMutation();
     const { data: teamsDropdown = [], isFetching: isFetchingTeams } =
-        useGetTeamsDropdown({
-            type: TeamType.TEAM_OF_USERS,
+        useApiTeamsDropdownList({
+            types: [TeamType.enum.TEAM_OF_USERS],
         });
 
     const onConfirm = async closeDialog => {

@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import { geoJSON } from 'leaflet';
 import L from 'leaflet';
 import { TileLayer, MapContainer, GeoJSON, Tooltip, Pane } from 'react-leaflet';
+import tiles from 'Iaso/constants/mapTiles';
 import { CloseTooltipOnMoveStart } from 'Iaso/utils/map/mapUtils';
 import { PaneWithPattern } from '../../../../../../../hat/assets/js/apps/Iaso/components/maps/PaneWithPattern/PaneWithPattern';
 import { CustomZoomControl } from '../../../../../../../hat/assets/js/apps/Iaso/components/maps/tools/CustomZoomControl';
@@ -91,7 +92,7 @@ export const MapComponent: FunctionComponent<Props> = ({
             />
             <TileLayer
                 attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                url={tiles.osm.url}
             />
             <Pane name={`BackgroundLayer-${name}`}>
                 {backgroundLayer?.length > 0 &&
