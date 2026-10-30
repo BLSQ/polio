@@ -1,7 +1,6 @@
 import React from 'react';
 import { Typography } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { Team } from '../../../../../../hat/assets/js/apps/Iaso/domains/teams/types/team';
 import {
     Nullable,
     Optional,
@@ -24,20 +23,6 @@ export const formatRoundNumbers = (roundNumbers: Round[]): string => {
     return roundNumbers.map(i => formatRoundNumber(i.number)).join(', ');
 };
 
-export const formatTargetTeams = (
-    targetTeams: number[],
-    teams: Team[],
-): string => {
-    return targetTeams?.length === 0
-        ? // TODO translate or throw error
-          'None'
-        : targetTeams
-              .map(
-                  (target_team: number) =>
-                      teams?.find(team => team.id === target_team)?.name,
-              )
-              .join(', ');
-};
 
 export const extractFileName = (fileUrl: string): string => {
     let trimmedLeft = '';
