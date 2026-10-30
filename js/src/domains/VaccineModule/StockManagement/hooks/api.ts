@@ -19,10 +19,7 @@ import {
 
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { commaSeparatedIdsToStringArray } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/forms';
-import {
-    CampaignDropdownOption,
-    useGetCampaignsDropdown,
-} from '../../../Campaigns/hooks/api/useGetCampaignsDropdown';
+import { useGetCampaignsDropdown } from '../../../Campaigns/hooks/api/useGetCampaignsDropdown';
 import { patchRequest2, postRequest2 } from '../../SupplyChain/hooks/api/vrf';
 import MESSAGES from '../messages';
 import { FormAFormValues } from '../StockVariation/types';

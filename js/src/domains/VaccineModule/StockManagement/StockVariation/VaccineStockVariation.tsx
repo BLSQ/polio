@@ -20,10 +20,7 @@ import {
 } from '../../../../constants/permissions';
 import { baseUrls } from '../../../../constants/urls';
 import { DESTRUCTION, EARMARKED, FORM_A, INCIDENT } from '../constants';
-import {
-    useGetDosesOptions,
-    useGetStockManagementSummary,
-} from '../hooks/api';
+import { useGetDosesOptions, useGetStockManagementSummary } from '../hooks/api';
 import MESSAGES from '../messages';
 import { StockVariationParams, StockVariationTab } from '../types';
 

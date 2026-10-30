@@ -38,7 +38,6 @@ type Args = {
     vaccineType?: string;
 };
 
-
 export const useStockVariationTabConfig = ({
     params,
     tab,
