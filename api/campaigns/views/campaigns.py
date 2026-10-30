@@ -4,7 +4,7 @@ from typing import Any, List, Union
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Exists, Max, Min, OuterRef, Prefetch, Q
+from django.db.models import Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
@@ -33,12 +33,12 @@ from plugins.polio.api.campaigns.filters.search import SearchFilterBackend
 from plugins.polio.api.campaigns.serializers.anonymous import AnonymousCampaignSerializer
 from plugins.polio.api.campaigns.serializers.calendar import CalendarCampaignSerializer
 from plugins.polio.api.campaigns.serializers.campaigns import CampaignSerializer
+from plugins.polio.api.campaigns.serializers.dropdown import (
+    CampaignDropdownOptionSerializer,
+)
 from plugins.polio.api.campaigns.serializers.list import ListCampaignSerializer
 from plugins.polio.api.campaigns.serializers.retrieve import RetrieveCampaignSerializer
-from plugins.polio.api.campaigns.serializers.shared import (
-    CampaignDropdownOptionSerializer,
-    CampaignTypeSerializer,
-)
+from plugins.polio.api.campaigns.serializers.shared import CampaignTypeSerializer
 from plugins.polio.api.preparedness.serializers import (
     CampaignPreparednessSpreadsheetSerializer,
     PreparednessPreviewSerializer,
@@ -85,7 +85,7 @@ class CampaignViewSet(ModelViewSet):
         "last_round_started_at",
         "country__name",
     ]
-    DROPDOWN_ORDERING_FIELDS = ["obr_name", "created_at", "country__name"]
+    DROPDOWN_ORDERING_FIELDS = ["obr_name", "country__name", "first_round_started_at"]
 
     @property
     def ordering_fields(self):
@@ -127,10 +127,11 @@ class CampaignViewSet(ModelViewSet):
         )
         return (
             Campaign.objects.filter_for_user(user)
-            .only("id", "obr_name", "created_at")
+            .only("id", "obr_name")
+            .annotate(first_round_started_at=Min("rounds__started_at"))
             .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
             .prefetch_related("campaign_types")
-            .distinct()
+            .order_by(F("first_round_started_at").desc(nulls_last=True), "obr_name")
         )
 
     def get_queryset(self):
@@ -179,7 +180,6 @@ class CampaignViewSet(ModelViewSet):
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=CampaignDropdownOptionSerializer,
         permission_classes=[permissions.IsAuthenticated],
     )
     def dropdown(self, request):
