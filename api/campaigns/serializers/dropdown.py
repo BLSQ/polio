@@ -54,7 +54,6 @@ class CampaignDropdownOptionSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "obr_name",
-            "created_at",
             "rounds",
             "campaign_types",
             "vaccines",

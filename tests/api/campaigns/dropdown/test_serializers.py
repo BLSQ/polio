@@ -32,7 +32,6 @@ class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropd
 
         expected_campaign_keys = [
             "campaign_types",
-            "created_at",
             "id",
             "obr_name",
             "rounds",
@@ -51,7 +50,6 @@ class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropd
         expected = {
             "id": str(self.campaign.id),
             "obr_name": "Campaign-1",
-            "created_at": received["created_at"],
             "campaign_types": [{"id": self.polio_type.pk, "name": self.polio_type.name}],
             "separate_scopes_per_round": False,
             "vaccines": [VACCINES[0][0]],
