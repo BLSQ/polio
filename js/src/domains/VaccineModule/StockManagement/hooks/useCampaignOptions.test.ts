@@ -82,17 +82,16 @@ describe('useCampaignOptions', () => {
     });
 
     describe('campaignOptions', () => {
-        it('orders campaigns by their earliest round start date, most recent first', () => {
+        it('keeps the order the endpoint returned', () => {
+            // The endpoint orders by the first round start date, most recent first
             mockUseGetCampaignsDropdown.mockReturnValue({
                 data: [
-                    campaign('MALI-2022', [round(3, 1, '2022-03-01')]),
                     campaign('MALI-2024', [
-                        // Out of order on purpose: the campaign is placed by its earliest
-                        // round, not by the first round the payload happens to list.
                         round(5, 2, '2024-09-01'),
                         round(4, 1, '2024-02-01'),
                     ]),
                     campaign('MALI-2023', [round(6, 1, '2023-05-01')]),
+                    campaign('MALI-2022', [round(3, 1, '2022-03-01')]),
                 ],
                 isFetching: false,
             });
@@ -106,24 +105,23 @@ describe('useCampaignOptions', () => {
             ]);
         });
 
-        it('puts campaigns with no usable round start date last', () => {
+        it('does not re-sort a payload whose dates are not in order', () => {
             mockUseGetCampaignsDropdown.mockReturnValue({
                 data: [
                     campaign('MALI-NO-ROUNDS', []),
-                    campaign('MALI-NO-DATE', [round(1, 1, null)]),
                     campaign('MALI-2021', [round(2, 1, '2021-01-01')]),
+                    campaign('MALI-2024', [round(3, 1, '2024-01-01')]),
                 ],
                 isFetching: false,
             });
 
             const { result } = renderHook(() => useCampaignOptions('MALI'));
 
-            expect(result.current.campaignOptions[0].value).toBe('MALI-2021');
-            expect(
-                result.current.campaignOptions.slice(1).map(o => o.value),
-            ).toEqual(
-                expect.arrayContaining(['MALI-NO-ROUNDS', 'MALI-NO-DATE']),
-            );
+            expect(result.current.campaignOptions.map(o => o.value)).toEqual([
+                'MALI-NO-ROUNDS',
+                'MALI-2021',
+                'MALI-2024',
+            ]);
         });
 
         it('returns label/value pairs built on obr_name alone', () => {
@@ -202,9 +200,9 @@ describe('useCampaignOptions', () => {
                 useCampaignOptions('MALI', 'MALI-2021'),
             );
 
-            expect(
-                result.current.roundNumberOptions.map(o => o.value),
-            ).toEqual([1]);
+            expect(result.current.roundNumberOptions.map(o => o.value)).toEqual(
+                [1],
+            );
         });
 
         it('keeps a round on hold when it is the one already selected', () => {
@@ -217,9 +215,9 @@ describe('useCampaignOptions', () => {
                 useCampaignOptions('MALI', 'MALI-2021', 2),
             );
 
-            expect(
-                result.current.roundNumberOptions.map(o => o.value),
-            ).toEqual([1, 2]);
+            expect(result.current.roundNumberOptions.map(o => o.value)).toEqual(
+                [1, 2],
+            );
         });
     });
 });
