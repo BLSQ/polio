@@ -48,12 +48,9 @@ from plugins.polio.budget.models import BudgetStep
 from plugins.polio.export_utils import generate_xlsx_campaigns_calendar, xlsx_file_name
 from plugins.polio.models import (
     Campaign,
-    CampaignScope,
     CampaignType,
     CountryUsersGroup,
     Round,
-    RoundScope,
-    SubActivityScope,
 )
 from plugins.polio.preparedness.spreadsheet_manager import (
     Campaign,

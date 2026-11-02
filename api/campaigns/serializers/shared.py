@@ -1,4 +1,3 @@
-from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from plugins.polio.api.shared_serializers import GroupSerializer
