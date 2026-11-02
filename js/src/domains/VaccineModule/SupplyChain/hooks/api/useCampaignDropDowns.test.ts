@@ -144,6 +144,24 @@ describe('useCampaignDropDowns', () => {
             ]);
         });
 
+        it('puts a campaign with no round start date last, like the endpoint does', () => {
+            mockDropdown([
+                campaign('MALI-NO-ROUNDS', []),
+                campaign('MALI-2024', [round(1, 1, '2024-02-01')]),
+                campaign('MALI-2021', [round(2, 1, '2021-01-01')]),
+            ]);
+
+            const { result } = renderHook(() =>
+                useCampaignDropDowns({ countryId: COUNTRY_ID }),
+            );
+
+            expect(result.current.campaigns.map(o => o.value)).toEqual([
+                'MALI-2024',
+                'MALI-2021',
+                'MALI-NO-ROUNDS',
+            ]);
+        });
+
         it('sorts the fIPV campaigns into the same list', () => {
             mockDropdown([campaign('MALI-2024', [round(1, 1, '2024-02-01')])]);
             mockFipv([fipvCampaign('MALI-FIPV-2025')]);

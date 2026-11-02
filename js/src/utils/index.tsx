@@ -204,7 +204,7 @@ export const earliestRoundStartTimestamp = (
         .filter(timestamp => !Number.isNaN(timestamp));
 
     if (startTimestamps.length === 0) {
-        return Number.POSITIVE_INFINITY;
+        return Number.NEGATIVE_INFINITY;
     }
 
     return Math.min(...startTimestamps);
