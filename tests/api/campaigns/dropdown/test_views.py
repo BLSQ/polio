@@ -151,9 +151,7 @@ class CampaignDropdownViewsAPITestCase(CampaignDropdownAPIBase):
         self.campaign.campaign_types.set([self.polio_type, self.measles_type])
         CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[2][0])
 
-        received_on_both_types = self.get_obr_names(
-            {"campaign_types": f"{self.polio_type.pk},{self.measles_type.pk}"}
-        )
+        received_on_both_types = self.get_obr_names({"campaign_types": f"{self.polio_type.pk},{self.measles_type.pk}"})
         # Matches all three rounds of the fixture campaign.
         received_on_the_round_dates = self.get_obr_names({"rounds__started_at__gte": "2020-01-01"})
         # The fixture scope plus the one just added.
