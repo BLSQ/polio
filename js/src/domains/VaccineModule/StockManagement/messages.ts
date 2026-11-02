@@ -458,6 +458,30 @@ const MESSAGES = defineMessages({
         id: 'iaso.polio.label.form_a_status_received',
         defaultMessage: 'Received',
     },
+    formAReceptionDateFrom: {
+        id: 'iaso.polio.label.formAReceptionDateFrom',
+        defaultMessage: 'Form A reception (RRT) from',
+    },
+    formAReceptionDateTo: {
+        id: 'iaso.polio.label.formAReceptionDateTo',
+        defaultMessage: 'Form A reception (RRT) to',
+    },
+    reportDateFrom: {
+        id: 'iaso.polio.label.reportDateFrom',
+        defaultMessage: 'Date of report from',
+    },
+    reportDateTo: {
+        id: 'iaso.polio.label.reportDateTo',
+        defaultMessage: 'Date of report to',
+    },
+    rrtReceptionDateFrom: {
+        id: 'iaso.polio.label.rrtReceptionDateFrom',
+        defaultMessage: 'Received by RRT from',
+    },
+    rrtReceptionDateTo: {
+        id: 'iaso.polio.label.rrtReceptionDateTo',
+        defaultMessage: 'Received by RRT to',
+    },
 });
 
 export default MESSAGES;

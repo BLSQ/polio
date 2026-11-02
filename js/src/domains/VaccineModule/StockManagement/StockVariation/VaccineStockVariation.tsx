@@ -20,19 +20,16 @@ import {
 } from '../../../../constants/permissions';
 import { baseUrls } from '../../../../constants/urls';
 import { DESTRUCTION, EARMARKED, FORM_A, INCIDENT } from '../constants';
-import {
-    useGetDosesOptions,
-    useGetStockManagementSummary,
-} from '../hooks/api';
+import { useGetDosesOptions, useGetStockManagementSummary } from '../hooks/api';
 import MESSAGES from '../messages';
 import { StockVariationParams, StockVariationTab } from '../types';
 
 import { useStockVariationTabConfig } from './config';
+import { StockVariationFilters } from './Filters/StockVariationFilters';
 import { CreateDestruction } from './Modals/CreateEditDestruction';
 import { CreateEarmarked } from './Modals/CreateEditEarmarked';
 import { CreateFormA } from './Modals/CreateEditFormA';
 import { CreateIncident } from './Modals/CreateEditIncident';
-import { StockVariationSearch } from './Modals/StockVariationSearch';
 import { VaccineStockVariationTable } from './Table/VaccineStockVariationTable';
 
 const useStyles = makeStyles(theme => {
@@ -189,13 +186,11 @@ export const VaccineStockVariation: FunctionComponent = () => {
                         <Typography variant="h5" color="primary">
                             {formatMessage(MESSAGES[`${tab}Reports`])}
                         </Typography>
-                        {currentTabConfig.search && (
-                            <StockVariationSearch
-                                params={params}
-                                searchKey={currentTabConfig.search.searchKey}
-                                pageKey={currentTabConfig.search.pageKey}
-                            />
-                        )}
+                        <StockVariationFilters
+                            params={params}
+                            tab={tab}
+                            dosesOptions={dosesOptions}
+                        />
                         <Box mt={1} justifyContent="flex-end" display="flex">
                             {createButton}
                         </Box>

@@ -1,8 +1,12 @@
 from django.db import transaction
+from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from plugins.polio.api.vaccines.permissions import OutgoingStockMovementPermission
+from plugins.polio.api.vaccines.stock_management.outgoingstockmovement.filters import OutgoingStockMovementFilter
 from plugins.polio.api.vaccines.stock_management.outgoingstockmovement.serializers import (
     VALIDATE_FORM_A_LIFECYCLE_CONTEXT_KEY,
     OutgoingStockMovementPatchSerializer,
@@ -30,9 +34,11 @@ class OutgoingStockMovementViewSet(VaccineStockSubitemBase):
     filter_backends = [
         filters.OrderingFilter,
         filters.SearchFilter,
+        DjangoFilterBackend,
     ]
     ordering_fields = ["report_date", "form_a_reception_date", "doses_per_vial", "usable_vials_used"]
     search_fields = ["campaign__obr_name", "non_obr_name"]
+    filterset_class = OutgoingStockMovementFilter
 
     def get_serializer_class(self):
         if self.action == "partial_update":
@@ -64,6 +70,18 @@ class OutgoingStockMovementViewSet(VaccineStockSubitemBase):
             qs = qs.select_for_update()
 
         return qs
+
+    @action(detail=False, methods=["GET"])
+    def round_numbers(self, request):
+        """Round numbers present in the Form A records the caller can see"""
+        numbers = (
+            self.get_queryset()
+            .filter(round__isnull=False)
+            .values_list("round__number", flat=True)
+            .distinct()
+            .order_by("round__number")
+        )
+        return Response(list(numbers))
 
     @transaction.atomic
     def update(self, request, *args, **kwargs):

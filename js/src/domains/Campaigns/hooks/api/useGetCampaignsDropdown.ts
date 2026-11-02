@@ -10,17 +10,12 @@ export type CampaignDropdownRound = {
     number: number;
     on_hold: boolean;
     started_at: string | null;
-    ended_at: string | null;
-    vaccines: string[];
-    has_scope: boolean;
 };
 
 export type CampaignDropdownOption = {
     id: string;
     obr_name: string;
     created_at: string;
-    vaccines: string[];
-    separate_scopes_per_round: boolean;
     rounds: CampaignDropdownRound[];
     campaign_types: { id: number; name: string }[];
 };
@@ -33,7 +28,6 @@ export type CampaignsDropdownParams = {
     campaign_category?: CampaignCategory;
     show_test?: boolean;
     deletion_status?: string;
-    has_scopes?: boolean;
 };
 
 export const getCampaignsDropdownUrl = (

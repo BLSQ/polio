@@ -19,12 +19,11 @@ import {
 
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { commaSeparatedIdsToStringArray } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/forms';
-import {
-    CampaignDropdownOption,
-    useGetCampaignsDropdown,
-} from '../../../Campaigns/hooks/api/useGetCampaignsDropdown';
+import { useGetCampaignsDropdown } from '../../../Campaigns/hooks/api/useGetCampaignsDropdown';
 import { patchRequest2, postRequest2 } from '../../SupplyChain/hooks/api/vrf';
+import { DESTRUCTION, FORM_A, INCIDENT } from '../constants';
 import MESSAGES from '../messages';
+import { getFilterApiParams } from '../StockVariation/config';
 import { FormAFormValues } from '../StockVariation/types';
 import {
     DosesPerVialDropdown,
@@ -157,7 +156,6 @@ export const useGetFormAList = (
         formaOrder: order,
         formaPage: page,
         formaPageSize: pageSize,
-        formaSearch: search,
         id: vaccine_stock,
     } = params;
 
@@ -167,9 +165,10 @@ export const useGetFormAList = (
     );
 
     const apiParams = useApiParams(safeParams);
-    const queryString = new URLSearchParams(
-        search ? { ...apiParams, search } : apiParams,
-    ).toString();
+    const queryString = new URLSearchParams({
+        ...apiParams,
+        ...getFilterApiParams(FORM_A, params),
+    }).toString();
     return useSnackQuery({
         queryKey: ['formA', queryString, vaccine_stock],
         queryFn: () => getFormAList(queryString),
@@ -188,7 +187,6 @@ export const useGetDestructionList = (
         destructionOrder: order,
         destructionPage: page,
         destructionPageSize: pageSize,
-        destructionSearch: search,
         id: vaccine_stock,
     } = params;
     const safeParams = useUrlParams(
@@ -196,9 +194,10 @@ export const useGetDestructionList = (
         { order: '-rrt_destruction_report_reception_date', pageSize: 20 },
     );
     const apiParams = useApiParams(safeParams);
-    const queryString = new URLSearchParams(
-        search ? { ...apiParams, search } : apiParams,
-    ).toString();
+    const queryString = new URLSearchParams({
+        ...apiParams,
+        ...getFilterApiParams(DESTRUCTION, params),
+    }).toString();
     return useSnackQuery({
         queryKey: ['destruction', queryString, vaccine_stock],
         queryFn: () => getDestructionList(queryString),
@@ -217,7 +216,6 @@ export const useGetIncidentList = (
         incidentOrder: order,
         incidentPage: page,
         incidentPageSize: pageSize,
-        incidentSearch: search,
         id: vaccine_stock,
     } = params;
     const safeParams = useUrlParams(
@@ -225,9 +223,10 @@ export const useGetIncidentList = (
         { order: '-incident_report_received_by_rrt', pageSize: 20 },
     );
     const apiParams = useApiParams(safeParams);
-    const queryString = new URLSearchParams(
-        search ? { ...apiParams, search } : apiParams,
-    ).toString();
+    const queryString = new URLSearchParams({
+        ...apiParams,
+        ...getFilterApiParams(INCIDENT, params),
+    }).toString();
     return useSnackQuery({
         queryKey: ['incidents', queryString, vaccine_stock],
         queryFn: () => getIncidentList(queryString),
@@ -273,14 +272,6 @@ export const useGetDosesOptions = (
             select: data => data?.results ?? [],
         },
     });
-};
-
-const CampaignRoundStartedAt = (campaign: CampaignDropdownOption): number => {
-    const startDates = (campaign.rounds ?? [])
-        .map(round => round.started_at)
-        .filter((startedAt): startedAt is string => Boolean(startedAt))
-        .map(startedAt => moment(startedAt).valueOf());
-    return startDates.length > 0 ? Math.min(...startDates) : -Infinity;
 };
 
 type UseCampaignOptionsResult = {
@@ -331,14 +322,9 @@ export const useCampaignOptions = (
     }, [formatMessage, round, selectedCampaign]);
 
     const campaignOptions = useMemo(() => {
-        const campaignsList = (data ?? [])
-            .slice()
-            .sort(
-                (a, b) => CampaignRoundStartedAt(b) - CampaignRoundStartedAt(a),
-            )
-            .map(c => {
-                return { label: c.obr_name, value: c.obr_name };
-            });
+        const campaignsList = (data ?? []).map(c => {
+            return { label: c.obr_name, value: c.obr_name };
+        });
         const defaultList = [{ label: campaignName, value: campaignName }];
         if ((campaignsList ?? []).length > 0) {
             return campaignsList;

@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Exists, Max, Min, OuterRef, Prefetch, Q
+from django.db.models import Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
@@ -33,12 +33,12 @@ from plugins.polio.api.campaigns.filters.search import SearchFilterBackend
 from plugins.polio.api.campaigns.serializers.anonymous import AnonymousCampaignSerializer
 from plugins.polio.api.campaigns.serializers.calendar import CalendarCampaignSerializer
 from plugins.polio.api.campaigns.serializers.campaigns import CampaignSerializer
+from plugins.polio.api.campaigns.serializers.dropdown import (
+    CampaignDropdownOptionSerializer,
+)
 from plugins.polio.api.campaigns.serializers.list import ListCampaignSerializer
 from plugins.polio.api.campaigns.serializers.retrieve import RetrieveCampaignSerializer
-from plugins.polio.api.campaigns.serializers.shared import (
-    CampaignDropdownOptionSerializer,
-    CampaignTypeSerializer,
-)
+from plugins.polio.api.campaigns.serializers.shared import CampaignTypeSerializer
 from plugins.polio.api.preparedness.serializers import (
     CampaignPreparednessSpreadsheetSerializer,
     PreparednessPreviewSerializer,
@@ -88,7 +88,7 @@ class CampaignViewSet(ModelViewSet):
         "last_round_started_at",
         "country__name",
     ]
-    DROPDOWN_ORDERING_FIELDS = ["obr_name", "created_at", "country__name"]
+    DROPDOWN_ORDERING_FIELDS = ["obr_name", "country__name", "first_round_started_at"]
 
     @property
     def ordering_fields(self):
@@ -125,29 +125,16 @@ class CampaignViewSet(ModelViewSet):
         return AnonymousCampaignSerializer
 
     def get_dropdown_queryset(self, user):
-        rounds_queryset = Round.objects.only(
-            "id", "number", "on_hold", "started_at", "ended_at", "campaign_id"
-        ).order_by("started_at")
-        group_has_org_units = Exists(OrgUnit.objects.filter(groups=OuterRef("group_id")))
-        campaign_scopes_queryset = CampaignScope.objects.only("id", "vaccine", "group_id", "campaign_id").annotate(
-            group_has_org_units=group_has_org_units
+        rounds_queryset = Round.objects.only("id", "number", "on_hold", "started_at", "campaign_id").order_by(
+            "started_at"
         )
-        round_scopes_queryset = RoundScope.objects.only("id", "vaccine", "group_id", "round_id").annotate(
-            group_has_org_units=group_has_org_units
-        )
-        subactivity_scopes_queryset = SubActivityScope.objects.only(
-            "id", "vaccine", "group_id", "subactivity_id"
-        ).annotate(group_has_org_units=group_has_org_units)
         return (
             Campaign.objects.filter_for_user(user)
-            .only("id", "obr_name", "created_at", "separate_scopes_per_round")
+            .only("id", "obr_name")
+            .annotate(first_round_started_at=Min("rounds__started_at"))
             .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
             .prefetch_related("campaign_types")
-            .prefetch_related(Prefetch("scopes", queryset=campaign_scopes_queryset))
-            .prefetch_related(Prefetch("rounds__scopes", queryset=round_scopes_queryset))
-            .prefetch_related("rounds__sub_activities")
-            .prefetch_related(Prefetch("rounds__sub_activities__scopes", queryset=subactivity_scopes_queryset))
-            .distinct()
+            .order_by(F("first_round_started_at").desc(nulls_last=True), "obr_name")
         )
 
     def get_queryset(self):
@@ -196,7 +183,6 @@ class CampaignViewSet(ModelViewSet):
     @action(
         detail=False,
         methods=["GET"],
-        serializer_class=CampaignDropdownOptionSerializer,
         permission_classes=[permissions.IsAuthenticated],
     )
     def dropdown(self, request):
