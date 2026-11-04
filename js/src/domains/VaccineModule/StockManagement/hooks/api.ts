@@ -19,11 +19,7 @@ import {
 
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { commaSeparatedIdsToStringArray } from '../../../../../../../../hat/assets/js/apps/Iaso/utils/forms';
-import { Campaign } from '../../../../constants/types';
-import {
-    CAMPAIGNS_ENDPOINT,
-    useGetCampaigns,
-} from '../../../Campaigns/hooks/api/useGetCampaigns';
+import { useGetCampaignsDropdown } from '../../../Campaigns/hooks/api/useGetCampaignsDropdown';
 import { patchRequest2, postRequest2 } from '../../SupplyChain/hooks/api/vrf';
 import { DESTRUCTION, FORM_A, INCIDENT } from '../constants';
 import MESSAGES from '../messages';
@@ -278,9 +274,6 @@ export const useGetDosesOptions = (
     });
 };
 
-const createdAtTimestamp = (campaign: Campaign): number =>
-    campaign.created_at ? moment(campaign.created_at).valueOf() : 0;
-
 type UseCampaignOptionsResult = {
     roundOptions: DropdownOptions<string>[];
     campaignOptions: DropdownOptions<string>[];
@@ -294,26 +287,12 @@ export const useCampaignOptions = (
     round?: number,
 ): UseCampaignOptionsResult => {
     const { formatMessage } = useSafeIntl();
-    const queryOptions = {
-        select: data => {
-            if (!data) return [];
-            return data.filter(c => c.top_level_org_unit_name === countryName);
-        },
-        keepPreviousData: true,
-        staleTime: 1000 * 60 * 15, // in MS
-        cacheTime: 1000 * 60 * 5,
-    };
-    const { data, isFetching } = useGetCampaigns(
-        // Show on hold and test campaigns to avoid missing forms
-        // whose campaign has been changed after creation
-        { show_test: true },
-        CAMPAIGNS_ENDPOINT,
-        undefined,
-        queryOptions,
+    const { data, isFetching } = useGetCampaignsDropdown(
+        { country__name: countryName, show_test: true },
+        { enabled: Boolean(countryName) },
     );
 
     const selectedCampaign = useMemo(
-        // @ts-ignore
         () => (data ?? []).find(campaign => campaign.obr_name === campaignName),
         [data, campaignName],
     );
@@ -343,12 +322,9 @@ export const useCampaignOptions = (
     }, [formatMessage, round, selectedCampaign]);
 
     const campaignOptions = useMemo(() => {
-        const campaignsList = ((data ?? []) as Campaign[])
-            .slice()
-            .sort((a, b) => createdAtTimestamp(b) - createdAtTimestamp(a))
-            .map(c => {
-                return { label: c.obr_name, value: c.obr_name };
-            });
+        const campaignsList = (data ?? []).map(c => {
+            return { label: c.obr_name, value: c.obr_name };
+        });
         const defaultList = [{ label: campaignName, value: campaignName }];
         if ((campaignsList ?? []).length > 0) {
             return campaignsList;

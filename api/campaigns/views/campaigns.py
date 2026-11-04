@@ -4,7 +4,7 @@ from typing import Any, Union
 
 from django.conf import settings
 from django.core.mail import send_mail
-from django.db.models import Max, Min, Prefetch, Q
+from django.db.models import Exists, F, Max, Min, OuterRef, Prefetch, Q
 from django.db.models.query import QuerySet
 from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404
@@ -33,14 +33,18 @@ from plugins.polio.api.campaigns.filters.search import SearchFilterBackend
 from plugins.polio.api.campaigns.serializers.anonymous import AnonymousCampaignSerializer
 from plugins.polio.api.campaigns.serializers.calendar import CalendarCampaignSerializer
 from plugins.polio.api.campaigns.serializers.campaigns import CampaignSerializer
+from plugins.polio.api.campaigns.serializers.dropdown import (
+    CampaignDropdownOptionSerializer,
+)
 from plugins.polio.api.campaigns.serializers.list import ListCampaignSerializer
 from plugins.polio.api.campaigns.serializers.retrieve import RetrieveCampaignSerializer
-from plugins.polio.api.campaigns.serializers.shared import CampaignDropDownSerializer, CampaignTypeSerializer
+from plugins.polio.api.campaigns.serializers.shared import CampaignTypeSerializer
 from plugins.polio.api.preparedness.serializers import (
     CampaignPreparednessSpreadsheetSerializer,
     PreparednessPreviewSerializer,
 )
 from plugins.polio.api.preparedness.utils import get_current_preparedness
+from plugins.polio.budget.models import BudgetStep
 from plugins.polio.export_utils import generate_xlsx_campaigns_calendar, xlsx_file_name
 from plugins.polio.models import (
     Campaign,
@@ -73,7 +77,7 @@ class CampaignViewSet(ModelViewSet):
     ]
     filterset_class = CampaignFilter
 
-    ordering_fields = [
+    LIST_ORDERING_FIELDS = [
         "obr_name",
         "cvdpv2_notified_at",
         "detection_status",
@@ -81,6 +85,14 @@ class CampaignViewSet(ModelViewSet):
         "last_round_started_at",
         "country__name",
     ]
+    DROPDOWN_ORDERING_FIELDS = ["obr_name", "country__name", "first_round_started_at"]
+
+    @property
+    def ordering_fields(self):
+        if getattr(self, "action", None) == "dropdown":
+            return self.DROPDOWN_ORDERING_FIELDS
+        return self.LIST_ORDERING_FIELDS
+
     filterset_fields = {
         "country__name": ["exact"],
         "country__id": ["in"],
@@ -97,23 +109,35 @@ class CampaignViewSet(ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_serializer_class(self):
+        if self.action == "dropdown":
+            return CampaignDropdownOptionSerializer
         if self.request.query_params.get("fieldset") == "calendar" and self.request.method in permissions.SAFE_METHODS:
             return CalendarCampaignSerializer
         if self.request.user.is_authenticated:
             if self.request.query_params.get("fieldset") == "list" and self.request.method in permissions.SAFE_METHODS:
                 return ListCampaignSerializer
-            if (
-                self.request.query_params.get("fieldset") == "dropdown"
-                and self.request.method in permissions.SAFE_METHODS
-            ):
-                return CampaignDropDownSerializer
             if self.action == "retrieve":
                 return RetrieveCampaignSerializer
             return CampaignSerializer
         return AnonymousCampaignSerializer
 
+    def get_dropdown_queryset(self, user):
+        rounds_queryset = Round.objects.only("id", "number", "on_hold", "started_at", "campaign_id").order_by(
+            "started_at"
+        )
+        return (
+            Campaign.objects.filter_for_user(user)
+            .only("id", "obr_name")
+            .annotate(first_round_started_at=Min("rounds__started_at"))
+            .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
+            .prefetch_related("campaign_types")
+            .order_by(F("first_round_started_at").desc(nulls_last=True), "obr_name")
+        )
+
     def get_queryset(self):
         user = self.request.user
+        if self.action == "dropdown":
+            return self.get_dropdown_queryset(user)
         campaigns = Campaign.objects.all()
 
         # used for Ordering
@@ -128,6 +152,9 @@ class CampaignViewSet(ModelViewSet):
             account_id = self.request.query_params.get("account_id", None)
             if account_id is not None:
                 campaigns = campaigns.filter(account_id=account_id)
+
+        # Avoid running one COUNT per campaign.
+        campaigns = campaigns.annotate(has_budget_steps=Exists(BudgetStep.objects.filter(campaign=OuterRef("pk"))))
 
         org_units_id_only_qs = OrgUnit.objects.only("id", "name")
         country_prefetch = Prefetch("country", queryset=org_units_id_only_qs)
@@ -149,6 +176,17 @@ class CampaignViewSet(ModelViewSet):
             .prefetch_related(rounds_scopes_group_org_units_prefetch)
         )
         return campaigns.distinct()
+
+    @action(
+        detail=False,
+        methods=["GET"],
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def dropdown(self, request):
+        campaigns = self.filter_queryset(self.get_queryset())
+        if request.query_params.get("deletion_status") is None:
+            campaigns = campaigns.filter(deleted_at__isnull=True)
+        return Response(self.get_serializer(campaigns, many=True).data)
 
     @action(detail=False, methods=["GET"], serializer_class=CampaignTypeSerializer)
     def available_campaign_types(self, request):
