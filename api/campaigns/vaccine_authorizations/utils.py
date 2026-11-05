@@ -29,7 +29,7 @@ def send_missing_vaccine_authorization_for_campaign_email(obr_name, org_unit, ac
 
         The campaign {obr_name} for {org_unit} has been created in the {domain_name} platform.
 
-        Please note that no nOPV2 authorization has been recorded in the platform for {org_unit} yet. 
+        Please note that no nOPV2 authorization has been recorded in the platform for {org_unit} yet.
 
         Be aware that {org_unit} does not have any nOPV2 authorization recorded into the platform yet.
 

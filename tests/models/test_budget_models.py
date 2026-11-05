@@ -15,12 +15,12 @@ BUDGET_SUBJECT_TEMPLATE = "Budget for campaign {{campaign.obr_name}} updated to 
 
 BUDGET_HTML_TEMPLATE = """{% extends "base_budget_email.html" %}
 {% block text %}
-{{ block.super }} 
+{{ block.super }}
 {% endblock %}"""
 
 BUDGET_TEXT_TEMPLATE = """{% extends "base_budget_email.txt" %}
 {% block text %}
-{{ block.super }} 
+{{ block.super }}
 {% endblock %}"""
 
 
@@ -28,12 +28,12 @@ SUBMITTER_SUBJECT_TEMPLATE = "Budget for campaign {{campaign.obr_name}} updated 
 
 SUBMITTER_HTML_TEMPLATE = """{% extends "submitter_email.html" %}
 {% block text %}
-{{ block.super }} 
+{{ block.super }}
 {% endblock %}"""
 
 SUBMITTER_TEXT_TEMPLATE = """{% extends "submitter_email.txt" %}
 {% block text %}
-{{ block.super }} 
+{{ block.super }}
 {% endblock %}"""
 
 

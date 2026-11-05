@@ -37,11 +37,11 @@ def vaccine_authorizations_60_days_expiration_email_alert(vaccine_auths, mailing
                 send_mail(
                     f"ALERT: Vaccine Authorization {obj} arrives to expiration date in 2 months",
                     f"""
-                    ALERT, 
+                    ALERT,
 
                     {obj.country} nOPV2 vaccines authorization date will expire on {obj.expiration_date}.
                     A new authorization is {next_vaccine_auth}, with an expiry date on {next_vaccine_auth.expiration_date}.
-                    Please take appropriate action as needed. 
+                    Please take appropriate action as needed.
                     Link to the platform vaccine authorization page : {vaccine_dashboard_link}/dashboard/polio/vaccinemodule/nopv2authorisation/accountId/{account_id}/order/-current_expiration_date/pageSize/20/page/1"
                     RRT team
                     """,
@@ -61,7 +61,7 @@ def vaccine_authorizations_60_days_expiration_email_alert(vaccine_auths, mailing
 
                                 {obj.country} nOPV2 vaccines authorization date will expire on {obj.expiration_date}.
                                 No new authorization pending.
-                                Please take appropriate action as needed. 
+                                Please take appropriate action as needed.
                                 Link to the platform vaccine authorization page : {vaccine_dashboard_link}/dashboard/polio/vaccinemodule/nopv2authorisation/accountId/{account_id}/order/-current_expiration_date/pageSize/20/page/1""
                                 RRT team
                                 """,
@@ -131,11 +131,11 @@ def expired_vaccine_authorizations_email_alert(vaccine_auths, mailing_list):
                 send_mail(
                     f"ALERT: Vaccine Authorization {obj} has expired.",
                     f"""
-                    ALERT, 
+                    ALERT,
 
                     {obj.country} nOPV2 vaccines authorization has expired expired on {obj.expiration_date}.
                     A new authorization is ongoing {next_vaccine_auth}, with an expiry date on {next_vaccine_auth.expiration_date}.
-                    Please take appropriate action as needed. 
+                    Please take appropriate action as needed.
                     Link to the platform vaccine authorization page : {vaccine_dashboard_link}/dashboard/polio/vaccinemodule/nopv2authorisation/accountId/{account_id}/order/-current_expiration_date/pageSize/20/page/1"
                     RRT team
                     """,
@@ -154,7 +154,7 @@ def expired_vaccine_authorizations_email_alert(vaccine_auths, mailing_list):
 
                                 {obj.country} nOPV2 vaccines authorization has expired on {obj.expiration_date}.
                                 No new authorization pending.
-                                Please take appropriate action as needed. 
+                                Please take appropriate action as needed.
                                 Link to the platform vaccine authorization page : {vaccine_dashboard_link}/dashboard/polio/vaccinemodule/nopv2authorisation/accountId/{account_id}/order/-current_expiration_date/pageSize/20/page/1"
                                 RRT team
                                 """,
