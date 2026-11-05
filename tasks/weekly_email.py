@@ -115,7 +115,7 @@ def send_notification_email(campaign):
     if lang == "fr":
         email_text = f"""Cher coordinateur, chère coordinatrice de la GPEI – {country.name},
 
-Statut hebdomadaire: Il reste {next_round_days_left} jours avant le début du prochain round. 
+Statut hebdomadaire: Il reste {next_round_days_left} jours avant le début du prochain round.
 
 Veillez à mettre à jour le formulaire ODK et en particulier l’OBR name, le numéro de Round, et les données géographiques avant le début du prochain Round. Merci.
 
@@ -124,7 +124,7 @@ Ci-dessous un résumé des informations de la campagne {obr_name} disponibles da
 * Date de notification              : {cvdpv2_notified_at}
 * Date du prochain round (Round {next_round_number})          : {next_round_date}
 * Type de vaccin                    : {vaccines_extended}
-* Population cible                  : {target_population} 
+* Population cible                  : {target_population}
 * RA Date de l'approbation RRT/ORPG  : {risk_assessment_rrt_oprtt_approval_at}
 * Date de soumission du budget      : {submitted_to_rrt_at_WFEDITABLE}
 * Lien vers la preparedness google sheet du Round {next_round_number} : {next_round_preparedness_spreadsheet_url}
@@ -172,7 +172,7 @@ If there are missing data or dates; visit {url} to update
 * Notification date              : {cvdpv2_notified_at}
 * Next round (Round {next_round_number}) date: {next_round_date}
 * Vaccine Type                   : {vaccines_extended}
-* Target population              : {target_population} 
+* Target population              : {target_population}
 * RA RRT/ORPG approval date      : {risk_assessment_rrt_oprtt_approval_at}
 * Date Budget Submitted          : {submitted_to_rrt_at_WFEDITABLE}
 * Link to Round {next_round_number} preparedness Google sheet: {next_round_preparedness_spreadsheet_url}

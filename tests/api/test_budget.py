@@ -768,7 +768,7 @@ class BudgetProcessViewSetTestCase(APITestCase):
     def test_mail_template_include(self):
         # Just to check if include works inside string template
         text = """  hello, {{user}}
-        
+
     {%include "_files.html" with files=files only %}
     {%include "_links.html" with links=links only %}
         """

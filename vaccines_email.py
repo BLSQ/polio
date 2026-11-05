@@ -11,10 +11,10 @@ def send_vaccines_notification_email(country_login: str, emails: list[str]):
     from_email = settings.DEFAULT_FROM_EMAIL
 
     email_text = f""" This is a warning message,
-    
+
 
 You receive this email because the connexion to WHO server for the account {country_login} has failed.
-Therefore the vaccines information cannot be retrieved for this country. 
+Therefore the vaccines information cannot be retrieved for this country.
 
 The Iaso Team.
     """
