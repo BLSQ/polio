@@ -1290,7 +1290,7 @@ class VaccineStockManagementAPITestCase(VaccineStockManagementAPITestBase):
         # Test creation and retrieval of OutgoingStockMovement with document via ORM
 
         # Define paths to the PDF files
-        PDF_FILE_PATH = "testdata/test_pdf.pdf"
+        PDF_FILE_PATH = "plugins/polio/tests/fixtures/safe_file.pdf"
 
         with open(PDF_FILE_PATH, "rb") as pdf_file:
             pdf_file_content = pdf_file.read()
