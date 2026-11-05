@@ -10,14 +10,19 @@ export type CampaignDropdownRound = {
     number: number;
     on_hold: boolean;
     started_at: string | null;
+    // Labels the round chip tooltip of the VRF round select.
+    ended_at: string | null;
+    vaccines: string[];
+    has_scope: boolean;
 };
 
 export type CampaignDropdownOption = {
     id: string;
     obr_name: string;
-    created_at: string;
     rounds: CampaignDropdownRound[];
     campaign_types: { id: number; name: string }[];
+    vaccines: string[];
+    separate_scopes_per_round: boolean;
 };
 
 export type CampaignsDropdownParams = {
@@ -28,6 +33,7 @@ export type CampaignsDropdownParams = {
     campaign_category?: CampaignCategory;
     show_test?: boolean;
     deletion_status?: string;
+    has_scopes?: boolean;
 };
 
 export const getCampaignsDropdownUrl = (

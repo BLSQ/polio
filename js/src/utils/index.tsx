@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { OrgUnit } from 'Iaso/domains/orgUnits/types/orgUnit';
 import { Campaign, Round } from '../constants/types';
 import { accessArrayRound } from '../domains/LQAS-IM/shared/LqasIm';
@@ -188,3 +189,28 @@ export const createSearchParamsWithArray = (
         ),
     );
 };
+
+type CampaignWithRoundStartDates = {
+    rounds?: { started_at?: string | null }[];
+};
+
+export const earliestRoundStartTimestamp = (
+    campaign: CampaignWithRoundStartDates,
+): number => {
+    const startTimestamps = (campaign.rounds ?? [])
+        .map(round =>
+            round.started_at ? moment(round.started_at).valueOf() : NaN,
+        )
+        .filter(timestamp => !Number.isNaN(timestamp));
+
+    if (startTimestamps.length === 0) {
+        return Number.NEGATIVE_INFINITY;
+    }
+
+    return Math.min(...startTimestamps);
+};
+
+export const orderCampaignsByEarliestRoundStartTimestamp = (
+    a: CampaignWithRoundStartDates,
+    b: CampaignWithRoundStartDates,
+): number => earliestRoundStartTimestamp(b) - earliestRoundStartTimestamp(a);

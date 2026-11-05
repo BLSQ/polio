@@ -48,9 +48,12 @@ from plugins.polio.budget.models import BudgetStep
 from plugins.polio.export_utils import generate_xlsx_campaigns_calendar, xlsx_file_name
 from plugins.polio.models import (
     Campaign,
+    CampaignScope,
     CampaignType,
     CountryUsersGroup,
     Round,
+    RoundScope,
+    SubActivityScope,
 )
 from plugins.polio.preparedness.spreadsheet_manager import (
     Campaign,
@@ -122,15 +125,29 @@ class CampaignViewSet(ModelViewSet):
         return AnonymousCampaignSerializer
 
     def get_dropdown_queryset(self, user):
-        rounds_queryset = Round.objects.only("id", "number", "on_hold", "started_at", "campaign_id").order_by(
-            "started_at"
+        rounds_queryset = Round.objects.only(
+            "id", "number", "on_hold", "started_at", "ended_at", "campaign_id"
+        ).order_by("started_at")
+        group_has_org_units = Exists(OrgUnit.objects.filter(groups=OuterRef("group_id")))
+        campaign_scopes_queryset = CampaignScope.objects.only("id", "vaccine", "group_id", "campaign_id").annotate(
+            group_has_org_units=group_has_org_units
         )
+        round_scopes_queryset = RoundScope.objects.only("id", "vaccine", "group_id", "round_id").annotate(
+            group_has_org_units=group_has_org_units
+        )
+        subactivity_scopes_queryset = SubActivityScope.objects.only(
+            "id", "vaccine", "group_id", "subactivity_id"
+        ).annotate(group_has_org_units=group_has_org_units)
         return (
             Campaign.objects.filter_for_user(user)
-            .only("id", "obr_name")
+            .only("id", "obr_name", "separate_scopes_per_round")
             .annotate(first_round_started_at=Min("rounds__started_at"))
             .prefetch_related(Prefetch("rounds", queryset=rounds_queryset))
             .prefetch_related("campaign_types")
+            .prefetch_related(Prefetch("scopes", queryset=campaign_scopes_queryset))
+            .prefetch_related(Prefetch("rounds__scopes", queryset=round_scopes_queryset))
+            .prefetch_related("rounds__sub_activities")
+            .prefetch_related(Prefetch("rounds__sub_activities__scopes", queryset=subactivity_scopes_queryset))
             .order_by(F("first_round_started_at").desc(nulls_last=True), "obr_name")
         )
 

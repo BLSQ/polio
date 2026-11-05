@@ -104,9 +104,14 @@ class CampaignFilter(django_filters.rest_framework.FilterSet):
     campaign_types = django_filters.CharFilter(method="filter_campaign_types", label=_("Campaign types"))
     campaign_category = django_filters.CharFilter(method="filter_campaign_category", label=_("Campaign category"))
     show_test = django_filters.BooleanFilter(method="filter_show_test", label=_("Show test"))
+    has_scopes = django_filters.BooleanFilter(method="filter_has_scopes", label=_("Has a scope"))
 
     def search_filter(self, queryset: QuerySet, _, value: str) -> QuerySet:
         return search_queryset(queryset, value)
+
+    def filter_has_scopes(self, queryset: QuerySet, _, value: bool) -> QuerySet:
+        has_a_scope = Q(separate_scopes_per_round=True) | Q(scopes__isnull=False)
+        return queryset.filter(has_a_scope) if value else queryset.exclude(has_a_scope)
 
     def filter_org_unit_groups(self, queryset: QuerySet, _, value: str) -> QuerySet:
         if not value:
