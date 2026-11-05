@@ -30,7 +30,7 @@ def valid_indicator(x):
 TEMPLATE = """
 Hello,
 
-Errors have been found when refreshing the preparedness data for the following upcoming campaigns: 
+Errors have been found when refreshing the preparedness data for the following upcoming campaigns:
 {% for round_error in rounds %}
 {{ round_error.round.campaign.obr_name }} {{ round_error.round.number }} starting on {{ round_error.round.started_at }}
 =====================================
