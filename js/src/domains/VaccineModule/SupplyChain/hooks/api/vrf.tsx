@@ -165,26 +165,14 @@ export const useCampaignDropDowns = ({
         campaignType: 'polio',
         show_test: false,
     };
-    const { data, isFetching } = useGetCampaignsDropdown(
-        {
-            country__id__in: options.countries,
-            campaign_types: options.campaignType,
-            campaign_category: options.campaignCategory,
-            show_test: options.show_test,
-            has_scopes: true,
-        },
-        { enabled: options.enabled },
-    );
-    const { data: fIPVData } = useGetCampaigns(
-        { ...options, campaignType: 'fIPV' },
-        CAMPAIGNS_ENDPOINT,
-    );
+
+    const { data, isFetching } = useGetCampaigns(options, CAMPAIGNS_ENDPOINT);
+
     return useMemo(() => {
-        const polioCampaigns = data ?? [];
-        const fipvCampaigns = (fIPVData as Campaign[]) ?? [];
-        const list = [
-            ...polioCampaigns,
-            ...fipvCampaigns.filter(
+        const list = (data as Campaign[]) ?? [];
+        const selectedCampaign = list.find(c => c.obr_name === campaign);
+        const campaigns = list
+            .filter(
                 c => c.separate_scopes_per_round || (c.scopes ?? []).length > 0,
             ),
         ].sort(orderCampaignsByEarliestRoundStartTimestamp);
@@ -202,12 +190,8 @@ export const useCampaignDropDowns = ({
 
         const rounds = vaccine
             ? (selectedCampaign?.rounds ?? [])
-                  .filter(
-                      round =>
-                          round.vaccine_names_extended.includes(vaccine) ||
-                          (fIPVData as Campaign[])?.some(
-                              c => c.obr_name === selectedCampaign?.obr_name,
-                          ),
+                  .filter(round =>
+                      round.vaccine_names_extended.includes(vaccine),
                   )
                   .filter(
                       round =>
@@ -229,7 +213,7 @@ export const useCampaignDropDowns = ({
             isFetching,
             rndsParams,
         };
-    }, [data, fIPVData, vaccine, isFetching, rndsParams, campaign]);
+    }, [data, vaccine, isFetching, campaign, rndsParams]);
 };
 
 const getVrfDetails = (id?: string) => {
