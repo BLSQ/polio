@@ -37,3 +37,15 @@ export const singleVaccinesList = [
         value: 'bOPV',
     },
 ];
+
+export const IPV_VACCINE = 'IPV';
+
+export const ipvVaccineOption = {
+    label: IPV_VACCINE,
+    value: IPV_VACCINE,
+};
+
+export const vrfVaccineFilterOptions = [
+    ...singleVaccinesList,
+    ipvVaccineOption,
+];
