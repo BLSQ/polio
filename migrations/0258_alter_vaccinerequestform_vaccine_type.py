@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('polio', '0257_alter_vaccinerequestform_vaccine_type'),
+        ("polio", "0257_alter_vaccinerequestform_vaccine_type"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='vaccinerequestform',
-            name='vaccine_type',
-            field=models.CharField(choices=[('mOPV2', 'mOPV2'), ('nOPV2', 'nOPV2'), ('bOPV', 'bOPV')], max_length=30),
+            model_name="vaccinerequestform",
+            name="vaccine_type",
+            field=models.CharField(choices=[("mOPV2", "mOPV2"), ("nOPV2", "nOPV2"), ("bOPV", "bOPV")], max_length=30),
         ),
     ]
