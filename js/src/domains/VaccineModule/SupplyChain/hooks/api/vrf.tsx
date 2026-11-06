@@ -174,9 +174,8 @@ export const useCampaignDropDowns = ({
         const campaigns = list
             .filter(
                 c => c.separate_scopes_per_round || (c.scopes ?? []).length > 0,
-            ),
-        ].sort(orderCampaignsByEarliestRoundStartTimestamp);
-
+            )
+            .sort(orderCampaignsByEarliestRoundStartTimestamp)
             .map(c => ({
                 label: c.obr_name,
                 value: c.obr_name,
