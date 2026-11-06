@@ -78,7 +78,6 @@ INDIVIDUAL_VACCINES = [
     ("mOPV2", _("mOPV2")),
     ("nOPV2", _("nOPV2")),
     ("bOPV", _("bOPV")),
-    ("IPV", _("IPV")),
 ]
 
 DOSES_PER_VIAL = {

@@ -77,7 +77,7 @@ export const usePaperStyles = makeStyles((theme: Theme) => ({
 export const grayText = { color: grey[500] };
 
 export const useDosesPerVialDropDownForVaccine = (
-    vaccine?: string,
+    vaccine?: 'bOPV' | 'nOPV2' | 'mOPV2',
 ): DropdownOptions<number>[] => {
     const { data: dosesPerVialReference } = useGetDosesPerVial();
     return useMemo(() => {
