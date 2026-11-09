@@ -3,7 +3,7 @@ import datetime as dt
 import functools
 
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 from logging import getLogger
 from typing import Optional
 
@@ -12,6 +12,7 @@ from django.core.mail import send_mail
 from django.db.models import Max, Min
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema
@@ -74,7 +75,7 @@ def handle_ona_request_with_key(request, key, country_id=None):
         # use cache
         last_campaign_date_agg = campaign_qs.aggregate(last_date=Max("end_date"))
         last_campaign_date: Optional[dt.date] = last_campaign_date_agg["last_date"]
-        prefer_cache = last_campaign_date and (last_campaign_date + timedelta(days=5)) < dt.date.today()
+        prefer_cache = last_campaign_date and (last_campaign_date + timedelta(days=5)) < timezone.now().date()
         try:
             forms = get_url_content(
                 url=config["url"],
@@ -97,7 +98,7 @@ def handle_ona_request_with_key(request, key, country_id=None):
         for form in forms:
             try:
                 today_string = form["today"]
-                today = datetime.strptime(today_string, "%Y-%m-%d").date()
+                today = dt.date.fromisoformat(today_string)
                 response_id = form.get("response_ID", None)
                 campaign = find_campaign_on_day_cached(campaign_qs, today, response_id)
                 district_name = form.get("District", None)
@@ -131,7 +132,7 @@ def handle_ona_request_with_key(request, key, country_id=None):
                 success = form["facility_id"] != None and form["campaign_id"] != None
                 stats_key = "ok" if success else "failure"
                 stats["alltime"][stats_key][country.name] = stats["alltime"][stats_key][country.name] + 1
-                if (datetime.utcnow().date() - today).days <= 7:
+                if (timezone.now().date() - today).days <= 7:
                     stats["7days"][stats_key][country.name] = stats["7days"][stats_key][country.name] + 1
             except Exception as e:
                 logger.exception(f"failed parsing of {form}", exc_info=e)

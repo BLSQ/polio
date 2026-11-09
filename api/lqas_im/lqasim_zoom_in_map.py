@@ -1,10 +1,10 @@
-import datetime as dt
 import json
 
 from datetime import timedelta
 
 from django.contrib.gis.geos import Polygon
 from django.db.models import Q, Subquery
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -20,7 +20,7 @@ from plugins.polio.models.base import CampaignType
 
 
 def get_latest_active_campaign_and_rounds(org_unit, start_date_after, end_date_before):
-    today = dt.date.today()
+    today = timezone.now().date()
     polio_campaign_type = CampaignType.objects.get(name=CampaignType.POLIO)
     latest_active_round_qs = Round.objects.filter(
         campaign__country=org_unit, campaign__campaign_types=polio_campaign_type

@@ -19,7 +19,7 @@ def refresh_data(
     date_filter=None,
     task=None,
 ):
-    started_at = datetime.now()
+    started_at = now()
     if date_filter is None:
         date_filter = now() - timedelta(days=180)
     elif type(date_filter) == str:
@@ -71,6 +71,6 @@ def refresh_data(
     upcoming_rounds = round_qs.filter(started_at__gte=now() - timedelta(days=1)).filter(campaign__isnull=False)
     warning_email.send_warning_email(upcoming_rounds)
 
-    finished_at = datetime.now()
+    finished_at = now()
     the_duration = (finished_at - started_at).total_seconds()
     task.report_success(f"Finished in {the_duration} seconds")

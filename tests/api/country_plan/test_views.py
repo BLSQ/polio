@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import jsonschema
 
-from django.utils import timezone
 from rest_framework import status
 
 from hat.audit.models import Modification
@@ -79,7 +78,7 @@ class CountryPlanViewsAPITestCase(CountryPlanAPIBase):
         """
         self.client.force_authenticate(self.user_non_admin_1)
 
-        time_of_creation = timezone.make_aware(datetime.datetime(2023, 10, 5))
+        time_of_creation = datetime.datetime(2023, 10, 5, tzinfo=datetime.timezone.utc)
         mock_now.return_value = time_of_creation
         recent_dashboard = CountryPlan.objects.create(
             account=self.account_one,
@@ -89,7 +88,7 @@ class CountryPlanViewsAPITestCase(CountryPlanAPIBase):
             vaccine="bOPV",
         )
 
-        time_of_update = timezone.make_aware(datetime.datetime(2023, 10, 10))
+        time_of_update = datetime.datetime(2023, 10, 10, tzinfo=datetime.timezone.utc)
         mock_now.return_value = time_of_update
 
         update_data = {"status": "final"}
@@ -105,7 +104,7 @@ class CountryPlanViewsAPITestCase(CountryPlanAPIBase):
         """
         self.client.force_authenticate(self.user_non_admin_1)
 
-        time_of_creation = timezone.make_aware(datetime.datetime(2023, 10, 10))
+        time_of_creation = datetime.datetime(2023, 10, 10, tzinfo=datetime.timezone.utc)
         mock_now.return_value = time_of_creation
 
         old_dashboard = CountryPlan.objects.create(
@@ -115,7 +114,7 @@ class CountryPlanViewsAPITestCase(CountryPlanAPIBase):
             status="draft",
             vaccine="bOPV",
         )
-        time_of_update = timezone.make_aware(datetime.datetime(2023, 10, 20))
+        time_of_update = datetime.datetime(2023, 10, 20, tzinfo=datetime.timezone.utc)
         mock_now.return_value = time_of_update
 
         update_data = {"status": "final"}

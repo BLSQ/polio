@@ -1,9 +1,10 @@
 import logging
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
 
 from django.db.models import Q
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
 from beanstalk_worker import task_decorator
 from plugins.polio.models import Round, VaccineStock, VaccineStockHistory
@@ -36,9 +37,9 @@ def archive_stock_for_round(round, vaccine_stock, reference_date, country=None):
 
 @task_decorator(task_name="archive_vaccine_stock")
 def archive_vaccine_stock_for_rounds(date=None, country=None, campaign=None, vaccine=None, task=None):
-    task_start = datetime.now()
+    task_start = timezone.now()
     account = task.launcher.iaso_profile.account
-    reference_date = datetime.strptime(date, "%Y-%m-%d") if date else task_start
+    reference_date = datetime.strptime(date, "%Y-%m-%d").replace(tzinfo=dt_timezone.utc) if date else task_start
     round_end_date = reference_date - timedelta(days=14)
 
     rounds_qs = Round.objects.filter(ended_at__lte=round_end_date, campaign__account=account).select_related(

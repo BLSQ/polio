@@ -148,7 +148,7 @@ def format_date(date: str, with_year: bool = False) -> str:
     if date is None:
         formatted_date = ""
     else:
-        formatted_date = dt.datetime.strptime(date, "%Y-%m-%d").strftime(date_format)
+        formatted_date = dt.date.fromisoformat(date).strftime(date_format)
     return formatted_date
 
 

@@ -1,6 +1,5 @@
-from datetime import date
-
 from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.dateparse import parse_date
 from drf_spectacular.utils import extend_schema
 from rest_framework import permissions, status
@@ -184,7 +183,7 @@ class VaccineStockManagementViewSet(ModelViewSet):
         export_xlsx = request.query_params.get("export_xlsx", False)
 
         if export_xlsx:
-            today = date.today().isoformat()
+            today = timezone.now().date().isoformat()
             filename = f"{today}-{vaccine_stock.country.name}-{vaccine_stock.vaccine}-stock-card-export"
             workbook = download_xlsx_stock_variants(
                 request,
@@ -242,7 +241,7 @@ class VaccineStockManagementViewSet(ModelViewSet):
         export_xlsx = request.query_params.get("export_xlsx", False)
 
         if export_xlsx:
-            today = date.today().isoformat()
+            today = timezone.now().date().isoformat()
             filename = f"{today}-{vaccine_stock.country.name}-{vaccine_stock.vaccine}-stock-card-export"
             workbook = download_xlsx_stock_variants(
                 request,

@@ -3,7 +3,6 @@ import datetime
 from unittest.mock import patch
 
 from django.contrib.gis.geos import MultiPolygon, Point, Polygon
-from django.utils import timezone
 
 from iaso import models as m
 from iaso.permissions.core_permissions import CORE_ORG_UNITS_PERMISSION
@@ -137,25 +136,25 @@ class CampaignStatusPolioTestCase(APITestCase):
 
         with patch(
             "django.utils.timezone.now",
-            lambda: timezone.make_aware(datetime.datetime(2020, 2, 2, 2, 2, 2)),
+            lambda: datetime.datetime(2020, 2, 2, 2, 2, 2, tzinfo=datetime.timezone.utc),
         ):
             d = CampaignSerializer(instance=c).data
             self.assertEqual(d["general_status"], "Preparing")
         with patch(
             "django.utils.timezone.now",
-            lambda: timezone.make_aware(datetime.datetime(2021, 1, 1, 2, 2, 2)),
+            lambda: datetime.datetime(2021, 1, 1, 2, 2, 2, tzinfo=datetime.timezone.utc),
         ):
             d = CampaignSerializer(instance=c).data
             self.assertEqual(d["general_status"], "Round 1 started")
         with patch(
             "django.utils.timezone.now",
-            lambda: timezone.make_aware(datetime.datetime(2021, 1, 3, 10, 2, 2)),
+            lambda: datetime.datetime(2021, 1, 3, 10, 2, 2, tzinfo=datetime.timezone.utc),
         ):
             d = CampaignSerializer(instance=c).data
             self.assertEqual(d["general_status"], "Round 1 ended")
         with patch(
             "django.utils.timezone.now",
-            lambda: timezone.make_aware(datetime.datetime(2021, 4, 20, 10, 2, 2)),
+            lambda: datetime.datetime(2021, 4, 20, 10, 2, 2, tzinfo=datetime.timezone.utc),
         ):
             d = CampaignSerializer(instance=c).data
             self.assertEqual(d["general_status"], "Round 3 started")

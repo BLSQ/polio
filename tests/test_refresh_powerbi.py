@@ -1,5 +1,6 @@
-from datetime import datetime
 from unittest.mock import patch
+
+from django.utils import timezone
 
 from iaso import models as m
 from iaso.api.tasks.views import ExternalTaskModelViewSet
@@ -51,7 +52,7 @@ class RefreshPowerBITestCase(APITestCase):
             account=account,
             launcher=cls.user,
             name=LQAS_CONFIG_SLUG,
-            started_at=datetime.now(),
+            started_at=timezone.now(),
             external=True,
         )
         cls.task2 = m.Task.objects.create(

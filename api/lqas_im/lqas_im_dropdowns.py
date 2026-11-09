@@ -1,6 +1,6 @@
 import calendar
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import django_filters
 
@@ -42,7 +42,7 @@ class LqasImCountryOptionsFilter(django_filters.rest_framework.FilterSet):
 
     def filter_month(self, queryset: QuerySet[OrgUnit], name: str, value: str):
         try:
-            date_obj = datetime.strptime(value, "%m-%Y")
+            date_obj = datetime.strptime(value, "%m-%Y").replace(tzinfo=timezone.utc)
             first_day = date_obj.replace(day=1)
             last_day = date_obj.replace(day=calendar.monthrange(date_obj.year, date_obj.month)[1])
         except:
@@ -99,7 +99,7 @@ class LqasImCampaignOptionsFilter(django_filters.rest_framework.FilterSet):
 
     def filter_month(self, queryset: QuerySet[OrgUnit], name: str, value: str):
         try:
-            date_obj = datetime.strptime(value, "%m-%Y")
+            date_obj = datetime.strptime(value, "%m-%Y").replace(tzinfo=timezone.utc)
             first_day = date_obj.replace(day=1)
             last_day = date_obj.replace(day=calendar.monthrange(date_obj.year, date_obj.month)[1])
         except:
@@ -172,7 +172,7 @@ class LqasImRoundOptionsFilter(django_filters.rest_framework.FilterSet):
 
     def filter_month(self, queryset: QuerySet[OrgUnit], name: str, value: str):
         try:
-            date_obj = datetime.strptime(value, "%m-%Y")
+            date_obj = datetime.strptime(value, "%m-%Y").replace(tzinfo=timezone.utc)
             first_day = date_obj.replace(day=1)
             last_day = date_obj.replace(day=calendar.monthrange(date_obj.year, date_obj.month)[1])
         except:
@@ -219,7 +219,7 @@ class LqasImCountryBlockOptionsFilter(django_filters.rest_framework.FilterSet):
 
     def filter_month(self, queryset: QuerySet[Group], name: str, value: str):
         try:
-            date_obj = datetime.strptime(value, "%m-%Y")
+            date_obj = datetime.strptime(value, "%m-%Y").replace(tzinfo=timezone.utc)
             first_day = date_obj.replace(day=1)
             last_day = date_obj.replace(day=calendar.monthrange(date_obj.year, date_obj.month)[1])
         except:
