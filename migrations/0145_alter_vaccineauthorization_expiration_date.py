@@ -9,7 +9,7 @@ from django.db import migrations, models
 def populate_expiration_date(apps, schema_editor):
     VaccineAuthorization = apps.get_model("polio", "VaccineAuthorization")
 
-    VaccineAuthorization.objects.filter(expiration_date=None).update(expiration_date=datetime.datetime.now())
+    VaccineAuthorization.objects.filter(expiration_date=None).update(expiration_date=datetime.datetime.now())  # noqa: DTZ005
 
 
 class Migration(migrations.Migration):

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from time import gmtime, strftime
 from typing import Any, Union
 
@@ -254,9 +254,17 @@ class CampaignViewSet(ModelViewSet):
         round_start_to = request.GET.get("roundStartTo")
         current_date = request.GET.get("currentDate")
 
-        round_start_from = datetime.strptime(round_start_from, "%d-%m-%Y") if round_start_from else None
-        round_start_to = datetime.strptime(round_start_to, "%d-%m-%Y") if round_start_to else None
-        current_date = datetime(self.get_year(current_date), 1, 1) if current_date else datetime(self.get_year(), 1, 1)
+        round_start_from = (
+            datetime.strptime(round_start_from, "%d-%m-%Y").replace(tzinfo=timezone.utc) if round_start_from else None
+        )
+        round_start_to = (
+            datetime.strptime(round_start_to, "%d-%m-%Y").replace(tzinfo=timezone.utc) if round_start_to else None
+        )
+        current_date = (
+            datetime(self.get_year(current_date), 1, 1, tzinfo=timezone.utc)
+            if current_date
+            else datetime(self.get_year(), 1, 1, tzinfo=timezone.utc)
+        )
         # get the filter query on start from and start to dates
         query_rounds = Q()
         if not round_start_from and not round_start_to:
@@ -419,10 +427,10 @@ class CampaignViewSet(ModelViewSet):
     @staticmethod
     def get_year(current_date=None):
         if current_date is not None:
-            current_date = datetime.strptime(current_date, "%Y-%m-%d")
+            current_date = datetime.strptime(current_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             current_date = current_date.date()
             return current_date.year
-        today = datetime.today()
+        today = now()
         return today.year
 
     @staticmethod

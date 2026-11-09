@@ -642,15 +642,15 @@ class VaccineSupplyChainAPITestCase(BaseVaccineSupplyChainAPITestCase, PolioTest
             pm.VaccineArrivalReport.objects.create(
                 request_form=request_form,
                 po_number=po_numbers[i],
-                arrival_report_date=datetime.datetime.strptime(date, "%Y-%m-%d").date(),
+                arrival_report_date=datetime.date.fromisoformat(date),
                 doses_received=1000,
                 doses_per_vial=20,
             )
             pm.VaccinePreAlert.objects.create(
-                date_pre_alert_reception=datetime.datetime.strptime(date, "%Y-%m-%d").date(),
+                date_pre_alert_reception=datetime.date.fromisoformat(date),
                 request_form=request_form,
                 po_number=po_numbers[i],
-                estimated_arrival_time=datetime.datetime.strptime(date, "%Y-%m-%d").date(),
+                estimated_arrival_time=datetime.date.fromisoformat(date),
                 doses_shipped=100,
                 doses_per_vial=20,
             )

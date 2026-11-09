@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
+
+from django.utils import timezone
 
 from iaso import models as m
 from iaso.test import APITestCase
@@ -37,8 +39,8 @@ class UpdateLqasFieldsTestCase(APITestCase):
         cls.country_org_unit_2.save()
         cls.user = cls.create_user_with_profile(username="test user", account=account, permissions=[POLIO_PERMISSION])
         cls.user.iaso_profile.org_units.set([cls.country_org_unit_1])
-        cls.round1_start = (datetime.now() - timedelta(days=42)).date()
-        cls.round1_end = (datetime.now() - timedelta(days=39)).date()
+        cls.round1_start = (timezone.now() - timedelta(days=42)).date()
+        cls.round1_end = (timezone.now() - timedelta(days=39)).date()
         cls.campaign = Campaign.objects.create(
             obr_name="right_campaign", account=account, initial_org_unit=cls.country_org_unit_1
         )

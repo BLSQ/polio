@@ -1,9 +1,9 @@
-import datetime
 import datetime as dt
 import itertools
 
 from typing import Any
 
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend  # type: ignore
 from drf_spectacular.utils import extend_schema
 from rest_framework import filters, serializers, status
@@ -99,7 +99,7 @@ class VaccineAuthorizationSerializer(serializers.ModelSerializer):
         check_for_already_validated_authorization(status, country)
 
         # Check validity of the dates
-        if expiration_date and expiration_date < datetime.date.today():
+        if expiration_date and expiration_date < timezone.now().date():
             raise serializers.ValidationError({"error": "expiration_date must be a future date."})
         if start_date and start_date > expiration_date:
             raise serializers.ValidationError({"error": "start_date must be before expiration_date."})

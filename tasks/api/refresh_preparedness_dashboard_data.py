@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 
@@ -32,7 +31,7 @@ class RefreshPreparednessDataViewset(ExternalTaskModelViewSet):
             name=PREPAREDNESS_TASK_NAME,
             status=RUNNING,
             external=True,
-            started_at=datetime.now(),
+            started_at=timezone.now(),
             should_be_killed=False,
         )
         status = self.launch_task(slug=slug, task_id=task.pk)

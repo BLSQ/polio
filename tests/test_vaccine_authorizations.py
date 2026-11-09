@@ -1,6 +1,5 @@
 import datetime
 
-from datetime import date
 from unittest import skip
 
 from django.contrib.auth.models import User
@@ -472,7 +471,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
                 "quantity": 12346,
                 "status": "ONGOING",
                 "comment": "waiting for approval.",
-                "expiration_date": (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+                "expiration_date": (now().date() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
             },
         )
         self.assertEqual(response.status_code, 201)
@@ -484,7 +483,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
                 "quantity": 12346,
                 "status": "ONGOING",
                 "comment": "new update",
-                "expiration_date": (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+                "expiration_date": (now().date() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
             },
         )
         self.assertEqual(response.status_code, 201)
@@ -496,7 +495,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
                 "quantity": 12346,
                 "status": "VALIDATED",
                 "comment": "Approved.",
-                "expiration_date": (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+                "expiration_date": (now().date() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
             },
         )
         self.assertEqual(response.status_code, 201)
@@ -524,7 +523,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
                     "quantity": 12346,
                     "status": "ONGOING",
                     "comment": "waiting for approval.",
-                    "expiration_date": (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+                    "expiration_date": (now().date() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
                 },
             )
 
@@ -547,7 +546,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
                 "quantity": 12346,
                 "status": "ONGOING",
                 "comment": "waiting for approval.",
-                "expiration_date": (datetime.date.today() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
+                "expiration_date": (now().date() + datetime.timedelta(days=1)).strftime("%Y-%m-%d"),
             },
         )
         self.assertEqual(response.status_code, 201)
@@ -580,7 +579,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
 
         self.team.users.set([self.user_1])
 
-        sixty_days_date = datetime.date.today() + datetime.timedelta(days=60)
+        sixty_days_date = now().date() + datetime.timedelta(days=60)
         vaccine_auths = VaccineAuthorization.objects.filter(expiration_date=sixty_days_date)
 
         mailing_list = [user.email for user in User.objects.filter(pk__in=self.team.users.all())]
@@ -600,7 +599,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             status="ONGOING",
             quantity=1000000,
             comment="Validated for 1M",
-            expiration_date=datetime.date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
         from_email = settings.DEFAULT_FROM_EMAIL
@@ -637,7 +636,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
 
         self.team.users.set([self.user_1])
 
-        sixty_days_date = datetime.date.today() + datetime.timedelta(days=60)
+        sixty_days_date = now().date() + datetime.timedelta(days=60)
 
         VaccineAuthorization.objects.create(
             account=self.user_1.iaso_profile.account,
@@ -654,10 +653,10 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             status="ONGOING",
             quantity=1000000,
             comment="Validated for 1M",
-            expiration_date=datetime.date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
-        future_date = datetime.date.today() + datetime.timedelta(days=60)
+        future_date = now().date() + datetime.timedelta(days=60)
         vaccine_auths = VaccineAuthorization.objects.filter(expiration_date=future_date)
 
         team = get_object_or_404(Team, name=NOPV2_VACCINE_TEAM_NAME)
@@ -679,7 +678,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
 
         self.team.users.set([self.user_1])
 
-        past_date = datetime.date.today() - datetime.timedelta(days=1)
+        past_date = now().date() - datetime.timedelta(days=1)
 
         vaccine_auths = VaccineAuthorization.objects.filter(expiration_date=past_date)
         mailing_list = [user.email for user in User.objects.filter(pk__in=self.team.users.all())]
@@ -699,7 +698,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             status="ONGOING",
             quantity=1000000,
             comment="Validated for 1M",
-            expiration_date=datetime.date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
         from_email = settings.DEFAULT_FROM_EMAIL
@@ -733,8 +732,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=5000000,
-            expiration_date=date.today() - datetime.timedelta(days=1),
-            start_date=date.today() - datetime.timedelta(days=20),
+            expiration_date=now().date() - datetime.timedelta(days=1),
+            start_date=now().date() - datetime.timedelta(days=20),
         )
 
         valid_entry = VaccineAuthorization.objects.create(
@@ -742,7 +741,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=5000000,
-            expiration_date=date.today(),
+            expiration_date=now().date(),
         )
 
         expired_entry_second = VaccineAuthorization.objects.create(
@@ -750,8 +749,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=5000000,
-            expiration_date=date.today() - datetime.timedelta(days=200),
-            start_date=date.today() - datetime.timedelta(days=250),
+            expiration_date=now().date() - datetime.timedelta(days=200),
+            start_date=now().date() - datetime.timedelta(days=250),
         )
 
         expired_entry_third = VaccineAuthorization.objects.create(
@@ -759,8 +758,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=5000000,
-            expiration_date=date.today() - datetime.timedelta(days=300),
-            start_date=date.today() - datetime.timedelta(days=350),
+            expiration_date=now().date() - datetime.timedelta(days=300),
+            start_date=now().date() - datetime.timedelta(days=350),
         )
 
         task = vaccine_authorization_update_expired_entries(user=self.user_1)
@@ -790,7 +789,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=100,
-            expiration_date=date.today(),
+            expiration_date=now().date(),
         )
 
         second = VaccineAuthorization.objects.create(
@@ -798,7 +797,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="EXPIRED",
             quantity=200,
-            expiration_date=date.today() + datetime.timedelta(days=10),
+            expiration_date=now().date() + datetime.timedelta(days=10),
         )
 
         third = VaccineAuthorization.objects.create(
@@ -806,7 +805,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ALGERIA,
             status="VALIDATED",
             quantity=300,
-            expiration_date=date.today() + datetime.timedelta(days=20),
+            expiration_date=now().date() + datetime.timedelta(days=20),
         )
 
         fourth = VaccineAuthorization.objects.create(
@@ -814,7 +813,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_SOMALIA,
             status="VALIDATED",
             quantity=400,
-            expiration_date=date.today() + datetime.timedelta(days=30),
+            expiration_date=now().date() + datetime.timedelta(days=30),
         )
 
         """
@@ -915,7 +914,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="ONGOING",
             quantity=200,
-            expiration_date=date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
         sixth = VaccineAuthorization.objects.create(
@@ -923,7 +922,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ALGERIA,
             status="ONGOING",
             quantity=300,
-            expiration_date=date.today() + datetime.timedelta(days=200),
+            expiration_date=now().date() + datetime.timedelta(days=200),
         )
 
         seventh = VaccineAuthorization.objects.create(
@@ -931,7 +930,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_SOMALIA,
             status="ONGOING",
             quantity=400,
-            expiration_date=date.today() + datetime.timedelta(days=300),
+            expiration_date=now().date() + datetime.timedelta(days=300),
         )
 
         # Ascendant
@@ -973,7 +972,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_SOMALIA,
             status="EXPIRED",
             quantity=400,
-            expiration_date=date.today() - datetime.timedelta(days=30),
+            expiration_date=now().date() - datetime.timedelta(days=30),
         )
 
         VaccineAuthorization.objects.create(
@@ -981,7 +980,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_SOMALIA,
             status="VALIDATED",
             quantity=400,
-            expiration_date=date.today() + datetime.timedelta(days=220),
+            expiration_date=now().date() + datetime.timedelta(days=220),
         )
 
         VaccineAuthorization.objects.create(
@@ -989,7 +988,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="EXPIRED",
             quantity=40000,
-            expiration_date=date.today() - datetime.timedelta(days=220),
+            expiration_date=now().date() - datetime.timedelta(days=220),
         )
 
         VaccineAuthorization.objects.create(
@@ -997,7 +996,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ALGERIA,
             status="SIGNATURE",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=120),
+            expiration_date=now().date() + datetime.timedelta(days=120),
         )
 
         VaccineAuthorization.objects.create(
@@ -1005,7 +1004,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_CHAD,
             status="EXPIRED",
             quantity=40000,
-            expiration_date=date.today() - datetime.timedelta(days=1),
+            expiration_date=now().date() - datetime.timedelta(days=1),
         )
 
         VaccineAuthorization.objects.create(
@@ -1013,7 +1012,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_SIERRA_LEONE,
             status="SIGNATURE",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=250),
+            expiration_date=now().date() + datetime.timedelta(days=250),
         )
 
         VaccineAuthorization.objects.create(
@@ -1021,7 +1020,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ZIMBABWE,
             status="ONGOING",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=250),
+            expiration_date=now().date() + datetime.timedelta(days=250),
         )
 
         VaccineAuthorization.objects.create(
@@ -1029,7 +1028,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ZIMBABWE,
             status="EXPIRED",
             quantity=40000,
-            expiration_date=date.today() - datetime.timedelta(days=250),
+            expiration_date=now().date() - datetime.timedelta(days=250),
         )
 
         VaccineAuthorization.objects.create(
@@ -1037,7 +1036,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_ZIMBABWE,
             status="SIGNATURE",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=250),
+            expiration_date=now().date() + datetime.timedelta(days=250),
         )
 
         VaccineAuthorization.objects.create(
@@ -1045,7 +1044,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_BURKINA_FASO,
             status="EXPIRED",
             quantity=40000,
-            expiration_date=date.today() - datetime.timedelta(days=250),
+            expiration_date=now().date() - datetime.timedelta(days=250),
         )
 
         VaccineAuthorization.objects.create(
@@ -1053,7 +1052,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_BURKINA_FASO,
             status="VALIDATED",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
         # response length
@@ -1126,8 +1125,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=120),
-            start_date=date.today(),
+            expiration_date=now().date() + datetime.timedelta(days=120),
+            start_date=now().date(),
         )
 
         data = {
@@ -1152,8 +1151,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="VALIDATED",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=120),
-            start_date=date.today(),
+            expiration_date=now().date() + datetime.timedelta(days=120),
+            start_date=now().date(),
         )
 
         ongoing_auth = VaccineAuthorization.objects.create(
@@ -1161,8 +1160,8 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             country=self.org_unit_DRC,
             status="ONGOING",
             quantity=40000,
-            expiration_date=date.today() + datetime.timedelta(days=200),
-            start_date=date.today(),
+            expiration_date=now().date() + datetime.timedelta(days=200),
+            start_date=now().date(),
         )
 
         data = {
@@ -1200,7 +1199,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
         )
         self.team.users.set([self.user_1, invalid_user])
 
-        past_date = datetime.date.today() - datetime.timedelta(days=1)
+        past_date = now().date() - datetime.timedelta(days=1)
 
         # Create a vaccine auth that expired yesterday
         past_vacc_auth = VaccineAuthorization.objects.create(
@@ -1219,7 +1218,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
             status="ONGOING",
             quantity=1000000,
             comment="Validated for 1M",
-            expiration_date=datetime.date.today() + datetime.timedelta(days=100),
+            expiration_date=now().date() + datetime.timedelta(days=100),
         )
 
         # Mock send_mail to validate recipients
@@ -1247,7 +1246,7 @@ class VaccineAuthorizationAPITestCase(APITestCase):
         self.team.users.set([self.user_1, invalid_user])
 
         # Create a vaccine auth that expires in 60 days
-        future_date = datetime.date.today() + datetime.timedelta(days=60)
+        future_date = now().date() + datetime.timedelta(days=60)
         VaccineAuthorization.objects.create(
             account=self.user_1.iaso_profile.account,
             country=self.org_unit_DRC,

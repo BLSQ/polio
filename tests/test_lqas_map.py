@@ -1,9 +1,10 @@
 import json
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone as dt_timezone
 
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import MultiPolygon, Polygon
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from iaso.models.base import Account, Group
@@ -159,10 +160,10 @@ class PolioLqasAfroMapTestCase(APITestCase):
         cls.campaign_1_scope = CampaignScope.objects.create(
             campaign=cls.campaign_1, vaccine="bOPV", group=cls.campaign1_scope_group
         )
-        cls.campaign1_round1_start = (datetime.now() - timedelta(days=69)).date()
-        cls.campaign1_round1_end = (datetime.now() - timedelta(days=64)).date()
-        cls.campaign1_round2_start = (datetime.now() - timedelta(days=38)).date()
-        cls.campaign1_round2_end = (datetime.now() - timedelta(days=33)).date()
+        cls.campaign1_round1_start = (timezone.now() - timedelta(days=69)).date()
+        cls.campaign1_round1_end = (timezone.now() - timedelta(days=64)).date()
+        cls.campaign1_round2_start = (timezone.now() - timedelta(days=38)).date()
+        cls.campaign1_round2_end = (timezone.now() - timedelta(days=33)).date()
         cls.campaign1_round1 = Round.objects.create(
             number=1,
             started_at=cls.campaign1_round1_start.strftime("%Y-%m-%d"),
@@ -184,10 +185,10 @@ class PolioLqasAfroMapTestCase(APITestCase):
             separate_scopes_per_round=True,
             initial_org_unit=cls.country_org_unit_2,
         )
-        cls.campaign2_round1_start = (datetime.now() - timedelta(days=99)).date()
-        cls.campaign2_round1_end = (datetime.now() - timedelta(days=94)).date()
-        cls.campaign2_round2_start = (datetime.now() - timedelta(days=42)).date()
-        cls.campaign2_round2_end = (datetime.now() - timedelta(days=39)).date()
+        cls.campaign2_round1_start = (timezone.now() - timedelta(days=99)).date()
+        cls.campaign2_round1_end = (timezone.now() - timedelta(days=94)).date()
+        cls.campaign2_round2_start = (timezone.now() - timedelta(days=42)).date()
+        cls.campaign2_round2_end = (timezone.now() - timedelta(days=39)).date()
         cls.campaign2_round1 = Round.objects.create(
             number=1,
             started_at=cls.campaign2_round1_start.strftime("%Y-%m-%d"),
@@ -330,10 +331,10 @@ class PolioLqasAfroMapTestCase(APITestCase):
         cls.non_polio_campaign_scope = CampaignScope.objects.create(
             campaign=cls.non_polio_campaign, vaccine="bOPV", group=cls.non_polio_campaign_scope_group
         )
-        cls.non_polio_campaign_round1_start = (datetime.now() - timedelta(days=68)).date()
-        cls.non_polio_campaign_round1_end = (datetime.now() - timedelta(days=63)).date()
-        cls.non_polio_campaign_round2_start = (datetime.now() - timedelta(days=37)).date()
-        cls.non_polio_campaign_round2_end = (datetime.now() - timedelta(days=32)).date()
+        cls.non_polio_campaign_round1_start = (timezone.now() - timedelta(days=68)).date()
+        cls.non_polio_campaign_round1_end = (timezone.now() - timedelta(days=63)).date()
+        cls.non_polio_campaign_round2_start = (timezone.now() - timedelta(days=37)).date()
+        cls.non_polio_campaign_round2_end = (timezone.now() - timedelta(days=32)).date()
         cls.non_polio_campaign_round1 = Round.objects.create(
             number=1,
             started_at=cls.non_polio_campaign_round1_start.strftime("%Y-%m-%d"),
@@ -433,7 +434,7 @@ class PolioLqasAfroMapTestCase(APITestCase):
 
     def test_campaign_is_started(self):
         self.assertTrue(self.campaign_1.is_started())
-        reference_date = datetime.strptime("01-01-2018", "%d-%m-%Y")
+        reference_date = datetime.strptime("01-01-2018", "%d-%m-%Y").replace(tzinfo=dt_timezone.utc)
         self.assertFalse(self.campaign_1.is_started(reference_date))
 
     def test_lqas_global(self):

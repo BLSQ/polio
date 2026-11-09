@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 from unittest import mock
 
 from django.utils import timezone
@@ -59,7 +59,7 @@ class PreparednessScoreFilterAPITestCase(PreparednessDashboardAPIBase):
         response = self.client.get(self.SCORE_URL, {"spread_id": exact_date_ssi.spread_id, "date": date_str})
         data = self.assertJSONResponse(response, status.HTTP_200_OK)
         self.assertIn("scores", data)
-        created_at = datetime.strptime(data["created_at"].split("T")[0], "%Y-%m-%d").date()
+        created_at = date.fromisoformat(data["created_at"].split("T")[0])
         expected_created_at = query_date.date()
         self.assertEqual(created_at, expected_created_at)
         self.assertEqual(data["id"], exact_date_ssi.id)

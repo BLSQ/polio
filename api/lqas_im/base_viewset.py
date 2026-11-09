@@ -1,4 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone as dt_timezone
+
+from django.utils import timezone
 
 from iaso.api.common import ModelViewSet
 from iaso.models.data_store import JsonDataStore
@@ -17,7 +19,7 @@ class LqasAfroViewset(ModelViewSet):
                 raise ValueError("period should be 3months, 6months, 9months or 12months")
             # End_date should be None when selecting period, since its "from X months ago until now"
             end_date_before = None
-            today = datetime.now()
+            today = timezone.now()
             interval_in_months = int(selected_period[0])
             if selected_period[1].isdigit():
                 interval_in_months = int(f"{selected_period[0]}{selected_period[1]}")
@@ -25,9 +27,11 @@ class LqasAfroViewset(ModelViewSet):
             start_date_after = (today - timedelta(days=interval_in_months * 31)).date()
         else:
             if start_date_after is not None:
-                start_date_after = datetime.strptime(start_date_after, "%d-%m-%Y").date()
+                start_date_after = (
+                    datetime.strptime(start_date_after, "%d-%m-%Y").replace(tzinfo=dt_timezone.utc).date()
+                )
             if end_date_before is not None:
-                end_date_before = datetime.strptime(end_date_before, "%d-%m-%Y").date()
+                end_date_before = datetime.strptime(end_date_before, "%d-%m-%Y").replace(tzinfo=dt_timezone.utc).date()
         return start_date_after, end_date_before
 
     def filter_campaigns_by_date(self, campaigns, reference, reference_date):

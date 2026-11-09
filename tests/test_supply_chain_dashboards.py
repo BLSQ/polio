@@ -1,5 +1,7 @@
 from datetime import date
 
+from django.utils import timezone
+
 from iaso import models as m
 from iaso.models.base import Account
 from iaso.models.org_unit import OrgUnit, OrgUnitType
@@ -46,9 +48,9 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         cls.other_campaign = Campaign.objects.create(obr_name="Not the expected result", account=cls.other_account)
         cls.vrf = VaccineRequestForm.objects.create(
             campaign=cls.campaign,
-            date_vrf_signature=date.today(),
-            date_vrf_reception=date.today(),
-            date_dg_approval=date.today(),
+            date_vrf_signature=timezone.now().date(),
+            date_vrf_reception=timezone.now().date(),
+            date_dg_approval=timezone.now().date(),
             quantities_ordered_in_doses=1000,
             vaccine_type=cls.vaccine_type,
         )
@@ -63,24 +65,27 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         cls.vrf.rounds.set([cls.round_1, cls.round_2])
         cls.other_vrf = VaccineRequestForm.objects.create(
             campaign=cls.other_campaign,
-            date_vrf_signature=date.today(),
-            date_vrf_reception=date.today(),
-            date_dg_approval=date.today(),
+            date_vrf_signature=timezone.now().date(),
+            date_vrf_reception=timezone.now().date(),
+            date_dg_approval=timezone.now().date(),
             quantities_ordered_in_doses=1000,
             vaccine_type=cls.vaccine_type,
         )
         cls.other_vrf.rounds.set([])
         cls.pre_alert = VaccinePreAlert.objects.create(
-            request_form=cls.vrf, date_pre_alert_reception=date.today(), doses_per_vial=20
+            request_form=cls.vrf, date_pre_alert_reception=timezone.now().date(), doses_per_vial=20
         )
         cls.other_pre_alert = VaccinePreAlert.objects.create(
-            request_form=cls.other_vrf, date_pre_alert_reception=date.today(), doses_per_vial=20
+            request_form=cls.other_vrf, date_pre_alert_reception=timezone.now().date(), doses_per_vial=20
         )
         cls.arrival_report = VaccineArrivalReport.objects.create(
-            request_form=cls.vrf, arrival_report_date=date.today(), doses_received=1000, doses_per_vial=20
+            request_form=cls.vrf, arrival_report_date=timezone.now().date(), doses_received=1000, doses_per_vial=20
         )
         cls.other_arrival_report = VaccineArrivalReport.objects.create(
-            request_form=cls.other_vrf, arrival_report_date=date.today(), doses_received=1000, doses_per_vial=20
+            request_form=cls.other_vrf,
+            arrival_report_date=timezone.now().date(),
+            doses_received=1000,
+            doses_per_vial=20,
         )
 
         cls.vaccine_stock = VaccineStock.objects.create(
@@ -90,7 +95,7 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         cls.form_a = OutgoingStockMovement.objects.create(
             campaign=cls.campaign,
             vaccine_stock=cls.vaccine_stock,
-            report_date=date.today(),
+            report_date=timezone.now().date(),
             form_a_reception_date=date(2022, 2, 2),
             usable_vials_used=100,
             doses_per_vial=20,
@@ -99,7 +104,7 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         cls.destruction_report = DestructionReport.objects.create(
             vaccine_stock=cls.vaccine_stock,
             rrt_destruction_report_reception_date=date(2022, 2, 9),
-            destruction_report_date=date.today(),
+            destruction_report_date=timezone.now().date(),
             unusable_vials_destroyed=10,
             action="destroyed",
             doses_per_vial=20,
@@ -196,9 +201,9 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
 
         new_vrf = VaccineRequestForm.objects.create(
             campaign=new_campaign,
-            date_vrf_signature=date.today(),
-            date_vrf_reception=date.today(),
-            date_dg_approval=date.today(),
+            date_vrf_signature=timezone.now().date(),
+            date_vrf_reception=timezone.now().date(),
+            date_dg_approval=timezone.now().date(),
             quantities_ordered_in_doses=2000,
             vaccine_type=self.vaccine_type,
         )
@@ -223,17 +228,17 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         )
         new_vrf.rounds.set([new_vrf_round_1, new_vrf_round_2])
         new_pre_alert = VaccinePreAlert.objects.create(
-            request_form=new_vrf, date_pre_alert_reception=date.today(), doses_per_vial=20
+            request_form=new_vrf, date_pre_alert_reception=timezone.now().date(), doses_per_vial=20
         )
         new_arrival_report = VaccineArrivalReport.objects.create(
-            request_form=new_vrf, arrival_report_date=date.today(), doses_received=2000, doses_per_vial=20
+            request_form=new_vrf, arrival_report_date=timezone.now().date(), doses_received=2000, doses_per_vial=20
         )
 
         # Should appear only in 2nd VRF
         new_forma = OutgoingStockMovement.objects.create(
             campaign=new_campaign,
             vaccine_stock=self.vaccine_stock,
-            report_date=date.today(),
+            report_date=timezone.now().date(),
             form_a_reception_date=date(2024, 2, 1),
             usable_vials_used=60,
             doses_per_vial=20,
