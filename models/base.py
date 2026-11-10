@@ -72,6 +72,14 @@ VACCINES = [
     ("nOPV2", _("nOPV2")),
     ("bOPV", _("bOPV")),
     ("nOPV2 & bOPV", _("nOPV2 & bOPV")),
+    ("IPV", _("IPV")),
+    ("fIPV", _("fIPV")),
+    ("IPV & bOPV", _("IPV & bOPV")),
+    ("fIPV & bOPV", _("fIPV & bOPV")),
+    ("IPV & nOPV2", _("IPV & nOPV2")),
+    ("fIPV & nOPV2", _("fIPV & nOPV2")),
+    ("IPV & nOPV2 & bOPV", _("IPV & nOPV2 & bOPV")),
+    ("fIPV & nOPV2 & bOPV", _("fIPV & nOPV2 & bOPV")),
 ]
 
 INDIVIDUAL_VACCINES = [
@@ -80,6 +88,69 @@ INDIVIDUAL_VACCINES = [
     ("bOPV", _("bOPV")),
     ("IPV", _("IPV")),
 ]
+
+VACCINES_BY_VIRUS = {
+    "PV1": ["bOPV", "IPV", "fIPV", "IPV & bOPV", "fIPV & bOPV"],
+    "PV3": ["bOPV", "IPV", "fIPV", "IPV & bOPV", "fIPV & bOPV"],
+    "cVDPV2": ["nOPV2", "IPV", "fIPV", "IPV & nOPV2", "fIPV & nOPV2"],
+    "WPV1": ["bOPV", "IPV", "fIPV", "IPV & bOPV", "fIPV & bOPV"],
+    "PV1 & cVDPV2": [
+        "nOPV2",
+        "bOPV",
+        "nOPV2 & bOPV",
+        "IPV",
+        "fIPV",
+        "IPV & nOPV2",
+        "IPV & bOPV",
+        "IPV & nOPV2 & bOPV",
+        "fIPV & nOPV2",
+        "fIPV & bOPV",
+        "fIPV & nOPV2 & bOPV",
+    ],
+    "cVDPV1 & cVDPV2": [
+        "nOPV2",
+        "bOPV",
+        "nOPV2 & bOPV",
+        "IPV",
+        "fIPV",
+        "IPV & nOPV2",
+        "IPV & bOPV",
+        "IPV & nOPV2 & bOPV",
+        "fIPV & nOPV2",
+        "fIPV & bOPV",
+        "fIPV & nOPV2 & bOPV",
+    ],
+}
+
+
+SUPPLY_CHAIN_VACCINE_ALIASES = {"fIPV": "IPV"}
+
+
+def invalid_vaccines_for_virus(virus, vaccines):
+    allowed_vaccines = VACCINES_BY_VIRUS.get(virus)
+    if not virus or allowed_vaccines is None:
+        return []
+    return sorted(vaccine for vaccine in vaccines if vaccine not in allowed_vaccines)
+
+
+def normalize_vaccine_for_supply_chain(vaccine):
+    return SUPPLY_CHAIN_VACCINE_ALIASES.get(vaccine, vaccine)
+
+
+def scope_vaccines_for_individual_vaccine(vaccine):
+    """Every VACCINES value whose vaccines include `vaccine`, once fIPV is read as IPV.
+
+    Lets a queryset match combined scopes with `vaccine__in=...` instead of an
+    exact comparison, so an "IPV & nOPV2" scope is found when looking for IPV,
+    and an "fIPV & bOPV" scope is found when looking for IPV too.
+    """
+    matching_values = []
+    for value, _label in VACCINES:
+        tokens = {normalize_vaccine_for_supply_chain(token.strip()) for token in value.split("&")}
+        if vaccine in tokens:
+            matching_values.append(value)
+    return matching_values
+
 
 DOSES_PER_VIAL = {
     "mOPV2": 20,
@@ -172,7 +243,7 @@ class RoundScope(models.Model):
     )
     round = models.ForeignKey("Round", on_delete=models.CASCADE, related_name="scopes")
 
-    vaccine = models.CharField(max_length=12, choices=VACCINES, blank=True)
+    vaccine = models.CharField(max_length=30, choices=VACCINES, blank=True)
 
     class Meta:
         unique_together = [("round", "vaccine")]
@@ -193,7 +264,7 @@ class CampaignScope(models.Model):
         default=make_group_campaign_scope,
     )
     campaign = models.ForeignKey("Campaign", on_delete=models.CASCADE, related_name="scopes")
-    vaccine = models.CharField(max_length=12, choices=VACCINES, blank=True)
+    vaccine = models.CharField(max_length=30, choices=VACCINES, blank=True)
 
     class Meta:
         unique_together = [("campaign", "vaccine")]
@@ -333,7 +404,7 @@ class SubActivityScope(models.Model):
     )
     subactivity = models.ForeignKey("SubActivity", on_delete=models.CASCADE, related_name="scopes")
 
-    vaccine = models.CharField(max_length=12, choices=VACCINES, blank=True)
+    vaccine = models.CharField(max_length=30, choices=VACCINES, blank=True)
 
 
 AGE_UNITS = [
@@ -1098,6 +1169,11 @@ class Campaign(SoftDeletableModel):
         return sorted(list(self.split_combined_vaccines(vaccines)))
 
     @property
+    def supply_chain_vaccines_list(self):
+        """single_vaccines_extended_list seen by supply chain and stock: fIPV counted as IPV."""
+        return sorted({normalize_vaccine_for_supply_chain(v) for v in self.single_vaccines_extended_list})
+
+    @property
     def single_vaccines_full_list(self):
         """Same as self.single_vaccines_full_list, but includes sub_activities"""
         vaccines = set(self.vaccines_full_list)
@@ -1128,11 +1204,10 @@ class Campaign(SoftDeletableModel):
 
     @staticmethod
     def split_combined_vaccines(vaccines):
-        if VACCINES[3][0] in vaccines:
-            vaccines.remove(VACCINES[3][0])
-            vaccines.add(VACCINES[1][0])
-            vaccines.add(VACCINES[2][0])
-        return vaccines
+        single_vaccines = set()
+        for vaccine in vaccines:
+            single_vaccines.update(token.strip() for token in vaccine.split("&") if token.strip())
+        return single_vaccines
 
     def update_geojson_field(self):
         "Update the geojson field on the campaign DOES NOT TRIGGER the save() you have to do it manually"
@@ -1563,7 +1638,7 @@ class VaccineStock(models.Model):
         related_name="vaccine_stocks",
         help_text="Unique (Country, Vaccine) pair",
     )
-    vaccine = models.CharField(max_length=12, choices=VACCINES)
+    vaccine = models.CharField(max_length=30, choices=INDIVIDUAL_VACCINES)
 
     class Meta:
         unique_together = ("country", "vaccine")
@@ -2344,14 +2419,17 @@ class VaccineStockCalculator:
             campaign__deleted_at__isnull=True,
         )
         if self.end_date:
+            # A combined scope ("IPV & nOPV2") counts for each of its vaccines,
+            # and an fIPV scope counts for IPV, since fIPV draws on IPV stock.
+            eligible_scope_vaccines = scope_vaccines_for_individual_vaccine(self.vaccine_stock.vaccine)
             eligible_rounds = (
                 Round.objects.filter(campaign=OuterRef("campaign"))
                 .filter(
                     (
                         Q(campaign__separate_scopes_per_round=False)
-                        & Q(campaign__scopes__vaccine=self.vaccine_stock.vaccine)
+                        & Q(campaign__scopes__vaccine__in=eligible_scope_vaccines)
                     )
-                    | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine=self.vaccine_stock.vaccine))
+                    | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine__in=eligible_scope_vaccines))
                 )
                 .filter(ended_at__lte=self.end_date)
                 .filter(id__in=OuterRef("rounds"))
@@ -2768,7 +2846,9 @@ class VaccineStockCalculator:
         if not presentation_config:
             return None
 
-        options = presentation_config.content[self.vaccine_stock.vaccine]
+        # .get(): an environment whose Config lacks the key must not 500. The
+        # lookup is normalized so fIPV is read as IPV — the Config has no fIPV key.
+        options = presentation_config.content.get(normalize_vaccine_for_supply_chain(self.vaccine_stock.vaccine))
         if not options:
             return None
         results = {}
