@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from iaso.models import Account, DataSource, Group, OrgUnit, OrgUnitType, SourceVersion
 from iaso.test import APITestCase
 from plugins.polio.models import Campaign, Round, SubActivity, SubActivityScope
+from plugins.polio.models.base import VACCINES_BY_VIRUS
 
 
 BASE_URL = "/api/polio/campaigns_subactivities/"
@@ -116,3 +117,227 @@ class SubactivitiesAPITestCase(APITestCase):
         response = self.client.delete(BASE_URL + str(self.sub_activity.id) + "/", format="json")
         self.assertEqual(response.status_code, 204)
         self.assertEqual(SubActivity.objects.count(), 0)
+
+
+class SubActivityVaccineVirusValidationAPITestCase(APITestCase):
+    @classmethod
+    def setUpTestData(cls) -> None:
+        cls.now = now()
+        cls.data_source = DataSource.objects.create(name="Default source")
+        cls.source_version = SourceVersion.objects.create(data_source=cls.data_source, number=1)
+        cls.account = Account.objects.create(name="Test Account", default_version=cls.source_version)
+        cls.user = cls.create_user_with_profile(username="Test User", account=cls.account, permissions=[])
+
+        cls.other_account = Account.objects.create(name="Other Account", default_version=cls.source_version)
+        cls.other_user = cls.create_user_with_profile(username="Other User", account=cls.other_account, permissions=[])
+
+        cls.org_unit = OrgUnit.objects.create(
+            name="Test Org Unit",
+            version=cls.source_version,
+            org_unit_type=OrgUnitType.objects.create(name="Jedi Council", short_name="Cnc"),
+            validation_status=OrgUnit.VALIDATION_VALID,
+        )
+
+        # cVDPV2 allows nOPV2, IPV, fIPV and their combinations, but not bOPV or mOPV2.
+        cls.campaign = Campaign.objects.create(
+            obr_name="Test Campaign", account=cls.account, country=cls.org_unit, virus="cVDPV2"
+        )
+        cls.round = Round.objects.create(campaign=cls.campaign, number=1)
+
+        # A sub-activity saved before the matrix existed: mOPV2 is not allowed for cVDPV2.
+        cls.sub_activity = SubActivity.objects.create(
+            name="Test SubActivity",
+            round=cls.round,
+            start_date=datetime.date(2022, 1, 1),
+            end_date=datetime.date(2022, 1, 31),
+        )
+        cls.group = Group.objects.create(name="Test group", source_version=cls.source_version)
+        cls.group.org_units.add(cls.org_unit)
+        cls.sub_activity_scope = SubActivityScope.objects.create(
+            subactivity=cls.sub_activity, group=cls.group, vaccine="mOPV2"
+        )
+
+    def setUp(self):
+        self.client.force_authenticate(self.user)
+
+    def scope(self, vaccine, name="New Group"):
+        return {"group": {"name": name, "org_units": [self.org_unit.id]}, "vaccine": vaccine}
+
+    def create_payload(self, vaccines):
+        return {
+            "round_number": self.round.number,
+            "campaign": self.campaign.obr_name,
+            "name": "New SubActivity",
+            "start_date": "2022-02-01",
+            "end_date": "2022-02-28",
+            "scopes": [self.scope(vaccine, name=f"{vaccine} group") for vaccine in vaccines],
+        }
+
+    def update_payload(self, vaccines):
+        return {
+            "round_number": self.round.number,
+            "campaign": self.campaign.obr_name,
+            "name": "Updated SubActivity",
+            "start_date": "2022-03-01",
+            "end_date": "2022-03-31",
+            "scopes": [self.scope(vaccine, name=f"{vaccine} group") for vaccine in vaccines],
+        }
+
+    def scope_vaccines(self, sub_activity=None):
+        """The vaccines actually stored, sorted so the comparison does not depend on insertion order."""
+        sub_activity = sub_activity or self.sub_activity
+        return sorted(sub_activity.scopes.values_list("vaccine", flat=True))
+
+    def created_sub_activity(self):
+        return SubActivity.objects.exclude(id=self.sub_activity.id).get()
+
+    def assertVaccinesRejected(self, response, vaccines):
+        """The error names every invalid vaccine and the vaccines the campaign's virus does allow."""
+        data = self.assertJSONResponse(response, 400)
+        expected_errors = [
+            f"Vaccine(s) {', '.join(vaccines)} cannot be used for virus {self.campaign.virus}. "
+            f"Allowed: {', '.join(VACCINES_BY_VIRUS[self.campaign.virus])}"
+        ]
+        received_errors = data["non_field_errors"]
+        self.assertEqual(expected_errors, received_errors)
+
+    # Creation
+
+    def test_create_accepts_vaccine_allowed_for_campaign_virus(self):
+        response = self.client.post(BASE_URL, self.create_payload(["nOPV2"]), format="json")
+        self.assertJSONResponse(response, 201)
+        self.assertEqual(2, SubActivity.objects.count())
+
+        expected_vaccines = ["nOPV2"]
+        received_vaccines = self.scope_vaccines(self.created_sub_activity())
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_rejects_vaccine_not_allowed_for_campaign_virus(self):
+        response = self.client.post(BASE_URL, self.create_payload(["bOPV"]), format="json")
+        self.assertVaccinesRejected(response, ["bOPV"])
+        self.assertEqual(1, SubActivity.objects.count())
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = sorted(SubActivityScope.objects.values_list("vaccine", flat=True))
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_accepts_ipv_and_fipv(self):
+        for vaccine in ["IPV", "fIPV"]:
+            with self.subTest(vaccine=vaccine):
+                response = self.client.post(BASE_URL, self.create_payload([vaccine]), format="json")
+                data = self.assertJSONResponse(response, 201)
+
+                expected_vaccines = [vaccine]
+                received_vaccines = self.scope_vaccines(SubActivity.objects.get(id=data["id"]))
+                self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_accepts_combined_vaccine_allowed_for_campaign_virus(self):
+        response = self.client.post(BASE_URL, self.create_payload(["fIPV & nOPV2"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["fIPV & nOPV2"]
+        received_vaccines = self.scope_vaccines(self.created_sub_activity())
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_rejects_combined_vaccine_whose_virus_allows_only_part_of_it(self):
+        """cVDPV2 allows fIPV but not bOPV, so the combined value is rejected as a whole."""
+        response = self.client.post(BASE_URL, self.create_payload(["fIPV & bOPV"]), format="json")
+        self.assertVaccinesRejected(response, ["fIPV & bOPV"])
+
+    def test_create_reports_every_invalid_vaccine_sorted(self):
+        response = self.client.post(BASE_URL, self.create_payload(["mOPV2", "bOPV"]), format="json")
+        self.assertVaccinesRejected(response, ["bOPV", "mOPV2"])
+
+    def test_create_without_campaign_virus_accepts_any_vaccine(self):
+        self.campaign.virus = None
+        self.campaign.save()
+        response = self.client.post(BASE_URL, self.create_payload(["bOPV"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["bOPV"]
+        received_vaccines = self.scope_vaccines(self.created_sub_activity())
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_with_pv2_campaign_accepts_any_vaccine(self):
+        """PV2 has no row in the matrix on purpose, so it constrains nothing."""
+        self.assertNotIn("PV2", VACCINES_BY_VIRUS)
+        self.campaign.virus = "PV2"
+        self.campaign.save()
+        response = self.client.post(BASE_URL, self.create_payload(["bOPV"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["bOPV"]
+        received_vaccines = self.scope_vaccines(self.created_sub_activity())
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_without_scopes_is_accepted(self):
+        response = self.client.post(BASE_URL, self.create_payload([]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = []
+        received_vaccines = self.scope_vaccines(self.created_sub_activity())
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    # Update: only newly submitted vaccines are checked
+
+    def test_update_keeps_stored_vaccine_not_allowed_for_virus(self):
+        self.assertNotIn("mOPV2", VACCINES_BY_VIRUS[self.campaign.virus])
+        response = self.client.put(f"{BASE_URL}{self.sub_activity.id}/", self.update_payload(["mOPV2"]), format="json")
+        self.assertJSONResponse(response, 200)
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_update_rejects_new_vaccine_not_allowed_for_virus(self):
+        payload = self.update_payload(["mOPV2", "bOPV"])
+        response = self.client.put(f"{BASE_URL}{self.sub_activity.id}/", payload, format="json")
+        self.assertVaccinesRejected(response, ["bOPV"])
+        self.assertEqual("Test SubActivity", SubActivity.objects.get(id=self.sub_activity.id).name)
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_update_accepts_new_allowed_vaccine_next_to_a_stored_one(self):
+        payload = self.update_payload(["mOPV2", "IPV"])
+        response = self.client.put(f"{BASE_URL}{self.sub_activity.id}/", payload, format="json")
+        self.assertJSONResponse(response, 200)
+
+        expected_vaccines = ["IPV", "mOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    # Account scoping
+
+    def test_cannot_create_sub_activity_on_a_campaign_of_another_account(self):
+        """The vaccine is valid for the virus, so the account check is what rejects it."""
+        self.client.force_authenticate(self.other_user)
+        response = self.client.post(BASE_URL, self.create_payload(["nOPV2"]), format="json")
+        data = self.assertJSONResponse(response, 400)
+
+        expected_errors = ["You do not have permission to create a SubActivity for this Campaign."]
+        received_errors = data["non_field_errors"]
+        self.assertEqual(expected_errors, received_errors)
+        self.assertEqual(1, SubActivity.objects.count())
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = sorted(SubActivityScope.objects.values_list("vaccine", flat=True))
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_cannot_update_sub_activity_of_another_account(self):
+        self.client.force_authenticate(self.other_user)
+        response = self.client.put(f"{BASE_URL}{self.sub_activity.id}/", self.update_payload(["IPV"]), format="json")
+        self.assertJSONResponse(response, 404)
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_sub_activities_of_another_account_are_not_listed(self):
+        self.client.force_authenticate(self.other_user)
+        data = self.assertJSONResponse(self.client.get(BASE_URL, format="json"), 200)
+
+        expected_results = []
+        received_results = data["results"]
+        self.assertEqual(expected_results, received_results)
