@@ -1,9 +1,8 @@
 import math
 
-from datetime import date
-
 from django.db.models import Model
 from django.http import HttpResponse
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
@@ -194,7 +193,7 @@ class PublicVaccineStockViewset(ViewSet):
 
         earmarked_totals = self._get_earmarked_totals(queryset)
 
-        today = date.today().isoformat()
+        today = timezone.now().date().isoformat()
         filename_details = f"{today}"
         country = request.query_params.get("country", None)
         vaccine = request.query_params.get("vaccine", None)

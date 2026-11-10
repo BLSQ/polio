@@ -1,11 +1,12 @@
 import os
 import time
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from logging import getLogger
 
 import gspread  # type: ignore
 
+from django.utils import timezone
 from gspread import Client  # type: ignore
 from gspread.exceptions import APIError  # type: ignore
 from oauth2client.service_account import ServiceAccountCredentials  # type: ignore
@@ -40,7 +41,7 @@ class QuotaLimiter:
     def num_calls(self):
         "Num of call done in the last RANGE_SECONDS"
         # prune calls from before the limit. no need to keep the old one and prevent memory leak
-        self.calls = list(filter(lambda d: d > datetime.now() - timedelta(seconds=self.RANGE_SECONDS), self.calls))
+        self.calls = list(filter(lambda d: d > timezone.now() - timedelta(seconds=self.RANGE_SECONDS), self.calls))
         return len(self.calls)
 
     def limit(self):
@@ -48,7 +49,7 @@ class QuotaLimiter:
         while self.num_calls > self.CALL_RANGE_LIMIT:
             logger.info(f"Quota: {self.num_calls} calls in last {self.CALL_RANGE_LIMIT}s. Above rate, waiting")
             time.sleep(3)
-        self.calls.append(datetime.now())
+        self.calls.append(timezone.now())
 
 
 # make it a global because we recreate a client per request

@@ -9,6 +9,7 @@ import pandas as pd
 from django.core.cache import cache
 from django.db.models import Max, Min
 from django.http import HttpResponse
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from drf_spectacular.utils import extend_schema
@@ -207,7 +208,7 @@ def fetch_and_match_forma_data(country_id=None):
             # use cache. (FormA is after campaign so the delay is longer)
             last_campaign_date_agg = campaigns_of_country.aggregate(last_date=Max("end_date"))
             last_campaign_date: Optional[date] = last_campaign_date_agg["last_date"]
-            prefer_cache = last_campaign_date and last_campaign_date + timedelta(days=60) < (date.today())
+            prefer_cache = last_campaign_date and last_campaign_date + timedelta(days=60) < (timezone.now().date())
             submissions = get_content_for_config(config, prefer_cache)
             df = handle_country(submissions, country, campaigns_of_country)
             dfs.append(df)

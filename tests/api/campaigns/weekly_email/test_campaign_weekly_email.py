@@ -176,7 +176,7 @@ class WeeklyEMailTestCase(APITestCase):
 
     @patch("plugins.polio.tasks.weekly_email.now")
     def test_computed_values(self, mock_now):
-        now = timezone.make_aware(datetime.datetime(2022, 10, 13))
+        now = datetime.datetime(2022, 10, 13, tzinfo=datetime.timezone.utc)
         mock_now.return_value = now
         round1 = Round.objects.create(
             started_at=datetime.date(2022, 9, 12),

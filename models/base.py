@@ -953,7 +953,7 @@ class Campaign(SoftDeletableModel):
 
     def is_started(self, reference_date=None):
         if reference_date is None:
-            reference_date = datetime.datetime.now()
+            reference_date = timezone.now()
         started_rounds = self.rounds.filter(started_at__lte=reference_date)
         return started_rounds.count() > 0
 

@@ -40,7 +40,7 @@ class CalendarPeriodFilterBackend(filters.BaseFilterBackend):
 
         try:
             reference_date = (
-                datetime.datetime.strptime(reference_date, "%Y-%m-%d").date()
+                datetime.datetime.strptime(reference_date, "%Y-%m-%d").replace(tzinfo=datetime.timezone.utc).date()
                 if reference_date
                 else timezone.localdate()
             )

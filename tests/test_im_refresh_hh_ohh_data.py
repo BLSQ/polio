@@ -1,5 +1,6 @@
-from datetime import datetime
 from unittest.mock import patch
+
+from django.utils import timezone
 
 from iaso import models as m
 from iaso.models.base import KILLED, RUNNING, SKIPPED, SUCCESS
@@ -49,7 +50,7 @@ class RefreshIMHouseholdDataTestCase(APITestCase):
             account=account,
             launcher=cls.user,
             name=IM_HH_OHH_CONFIG_SLUG,
-            started_at=datetime.now(),
+            started_at=timezone.now(),
             external=True,
         )
         cls.task2 = m.Task.objects.create(

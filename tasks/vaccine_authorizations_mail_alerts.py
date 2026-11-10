@@ -1,6 +1,3 @@
-import datetime
-import datetime as dt
-
 from datetime import timedelta
 from logging import getLogger
 
@@ -8,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from beanstalk_worker import task_decorator
 from hat import settings
@@ -80,7 +78,7 @@ def vaccine_authorizations_60_days_expiration_email_alert(vaccine_auths, mailing
 def send_email_vaccine_authorizations_60_days_expiration_alert(task=None):
     # NOTE: If any change is made to the mailing list building it should be replicated in the corresponding test too.
     # Test Name:  test_send_email_vaccine_authorizations_mailing_list_builder
-    future_date = dt.date.today() + timedelta(days=60)
+    future_date = timezone.now().date() + timedelta(days=60)
     vaccine_auths = VaccineAuthorization.objects.filter(expiration_date=future_date)
     total = vaccine_auths.count()
 
@@ -170,7 +168,7 @@ def expired_vaccine_authorizations_email_alert(vaccine_auths, mailing_list):
 
 @task_decorator(task_name="expired_vaccine_authorizations_email_alert")
 def send_email_expired_vaccine_authorizations_alert(task=None):
-    past_date = dt.date.today() - timedelta(days=1)
+    past_date = timezone.now().date() - timedelta(days=1)
     team = get_object_or_404(Team, name=NOPV2_VACCINE_TEAM_NAME)
     vaccine_auths = VaccineAuthorization.objects.filter(expiration_date=past_date)
     # Convert to list so we can append the GPEI coordinator email later
@@ -209,7 +207,7 @@ def send_email_expired_vaccine_authorizations_alert(task=None):
 def vaccine_authorization_update_expired_entries(task=None):
     # NOTE: If any change is made to the mailing list building it should be replicated in the corresponding test too.
     # Test Name:  test_send_email_vaccine_authorizations_mailing_list_builder
-    expired_vacc_auth = VaccineAuthorization.objects.filter(expiration_date__lt=datetime.date.today())
+    expired_vacc_auth = VaccineAuthorization.objects.filter(expiration_date__lt=timezone.now().date())
     total = expired_vacc_auth.count()
 
     expired_auth = 0
