@@ -1,7 +1,6 @@
 export const VRF = 'vrf';
 export const VAR = 'arrival_reports';
 export const PREALERT = 'pre_alerts';
-export const IPV_VACCINE = 'IPV';
 
 export const apiUrl = '/api/polio/vaccine/request_forms/';
 
@@ -24,11 +23,6 @@ export const defaultVaccineOptions = [
     },
 ];
 
-export const ipvVaccineOption = {
-    label: IPV_VACCINE,
-    value: IPV_VACCINE,
-};
-
 export const singleVaccinesList = [
     {
         label: 'nOPV2',
@@ -44,9 +38,14 @@ export const singleVaccinesList = [
     },
 ];
 
+export const IPV_VACCINE = 'IPV';
+
+export const ipvVaccineOption = {
+    label: IPV_VACCINE,
+    value: IPV_VACCINE,
+};
+
 export const vrfVaccineFilterOptions = [
     ...singleVaccinesList,
     ipvVaccineOption,
 ];
-
-export const fipvVaccineOptions = [ipvVaccineOption, ...singleVaccinesList];
