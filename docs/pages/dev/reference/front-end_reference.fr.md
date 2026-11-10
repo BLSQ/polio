@@ -1,1 +1,0 @@
-## Traduction française bientôt disponible

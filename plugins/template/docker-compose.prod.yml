@@ -1,3 +1,0 @@
-services:
-    iaso:
-      image: blsq/***:${PROD_IMAGE_TAG:-develop}

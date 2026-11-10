@@ -4,7 +4,7 @@ Explain here in one sentence.
 
 ### Related JIRA tickets
 
-IA-XXX, WC2-XXX, POLIO-XXX, POLIOPM-XXX SLEEP-XXX, SNT-XXX, CONSOLE-XXX
+POLIO-XXX, POLIOPM-XXX, IA-XXX
 
 ## Changes
 

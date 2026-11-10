@@ -1,0 +1,55 @@
+import { Plugin } from 'Iaso/plugins/types';
+import {
+    PERMISSIONS_MESSAGES,
+    PERMISSIONS_GROUPS_MESSAGES,
+} from '../js/src/constants/translations/permissionsMessages';
+import { BlockOfCountriesField } from './src/components/BlockOfCountriesField';
+import { Disclaimer } from './src/components/Disclaimer';
+import { menu } from './src/constants/menu';
+import { redirections } from './src/constants/redirections';
+import { routes } from './src/constants/routes';
+import en from './src/constants/translations/en.json';
+import es from './src/constants/translations/es.json';
+import fr from './src/constants/translations/fr.json';
+import {
+    DASHBOARD_BASE_URL,
+    baseUrls,
+    paramsConfig,
+} from './src/constants/urls';
+import { PolioNotificationTaskAction } from './src/domains/Notifications/TaskRowAction';
+
+const translations = {
+    en,
+    es,
+    fr,
+};
+
+const config: Plugin = {
+    baseUrls,
+    paramsConfig,
+    routes,
+    redirections,
+    menu,
+    translations,
+    permissionsMessages: PERMISSIONS_MESSAGES,
+    permissionsGroupsMessages: PERMISSIONS_GROUPS_MESSAGES,
+    homeUrl: `/${DASHBOARD_BASE_URL}/campaignCategory/all`,
+    customComponents: [
+        {
+            key: 'topbar.disclaimer',
+            component: Disclaimer,
+        },
+        {
+            key: 'tasks.rowAction',
+            component: PolioNotificationTaskAction,
+        },
+        {
+            key: 'groups.dialogField',
+            component: BlockOfCountriesField,
+        },
+    ],
+    // homeOffline: () => <div>OFFLINE</div>,
+    // homeOnline: () => <div>CONNECTED HOME POLIO</div>,
+};
+
+export default config;
