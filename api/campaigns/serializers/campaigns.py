@@ -28,6 +28,7 @@ from plugins.polio.models import (
     Round,
     VaccineAuthorization,
 )
+from plugins.polio.models.base import VACCINES_BY_VIRUS, invalid_vaccines_for_virus
 from plugins.polio.preparedness.spreadsheet_manager import (
     Campaign,
 )
@@ -99,7 +100,42 @@ class CampaignSerializer(serializers.ModelSerializer):
         if (not is_polio) and data.get("integrated_campaigns", None):
             raise serializers.ValidationError("Non Polio campaign cannot have integrated campaigns")
 
+        self._validate_vaccines_against_virus(data)
+
         return data
+
+    def _submitted_scope_vaccines(self, data):
+        """Scope vaccines present in the payload, campaign level and round level."""
+        vaccines = set()
+        for scope in data.get("scopes") or []:
+            if scope.get("vaccine"):
+                vaccines.add(scope["vaccine"])
+        for round_data in data.get("rounds") or []:
+            for scope in round_data.get("scopes") or []:
+                if scope.get("vaccine"):
+                    vaccines.add(scope["vaccine"])
+        return vaccines
+
+    def _stored_scope_vaccines(self):
+        """Scope vaccines already saved on the campaign being edited."""
+        campaign = self.instance
+        if campaign is None:
+            return set()
+        vaccines = set(campaign.scopes.values_list("vaccine", flat=True))
+        for round in campaign.rounds.all():
+            vaccines.update(round.scopes.values_list("vaccine", flat=True))
+        return vaccines
+
+    def _validate_vaccines_against_virus(self, data):
+        """Reject scope vaccines that the campaign's virus does not allow."""
+        virus = data.get("virus") or (self.instance.virus if self.instance else None)
+        new_vaccines = self._submitted_scope_vaccines(data) - self._stored_scope_vaccines()
+        invalid_vaccines = invalid_vaccines_for_virus(virus, new_vaccines)
+        if invalid_vaccines:
+            raise serializers.ValidationError(
+                f"Vaccine(s) {', '.join(invalid_vaccines)} cannot be used for virus {virus}. "
+                f"Allowed: {', '.join(VACCINES_BY_VIRUS[virus])}"
+            )
 
     def validate_integrated_to(self, integrated_to):
         if not integrated_to:
@@ -205,7 +241,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         c_rounds = [r for r in campaign.rounds.all()]
         nOPV2_rounds = []
         for r in c_rounds:
-            if "nOPV2" in r.vaccine_names:
+            if "nOPV2" in r.single_vaccine_list:
                 nOPV2_rounds.append(r)
 
         if initial_org_unit and len(nOPV2_rounds) > 0:
@@ -366,7 +402,7 @@ class CampaignSerializer(serializers.ModelSerializer):
         c_rounds = [r for r in campaign.rounds.all()]
         nOPV2_rounds = []
         for r in c_rounds:
-            if "nOPV2" in r.vaccine_names:
+            if "nOPV2" in r.single_vaccine_list:
                 nOPV2_rounds.append(r)
         if initial_org_unit and len(nOPV2_rounds) > 0:
             try:
