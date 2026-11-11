@@ -147,6 +147,14 @@ def scope_vaccines_for_individual_vaccine(vaccine):
     return matching_values
 
 
+def supply_chain_vaccines_for_scope_vaccine(scope_vaccine):
+    if not scope_vaccine:
+        return []
+    return sorted(
+        {normalize_vaccine_for_supply_chain(token.strip()) for token in scope_vaccine.split("&") if token.strip()}
+    )
+
+
 DOSES_PER_VIAL = {
     "mOPV2": 20,
     "nOPV2": 50,
