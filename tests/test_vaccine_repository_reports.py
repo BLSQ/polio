@@ -1,5 +1,7 @@
 import datetime
 
+from urllib.parse import urlencode
+
 from django.contrib.auth.models import AnonymousUser
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -185,6 +187,54 @@ class VaccineRepositoryReportsAPITestCase(APITestCase, PolioTestCaseMixin):
         data = response.json()["results"]
         self.assertEqual(data[0]["vaccine"], pm.VACCINES[0][0])
         self.assertEqual(data[1]["vaccine"], pm.VACCINES[1][0])
+
+    def stock_with_incident_report(self, vaccine):
+        """A stock the reports endpoint will list, i.e. one that has at least one report."""
+        vaccine_stock = pm.VaccineStock.objects.create(account=self.account, country=self.testland, vaccine=vaccine)
+        pm.IncidentReport.objects.create(
+            vaccine_stock=vaccine_stock,
+            date_of_incident_report=self.now - datetime.timedelta(days=5),
+            incident_report_received_by_rrt=self.now,
+            usable_vials=10,
+            unusable_vials=0,
+            stock_correction=pm.IncidentReport.StockCorrectionChoices.VVM_REACHED_DISCARD_POINT,
+            title=f"{vaccine} incident",
+            comment=f"{vaccine} incident",
+            doses_per_vial=5,
+        )
+        return vaccine_stock
+
+    def reported_vaccines(self, vaccine_name):
+        self.client.force_authenticate(user=self.user)
+        # `limit` forces the paginated response, as in test_reports_list_response_structure.
+        response = self.client.get(f"{REPORTS_URL}?limit=10&{urlencode({'vaccine_name': vaccine_name})}")
+        data = self.assertJSONResponse(response, 200)["results"]
+        return sorted(result["vaccine"] for result in data)
+
+    def test_reports_filtering_by_fipv_returns_the_ipv_stock(self):
+        """fIPV stock is held as IPV, so filtering by fIPV must find the IPV stock (section 5.3)."""
+        self.stock_with_incident_report("IPV")
+
+        expected_vaccines = ["IPV"]
+        received_vaccines = self.reported_vaccines("fIPV")
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_reports_filtering_by_a_combined_vaccine_returns_each_of_its_stocks(self):
+        """A combination is held as one stock per vaccine, so both are returned."""
+        self.stock_with_incident_report("IPV")
+        self.stock_with_incident_report(pm.VACCINES[1][0])  # nOPV2
+
+        expected_vaccines = ["IPV", "nOPV2"]
+        received_vaccines = self.reported_vaccines("IPV & nOPV2")
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_reports_filtering_by_ipv_does_not_return_other_stocks(self):
+        self.stock_with_incident_report("IPV")
+
+        expected_vaccines = ["IPV"]
+        received_vaccines = self.reported_vaccines("IPV")
+        self.assertEqual(expected_vaccines, received_vaccines)
+        self.assertNotIn(pm.VACCINES[0][0], received_vaccines)
 
 
 class VaccineRepositoryReportsQueryPerformanceTestCase(APITestCase, PolioTestCaseMixin):
