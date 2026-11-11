@@ -138,12 +138,7 @@ def normalize_vaccine_for_supply_chain(vaccine):
 
 
 def scope_vaccines_for_individual_vaccine(vaccine):
-    """Every VACCINES value whose vaccines include `vaccine`, once fIPV is read as IPV.
-
-    Lets a queryset match combined scopes with `vaccine__in=...` instead of an
-    exact comparison, so an "IPV & nOPV2" scope is found when looking for IPV,
-    and an "fIPV & bOPV" scope is found when looking for IPV too.
-    """
+    """Every VACCINES value whose vaccines include `vaccine`, once fIPV is read as IPV."""
     matching_values = []
     for value, _label in VACCINES:
         tokens = {normalize_vaccine_for_supply_chain(token.strip()) for token in value.split("&")}
