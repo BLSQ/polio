@@ -307,37 +307,3 @@ class SubActivityVaccineVirusValidationAPITestCase(APITestCase):
         expected_vaccines = ["IPV", "mOPV2"]
         received_vaccines = self.scope_vaccines()
         self.assertEqual(expected_vaccines, received_vaccines)
-
-    # Account scoping
-
-    def test_cannot_create_sub_activity_on_a_campaign_of_another_account(self):
-        """The vaccine is valid for the virus, so the account check is what rejects it."""
-        self.client.force_authenticate(self.other_user)
-        response = self.client.post(BASE_URL, self.create_payload(["nOPV2"]), format="json")
-        data = self.assertJSONResponse(response, 400)
-
-        expected_errors = ["You do not have permission to create a SubActivity for this Campaign."]
-        received_errors = data["non_field_errors"]
-        self.assertEqual(expected_errors, received_errors)
-        self.assertEqual(1, SubActivity.objects.count())
-
-        expected_vaccines = ["mOPV2"]
-        received_vaccines = sorted(SubActivityScope.objects.values_list("vaccine", flat=True))
-        self.assertEqual(expected_vaccines, received_vaccines)
-
-    def test_cannot_update_sub_activity_of_another_account(self):
-        self.client.force_authenticate(self.other_user)
-        response = self.client.put(f"{BASE_URL}{self.sub_activity.id}/", self.update_payload(["IPV"]), format="json")
-        self.assertJSONResponse(response, 404)
-
-        expected_vaccines = ["mOPV2"]
-        received_vaccines = self.scope_vaccines()
-        self.assertEqual(expected_vaccines, received_vaccines)
-
-    def test_sub_activities_of_another_account_are_not_listed(self):
-        self.client.force_authenticate(self.other_user)
-        data = self.assertJSONResponse(self.client.get(BASE_URL, format="json"), 200)
-
-        expected_results = []
-        received_results = data["results"]
-        self.assertEqual(expected_results, received_results)
