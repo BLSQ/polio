@@ -553,6 +553,10 @@ export type PolioCampaignValues = DefaultCampaignValues & {
 
 export type CampaignFormValues = DefaultCampaignValues | PolioCampaignValues;
 
+export const asPolioCampaignValues = (
+    values: CampaignFormValues,
+): PolioCampaignValues => values as PolioCampaignValues;
+
 export type CampaignTypesDropdown = DropdownOptionsWithOriginal<
     string,
     CampaignType
