@@ -91,10 +91,29 @@ export type CampaignFieldType =
     | 'hidden'
     | 'xml-external';
 
-export type Vaccine = 'nOPV2' | 'bOPV' | 'mOPV2' | 'nOPV2 & bOPV' | 'IPV';
-export type VaccineForStock = 'nOPV2' | 'bOPV' | 'mOPV2';
+export type Vaccine =
+    | 'nOPV2'
+    | 'bOPV'
+    | 'mOPV2'
+    | 'nOPV2 & bOPV'
+    | 'IPV'
+    | 'fIPV'
+    | 'IPV & bOPV'
+    | 'fIPV & bOPV'
+    | 'IPV & nOPV2'
+    | 'fIPV & nOPV2'
+    | 'IPV & nOPV2 & bOPV'
+    | 'fIPV & nOPV2 & bOPV';
+export type VaccineForStock = 'nOPV2' | 'bOPV' | 'mOPV2' | 'IPV';
 
-export type Virus = 'PV1' | 'PV2' | 'PV3' | 'cVDPV2' | 'WPV1';
+export type Virus =
+    | 'PV1'
+    | 'PV2'
+    | 'PV3'
+    | 'cVDPV2'
+    | 'WPV1'
+    | 'PV1 & cVDPV2'
+    | 'cVDPV1 & cVDPV2';
 
 export type DetectionStatus = 'PENDING' | 'ONGOING' | 'FINISHED';
 

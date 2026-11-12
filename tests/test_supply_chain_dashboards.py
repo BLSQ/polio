@@ -8,6 +8,7 @@ from iaso.models.org_unit import OrgUnit, OrgUnitType
 from iaso.test import APITestCase
 from plugins.polio.models import (
     Campaign,
+    CampaignScope,
     DestructionReport,
     OutgoingStockMovement,
     RoundScope,
@@ -282,3 +283,59 @@ class SupplyChainDashboardsAPITestCase(APITestCase):
         self.assertEqual(vrf2["id"], new_vrf.id)
         self.assertEqual(vrf2["form_a_reception_date"], str(new_forma.form_a_reception_date))
         self.assertEqual(vrf2["destruction_report_reception_date"], str(last_dr.rrt_destruction_report_reception_date))
+
+    def test_vrf_destruction_report_window_is_closed_by_an_fipv_campaign(self):
+        self.client.force_authenticate(self.authorized_user_read)
+
+        ipv_vrf = VaccineRequestForm.objects.create(
+            campaign=self.campaign,
+            date_vrf_signature=timezone.now().date(),
+            date_vrf_reception=timezone.now().date(),
+            date_dg_approval=timezone.now().date(),
+            quantities_ordered_in_doses=1000,
+            vaccine_type="IPV",
+        )
+        ipv_vrf.rounds.set([self.round_1, self.round_2])
+        ipv_stock = VaccineStock.objects.create(country=self.country, vaccine="IPV", account=self.account)
+
+        # A later campaign in the same country, scoped fIPV: its supply chain vaccine is IPV.
+        fipv_campaign = Campaign.objects.create(
+            obr_name="fIPV-follow-up", account=self.account, initial_org_unit=self.country
+        )
+        Round.objects.create(campaign=fipv_campaign, number=1, started_at=date(2022, 3, 1), ended_at=date(2022, 3, 10))
+        # The scope group must hold org units: the campaign vaccine lists ignore empty scopes.
+        fipv_district = OrgUnit.objects.create(
+            name="fIPV district",
+            org_unit_type=OrgUnitType.objects.create(name="district", short_name="dis"),
+            version=self.source_version_1,
+        )
+        fipv_scope_group = m.Group.objects.create(name="fIPV scope")
+        fipv_scope_group.org_units.add(fipv_district)
+        CampaignScope.objects.create(campaign=fipv_campaign, vaccine="fIPV", group=fipv_scope_group)
+        self.assertEqual(["IPV"], fipv_campaign.supply_chain_vaccines_list)
+
+        in_window_report = DestructionReport.objects.create(
+            vaccine_stock=ipv_stock,
+            rrt_destruction_report_reception_date=date(2022, 2, 15),
+            destruction_report_date=date(2022, 2, 15),
+            unusable_vials_destroyed=5,
+            action="destroyed",
+            doses_per_vial=5,
+        )
+        # After the fIPV campaign started, so outside the window of this VRF.
+        DestructionReport.objects.create(
+            vaccine_stock=ipv_stock,
+            rrt_destruction_report_reception_date=date(2022, 3, 15),
+            destruction_report_date=date(2022, 3, 15),
+            unusable_vials_destroyed=5,
+            action="destroyed",
+            doses_per_vial=5,
+        )
+
+        jr = self.assertJSONResponse(self.client.get(self.vrf_url), 200)
+
+        expected_destruction_dates = [str(in_window_report.rrt_destruction_report_reception_date)]
+        received_destruction_dates = [
+            result["destruction_report_reception_date"] for result in jr["results"] if result["id"] == ipv_vrf.id
+        ]
+        self.assertEqual(expected_destruction_dates, received_destruction_dates)

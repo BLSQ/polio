@@ -57,7 +57,7 @@ def check_total_doses_requested(vaccine_authorization, nOPV2_rounds, current_cam
 
         existing_nopv2_rounds = []
         for r in campaigns_rounds:
-            if "nOPV2" in r.vaccine_names:
+            if "nOPV2" in r.single_vaccine_list:
                 existing_nopv2_rounds.append(r)
 
         for r in existing_nopv2_rounds:

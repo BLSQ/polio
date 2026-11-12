@@ -8,7 +8,11 @@ from django.utils import timezone
 
 from beanstalk_worker import task_decorator
 from plugins.polio.models import Round, VaccineStock, VaccineStockHistory
-from plugins.polio.models.base import VACCINES, VaccineStockCalculator
+from plugins.polio.models.base import (
+    INDIVIDUAL_VACCINES,
+    VaccineStockCalculator,
+    scope_vaccines_for_individual_vaccine,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -52,7 +56,7 @@ def archive_vaccine_stock_for_rounds(date=None, country=None, campaign=None, vac
     if campaign:
         rounds_qs = rounds_qs.filter(campaign__obr_name=campaign)
 
-    vaccines = [v[0] for v in VACCINES]
+    vaccines = [v[0] for v in INDIVIDUAL_VACCINES]
 
     if vaccine:
         vaccines = [vaccine]
@@ -62,9 +66,10 @@ def archive_vaccine_stock_for_rounds(date=None, country=None, campaign=None, vac
     # Merging the querysets wouldn't work as it would remove duplicate rounds and some rounds need to be updatred for
     # multiple vaccines
     for vax in vaccines:
+        scope_vaccines = scope_vaccines_for_individual_vaccine(vax)
         vax_rounds_qs = rounds_qs.filter(
-            (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine=vax))
-            | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine=vax))
+            (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine__in=scope_vaccines))
+            | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine__in=scope_vaccines))
         )
 
         # Exclude rounds that already have a history entry for this vaccine

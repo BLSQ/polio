@@ -12,7 +12,7 @@ from plugins.polio.models import (
     Campaign,
     CampaignType,
 )
-from plugins.polio.models.base import ReasonForDelay
+from plugins.polio.models.base import VACCINES_BY_VIRUS, ReasonForDelay
 from plugins.polio.preparedness.spreadsheet_manager import *
 from plugins.polio.tests.api.test import PolioTestCaseMixin
 
@@ -507,3 +507,154 @@ class CreateCampaignAPITestCase(APITestCase, PolioTestCaseMixin):
         self.assertEqual(len(jr["rounds"]), 1)
         self.assertEqual(len(jr["rounds"][0]["datelogs"]), 1)
         self.assertEqual(jr["rounds"][0]["datelogs"][0]["reason_for_delay"], self.initial_data.key_name)
+
+    def campaign_payload(self, virus, vaccines, obr_name="obr_name", **extra):
+        """A creation payload like the other tests', with one campaign level scope per vaccine.
+
+        Each scope takes one of the org units created in setUpTestData, cycling
+        through them so two scopes never share a group.
+        """
+        started_at = self.now.strftime("%Y-%m-%d")
+        ended_at = (self.now + datetime.timedelta(days=20)).strftime("%Y-%m-%d")
+        return {
+            "account": self.account.pk,
+            "obr_name": obr_name,
+            "detection_status": "PENDING",
+            "virus": virus,
+            "separate_scopes_per_round": False,
+            "scopes": [
+                {
+                    "vaccine": vaccine,
+                    "group": {"org_units": [self.org_units[index % len(self.org_units)].id]},
+                }
+                for index, vaccine in enumerate(vaccines)
+            ],
+            "rounds": [{"number": 1, "started_at": started_at, "ended_at": ended_at}],
+            **extra,
+        }
+
+    def scope_vaccines(self, campaign=None):
+        """The vaccines actually stored, sorted so the comparison does not depend on insertion order."""
+        campaign = campaign or Campaign.objects.get()
+        return sorted(campaign.scopes.values_list("vaccine", flat=True))
+
+    def assertVaccinesRejected(self, response, vaccines, virus):
+        """The error names every invalid vaccine and the vaccines the virus does allow."""
+        data = self.assertJSONResponse(response, 400)
+        expected_errors = [
+            f"Vaccine(s) {', '.join(vaccines)} cannot be used for virus {virus}. "
+            f"Allowed: {', '.join(VACCINES_BY_VIRUS[virus])}"
+        ]
+        received_errors = data["non_field_errors"]
+        self.assertEqual(expected_errors, received_errors)
+        self.assertEqual(0, Campaign.objects.count())
+
+    def test_create_accepts_vaccine_allowed_for_virus(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post("/api/polio/campaigns/", self.campaign_payload("cVDPV2", ["nOPV2"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["nOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_rejects_vaccine_not_allowed_for_virus(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post("/api/polio/campaigns/", self.campaign_payload("cVDPV2", ["bOPV"]), format="json")
+        self.assertVaccinesRejected(response, ["bOPV"], "cVDPV2")
+
+    def test_create_error_lists_the_allowed_vaccines(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post("/api/polio/campaigns/", self.campaign_payload("PV1", ["mOPV2"]), format="json")
+        self.assertVaccinesRejected(response, ["mOPV2"], "PV1")
+
+    def test_create_reports_every_invalid_vaccine_sorted(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
+            "/api/polio/campaigns/", self.campaign_payload("cVDPV2", ["mOPV2", "bOPV"]), format="json"
+        )
+        self.assertVaccinesRejected(response, ["bOPV", "mOPV2"], "cVDPV2")
+
+    def test_create_accepts_ipv_and_fipv_for_every_virus_in_the_matrix(self):
+        """IPV and fIPV are allowed whatever the virus, per the plan's matrix."""
+        self.client.force_authenticate(self.user)
+        for virus in VACCINES_BY_VIRUS:
+            for vaccine in ["IPV", "fIPV"]:
+                with self.subTest(virus=virus, vaccine=vaccine):
+                    obr_name = f"{virus} {vaccine}"
+                    payload = self.campaign_payload(virus, [vaccine], obr_name=obr_name)
+                    response = self.client.post("/api/polio/campaigns/", payload, format="json")
+                    self.assertJSONResponse(response, 201)
+
+                    expected_vaccines = [vaccine]
+                    received_vaccines = self.scope_vaccines(Campaign.objects.get(obr_name=obr_name))
+                    self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_accepts_combined_vaccine_allowed_for_virus(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
+            "/api/polio/campaigns/", self.campaign_payload("cVDPV2", ["fIPV & nOPV2"]), format="json"
+        )
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["fIPV & nOPV2"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_rejects_combined_vaccine_whose_virus_allows_only_part_of_it(self):
+        """ "fIPV & nOPV2" is a single value: PV1 allows fIPV but not nOPV2, so it is rejected."""
+        self.client.force_authenticate(self.user)
+        response = self.client.post(
+            "/api/polio/campaigns/", self.campaign_payload("PV1", ["fIPV & nOPV2"]), format="json"
+        )
+        self.assertVaccinesRejected(response, ["fIPV & nOPV2"], "PV1")
+
+    def test_create_validates_round_scopes(self):
+        self.client.force_authenticate(self.user)
+        payload = self.campaign_payload("cVDPV2", [])
+        payload["separate_scopes_per_round"] = True
+        payload["rounds"][0]["scopes"] = [{"vaccine": "bOPV", "group": {"org_units": [self.org_unit.id]}}]
+        response = self.client.post("/api/polio/campaigns/", payload, format="json")
+        self.assertVaccinesRejected(response, ["bOPV"], "cVDPV2")
+
+    def test_create_without_virus_accepts_any_vaccine(self):
+        self.client.force_authenticate(self.user)
+        response = self.client.post("/api/polio/campaigns/", self.campaign_payload(None, ["bOPV"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["bOPV"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_with_pv2_accepts_any_vaccine(self):
+        """PV2 has no row in the matrix on purpose, so it constrains nothing."""
+        self.client.force_authenticate(self.user)
+        self.assertNotIn("PV2", VACCINES_BY_VIRUS)
+        response = self.client.post("/api/polio/campaigns/", self.campaign_payload("PV2", ["bOPV"]), format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["bOPV"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_create_validates_a_campaign_submitted_without_any_campaign_type(self):
+        """The gate is the virus, not the polio campaign type.
+
+        Legacy campaigns carry no campaign type, and the UI re-submits the empty
+        list on save, so gating on the type would skip validation for them.
+        """
+        self.client.force_authenticate(self.user)
+        payload = self.campaign_payload("cVDPV2", ["bOPV"], campaign_types=[])
+        response = self.client.post("/api/polio/campaigns/", payload, format="json")
+        self.assertVaccinesRejected(response, ["bOPV"], "cVDPV2")
+
+    def test_create_does_not_validate_a_non_polio_campaign_without_virus(self):
+        self.client.force_authenticate(self.user)
+        measles, _ = CampaignType.objects.get_or_create(name=CampaignType.MEASLES)
+        payload = self.campaign_payload(None, ["bOPV"], campaign_types=[measles.id])
+        response = self.client.post("/api/polio/campaigns/", payload, format="json")
+        self.assertJSONResponse(response, 201)
+
+        expected_vaccines = ["bOPV"]
+        received_vaccines = self.scope_vaccines()
+        self.assertEqual(expected_vaccines, received_vaccines)

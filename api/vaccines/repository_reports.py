@@ -11,6 +11,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from iaso.api.common import Paginator
 from plugins.polio.models import DestructionReport, IncidentReport, VaccineStock
+from plugins.polio.models.base import supply_chain_vaccines_for_scope_vaccine
 
 
 class VaccineReportingFilterBackend(filters.BaseFilterBackend):
@@ -20,7 +21,7 @@ class VaccineReportingFilterBackend(filters.BaseFilterBackend):
         # Filter by vaccine name (single)
         vaccine_name = request.query_params.get("vaccine_name", None)
         if vaccine_name:
-            queryset = queryset.filter(vaccine=vaccine_name)
+            queryset = queryset.filter(vaccine__in=supply_chain_vaccines_for_scope_vaccine(vaccine_name))
 
         # Filter by country block — .distinct() is scoped here because the M2M join can duplicate rows
         country_block = request.query_params.get("country_block", None)

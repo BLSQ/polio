@@ -16,7 +16,7 @@ from plugins.polio.models import (
     SubActivity,
     SubActivityScope,
 )
-from plugins.polio.models.base import CampaignType, ReasonForDelay
+from plugins.polio.models.base import VACCINES_BY_VIRUS, CampaignType, ReasonForDelay
 from plugins.polio.preparedness.spreadsheet_manager import *
 from plugins.polio.tests.api.test import PolioTestCaseMixin
 
@@ -443,3 +443,85 @@ class UpdateCampaignAPITestCase(APITestCase, PolioTestCaseMixin):
         round = campaign.rounds.first()
         self.assertEqual(round.chronograms.valid().count(), 1)
         self.assertIsNone(round.chronograms.valid().first().created_by)
+
+    def legacy_campaign(self, virus="cVDPV2"):
+        """A campaign holding an mOPV2 scope that its virus would not allow today."""
+        campaign, *_, district = self.create_campaign(
+            obr_name="LEGACY_CAMPAIGN",
+            account=self.account,
+            source_version=self.source_version_1,
+            country_ou_type=self.country_type,
+            district_ou_type=self.district_type,
+        )
+        campaign.virus = virus
+        campaign.save()
+        self.assertNotIn("mOPV2", VACCINES_BY_VIRUS[virus])
+        return campaign, district
+
+    def put_campaign(self, campaign, scopes=None):
+        """Re-submit what the API returns, the way the frontend does."""
+        data = self.assertJSONResponse(self.client.get(f"/api/polio/campaigns/{campaign.id}/"), 200)
+        if scopes is not None:
+            data = {**data, "scopes": data["scopes"] + scopes}
+        return self.client.put(f"/api/polio/campaigns/{campaign.id}/", data, format="json")
+
+    def scope_vaccines(self, campaign):
+        """The vaccines actually stored, sorted so the comparison does not depend on insertion order."""
+        return sorted(campaign.scopes.values_list("vaccine", flat=True))
+
+    def test_update_keeps_stored_vaccine_not_allowed_for_virus(self):
+        self.client.force_authenticate(self.user)
+        campaign, _ = self.legacy_campaign()
+        self.assertJSONResponse(self.put_campaign(campaign), 200)
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = self.scope_vaccines(campaign)
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_update_rejects_new_vaccine_not_allowed_for_virus(self):
+        self.client.force_authenticate(self.user)
+        campaign, district = self.legacy_campaign()
+        new_scopes = [{"vaccine": "bOPV", "group": {"org_units": [district.id]}}]
+        data = self.assertJSONResponse(self.put_campaign(campaign, new_scopes), 400)
+
+        expected_errors = [
+            f"Vaccine(s) bOPV cannot be used for virus cVDPV2. Allowed: {', '.join(VACCINES_BY_VIRUS['cVDPV2'])}"
+        ]
+        received_errors = data["non_field_errors"]
+        self.assertEqual(expected_errors, received_errors)
+
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = self.scope_vaccines(campaign)
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_update_accepts_new_allowed_vaccine_on_a_legacy_campaign(self):
+        self.client.force_authenticate(self.user)
+        campaign, district = self.legacy_campaign()
+        new_scopes = [{"vaccine": "nOPV2", "group": {"org_units": [district.id]}}]
+        self.assertJSONResponse(self.put_campaign(campaign, new_scopes), 200)
+
+        expected_vaccines = ["mOPV2", "nOPV2"]
+        received_vaccines = self.scope_vaccines(campaign)
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_update_validates_new_vaccine_against_the_submitted_virus(self):
+        """Switching the virus validates against the new virus, not the stored one."""
+        self.client.force_authenticate(self.user)
+        campaign, district = self.legacy_campaign(virus="PV1")
+        CampaignScope.objects.create(
+            campaign=campaign,
+            vaccine="bOPV",
+            group=m.Group.objects.create(name="bOPV scope", source_version=self.source_version_1),
+        )
+        data = self.assertJSONResponse(self.client.get(f"/api/polio/campaigns/{campaign.id}/"), 200)
+        data["virus"] = "cVDPV2"
+        data["scopes"] = data["scopes"] + [{"vaccine": "nOPV2", "group": {"org_units": [district.id]}}]
+        # mOPV2 and bOPV are already stored, so only the new nOPV2 scope is checked,
+        # and cVDPV2 allows it.
+        self.assertJSONResponse(self.client.put(f"/api/polio/campaigns/{campaign.id}/", data, format="json"), 200)
+        campaign.refresh_from_db()
+        self.assertEqual("cVDPV2", campaign.virus)
+
+        expected_vaccines = ["bOPV", "mOPV2", "nOPV2"]
+        received_vaccines = self.scope_vaccines(campaign)
+        self.assertEqual(expected_vaccines, received_vaccines)
