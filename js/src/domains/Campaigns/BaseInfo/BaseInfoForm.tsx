@@ -5,7 +5,7 @@ import React, {
     useMemo,
     useRef,
 } from 'react';
-import { Box, Grid } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 import { useSafeIntl } from 'bluesquare-components';
 import { Field, useFormikContext } from 'formik';
 import { userHasPermission } from '../../../../../../../hat/assets/js/apps/Iaso/domains/users/utils';
@@ -19,8 +19,14 @@ import {
 import { MultiSelect } from '../../../components/Inputs/MultiSelect';
 import { OrgUnitsLevels } from '../../../components/Inputs/OrgUnitsSelect';
 import MESSAGES from '../../../constants/messages';
-import { CampaignFormValues } from '../../../constants/types';
-import { polioViruses } from '../../../constants/virus';
+import {
+    asPolioCampaignValues,
+    CampaignFormValues,
+} from '../../../constants/types';
+import {
+    availableVaccinesForVirus,
+    polioViruses,
+} from '../../../constants/virus';
 import { useStyles } from '../../../styles/theme';
 import { useGetGroupedCampaigns } from '../../GroupedCampaigns/hooks/useGetGroupedCampaigns';
 import { useGetCampaignTypes } from '../hooks/api/useGetCampaignTypes';
@@ -70,6 +76,17 @@ export const BaseInfoForm: FunctionComponent = () => {
         useGetCampaignTypes(true);
     const isPolio = useIsPolioCampaign(values);
     const { top_level_org_unit_id } = values;
+    const { virus, vaccines } = asPolioCampaignValues(values);
+    const availableVaccinesHint = useMemo(() => {
+        if (vaccines) {
+            return undefined;
+        }
+        const available = availableVaccinesForVirus(virus);
+        if (!available || available.length === 0) {
+            return undefined;
+        }
+        return available.map(vaccine => vaccine.label).join(', ');
+    }, [vaccines, virus]);
     const getLabelByKey = useCallback(
         key => {
             if (isPolio === undefined) return '';
@@ -266,6 +283,17 @@ export const BaseInfoForm: FunctionComponent = () => {
                                         MESSAGES.helpTextEditVaccineViaScope,
                                     )}
                                 />
+                                {availableVaccinesHint && (
+                                    <Typography
+                                        variant="caption"
+                                        color="textSecondary"
+                                    >
+                                        {formatMessage(
+                                            MESSAGES.availableVaccinesForVirus,
+                                            { vaccines: availableVaccinesHint },
+                                        )}
+                                    </Typography>
+                                )}
                             </Box>
                             <Box mt={2}>
                                 <Field
