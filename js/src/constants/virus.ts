@@ -162,4 +162,18 @@ export const VACCINES_BY_VIRUS: Partial<Record<Virus, Vaccine[]>> = {
     ],
 };
 
+export const availableVaccinesForVirus = (
+    virus?: string | null,
+): PolioVaccine[] | undefined => {
+    const allowedVaccines = virus
+        ? VACCINES_BY_VIRUS[virus as Virus]
+        : undefined;
+    if (!allowedVaccines) {
+        return undefined;
+    }
+    return polioVaccines.filter(vaccine =>
+        allowedVaccines.includes(vaccine.value as Vaccine),
+    );
+};
+
 export { polioVaccines, polioViruses, useMapLegend };
