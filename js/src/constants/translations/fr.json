@@ -538,6 +538,7 @@
     "iaso.polio.label.Health_worker": "Agent de santé",
     "iaso.polio.label.healthCentreToDistrict": "Des centres de santé au district",
     "iaso.polio.label.helpTextEditVaccineViaScope": "La liste de vaccins est déterminée dans le périmètre",
+    "iaso.polio.label.availableVaccinesForVirus": "Disponibles pour ce virus : {vaccines}",
     "iaso.polio.label.hideSubactivities": "Masquer les sous-activités",
     "iaso.polio.label.historyForRound": "Historique du round {roundNumber}",
     "iaso.polio.label.house_not_visited": "Foyer non-visité",
