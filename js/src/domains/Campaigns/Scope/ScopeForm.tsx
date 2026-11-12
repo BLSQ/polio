@@ -18,7 +18,11 @@ import { BooleanInput } from '../../../components/Inputs';
 
 import MESSAGES from '../../../constants/messages';
 
-import { CampaignFormValues } from '../../../constants/types';
+import {
+    asPolioCampaignValues,
+    CampaignFormValues,
+} from '../../../constants/types';
+import { availableVaccinesForVirus } from '../../../constants/virus';
 import { useStyles } from '../../../styles/theme';
 import { useIsPolioCampaign } from '../hooks/useIsPolioCampaignCheck';
 import { useGetGeoJson } from './hooks/useGetGeoJson';
@@ -51,6 +55,10 @@ export const ScopeForm: FunctionComponent = () => {
     const campaignDistrictCount = useMemo(
         () => countDistricts(values.scopes),
         [values.scopes],
+    );
+    const availableVaccines = useMemo(
+        () => availableVaccinesForVirus(asPolioCampaignValues(values).virus),
+        [values],
     );
     const roundDistrictCount = useMemo(
         () =>
@@ -205,6 +213,7 @@ export const ScopeForm: FunctionComponent = () => {
                             page={page}
                             setPage={setPage}
                             campaign={values}
+                            availableVaccines={availableVaccines}
                         />
                     )}
                     {scopePerRound &&
@@ -234,6 +243,7 @@ export const ScopeForm: FunctionComponent = () => {
                                     page={page}
                                     setPage={setPage}
                                     campaign={values}
+                                    availableVaccines={availableVaccines}
                                 />
                             </TabPanel>
                         ))}
