@@ -1,7 +1,12 @@
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import { useSkipEffectOnMount, useDebounce } from 'bluesquare-components';
 import { useFormikContext } from 'formik';
-import { CampaignFormValues, Round } from '../../../../constants/types';
+import {
+    asPolioCampaignValues,
+    CampaignFormValues,
+    Round,
+} from '../../../../constants/types';
+import { availableVaccinesForVirus } from '../../../../constants/virus';
 import { useIsPolioCampaign } from '../../hooks/useIsPolioCampaignCheck';
 import { ScopeField } from '../../Scope/ScopeField';
 import { FilteredDistricts } from '../../Scope/Scopes/types';
@@ -39,20 +44,10 @@ export const SubActivityScopeField: FunctionComponent<Props> = ({
             searchScope,
         });
 
-    // Uncomment to enable restriction of available vaccines based on round vaccines
-    // const availableVaccines = useMemo(() => {
-    //     const subActivityVaccines = round?.scopes?.map(scope => scope.vaccine);
-    //     if (!subActivityVaccines) {
-    //         return undefined;
-    //     }
-    //     const vaccines = polioVaccines.filter(vaccine =>
-    //         subActivityVaccines.includes(vaccine.value),
-    //     );
-    //     if (vaccines.length > 0) {
-    //         return vaccines;
-    //     }
-    //     return undefined;
-    // }, [round?.scopes]);
+    const availableVaccines = useMemo(
+        () => availableVaccinesForVirus(asPolioCampaignValues(campaign).virus),
+        [campaign],
+    );
 
     useSkipEffectOnMount(() => {
         setPage(0);
@@ -73,7 +68,7 @@ export const SubActivityScopeField: FunctionComponent<Props> = ({
             isFetchingRegions={isFetchingRegions}
             filteredDistricts={filteredDistricts}
             campaign={campaign}
-            // availableVaccines={availableVaccines}
+            availableVaccines={availableVaccines}
             searchInputWithMargin={false}
         />
     );

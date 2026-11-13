@@ -2,6 +2,7 @@ import React, {
     FunctionComponent,
     ReactNode,
     useCallback,
+    useEffect,
     useState,
 } from 'react';
 import { Box, FormControlLabel, FormGroup, Grid, Switch } from '@mui/material';
@@ -54,7 +55,20 @@ export const ScopeInput: FunctionComponent<Props> = ({
     searchInputWithMargin = true,
 }) => {
     const [selectRegion, setSelectRegion] = useState(false);
-    const [selectedVaccine, setSelectedVaccine] = useState<Vaccine>('nOPV2');
+    const [selectedVaccine, setSelectedVaccine] = useState<Vaccine>(
+        (availableVaccines?.[0]?.value as Vaccine) ?? 'nOPV2',
+    );
+    useEffect(() => {
+        if (
+            availableVaccines &&
+            availableVaccines.length > 0 &&
+            !availableVaccines.some(
+                vaccine => vaccine.value === selectedVaccine,
+            )
+        ) {
+            setSelectedVaccine(availableVaccines[0].value as Vaccine);
+        }
+    }, [availableVaccines, selectedVaccine]);
     const isPolio = useIsPolioCampaign(campaign);
     const [, , helpers] = useField(field.name);
     const { formatMessage } = useSafeIntl();

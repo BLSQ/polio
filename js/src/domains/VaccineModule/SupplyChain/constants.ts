@@ -24,11 +24,6 @@ export const defaultVaccineOptions = [
     },
 ];
 
-export const ipvVaccineOption = {
-    label: IPV_VACCINE,
-    value: IPV_VACCINE,
-};
-
 export const singleVaccinesList = [
     {
         label: 'nOPV2',
@@ -42,11 +37,10 @@ export const singleVaccinesList = [
         label: 'bOPV',
         value: 'bOPV',
     },
+    {
+        label: 'IPV',
+        value: 'IPV',
+    },
 ];
 
-export const vrfVaccineFilterOptions = [
-    ...singleVaccinesList,
-    ipvVaccineOption,
-];
-
-export const fipvVaccineOptions = [ipvVaccineOption, ...singleVaccinesList];
+export const vrfVaccineFilterOptions = [...singleVaccinesList];
