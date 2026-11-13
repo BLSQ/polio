@@ -46,11 +46,7 @@ import {
     CampaignDropdownRound,
     useGetCampaignsDropdown,
 } from '../../../../Campaigns/hooks/api/useGetCampaignsDropdown';
-import {
-    apiUrl,
-    fipvVaccineOptions,
-    singleVaccinesList,
-} from '../../constants';
+import { apiUrl, singleVaccinesList } from '../../constants';
 import MESSAGES from '../../messages';
 import {
     CampaignDropdowns,
@@ -64,6 +60,14 @@ const defaults = {
     pageSize: 20,
     page: 1,
 };
+
+const roundUsesVaccine = (roundVaccines: string[], vaccine: string): boolean =>
+    roundVaccines.some(scopeVaccine =>
+        scopeVaccine
+            .split('&')
+            .map(token => token.trim())
+            .includes(vaccine),
+    );
 const getVrfList = (
     params: FormattedApiParams,
 ): Promise<{ results: VRF[] }> => {
@@ -210,7 +214,7 @@ export const useCampaignDropDowns = ({
         );
         let vaccines;
         if (isFipvCampaign) {
-            vaccines = fipvVaccineOptions;
+            vaccines = singleVaccinesList;
         } else {
             vaccines = (selectedCampaign?.vaccines ?? []).map(vaccineName => ({
                 label: vaccineName,
@@ -241,7 +245,7 @@ export const useCampaignDropDowns = ({
                     .map(toRoundOption);
             }
             return (selectedCampaign?.rounds ?? [])
-                .filter(round => round.vaccines.includes(vaccine))
+                .filter(round => roundUsesVaccine(round.vaccines, vaccine))
                 .filter(
                     round =>
                         !selectedCampaign?.separate_scopes_per_round ||

@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Campaign } from '../../../../../constants/types';
 import type { CampaignDropdownOption } from '../../../../Campaigns/hooks/api/useGetCampaignsDropdown';
-import { fipvVaccineOptions, singleVaccinesList } from '../../constants';
+import { singleVaccinesList } from '../../constants';
 import { useCampaignDropDowns } from './vrf';
 
 const mockUseGetCampaignsDropdown = vi.fn();
@@ -256,7 +256,7 @@ describe('useCampaignDropDowns', () => {
             );
 
             expect(result.current.isFipvCampaign).toBe(true);
-            expect(result.current.vaccines).toEqual(fipvVaccineOptions);
+            expect(result.current.vaccines).toEqual(singleVaccinesList);
         });
     });
 
