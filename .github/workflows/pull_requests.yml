@@ -41,3 +41,8 @@ jobs:
       iaso_branch: ${{ needs.config.outputs.iaso_branch }}
       plugin_branch: ${{ needs.config.outputs.plugin_branch }}
       plugin_name: polio
+
+  dco:
+    uses: BLSQ/iaso-ci/.github/workflows/dco.yml@IA-5660_require-dco-for-external-contribs
+    permissions:
+      contents: read
