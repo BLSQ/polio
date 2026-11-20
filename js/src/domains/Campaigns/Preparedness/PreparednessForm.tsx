@@ -1,6 +1,9 @@
 import React, { useState, FunctionComponent } from 'react';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Tab, Box } from '@mui/material';
+import TabContext from '@mui/lab/TabContext/TabContext';
+import TabList from '@mui/lab/TabList/TabList';
+import TabPanel from '@mui/lab/TabPanel/TabPanel';
+import Box from '@mui/material/Box/Box';
+import Tab from '@mui/material/Tab/Tab';
 import { useSafeIntl } from 'bluesquare-components';
 import { useFormikContext } from 'formik';
 

@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { CsvButton } from '../../../../../../hat/assets/js/apps/Iaso/components/Buttons/CsvButton';
 import { CreateBudgetProcessModal } from './BudgetProcess/CreateBudgetProcessModal';
 import MESSAGES from './messages';

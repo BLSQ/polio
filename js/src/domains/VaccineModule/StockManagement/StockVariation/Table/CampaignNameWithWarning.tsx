@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
-import { Box, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useSafeIntl } from 'bluesquare-components';
 import { REGULAR, ROUND_ON_HOLD } from '../../constants';
 import MESSAGES from '../../messages';

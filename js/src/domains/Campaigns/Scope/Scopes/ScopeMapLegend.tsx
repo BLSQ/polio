@@ -1,5 +1,8 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { Box, FormControl, List, ListItem } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import FormControl from '@mui/material/FormControl/FormControl';
+import List from '@mui/material/List/List';
+import ListItem from '@mui/material/ListItem/ListItem';
 import { useSafeIntl } from 'bluesquare-components';
 import { FieldInputProps } from 'formik';
 import { MapLegend } from '../../../../../../../../hat/assets/js/apps/Iaso/components/maps/MapLegend';

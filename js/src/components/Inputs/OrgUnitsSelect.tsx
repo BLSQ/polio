@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react';
-import { CircularProgress, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
 import { FormikProps, FieldInputProps } from 'formik';
 import { get } from 'lodash';
 import { OrgUnitTreeviewModal } from '../../../../../../hat/assets/js/apps/Iaso/domains/orgUnits/components/TreeView/OrgUnitTreeviewModal';

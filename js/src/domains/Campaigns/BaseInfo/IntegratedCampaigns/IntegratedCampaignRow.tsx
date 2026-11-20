@@ -1,9 +1,10 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { TableRow, TableCell } from '@mui/material';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableRow from '@mui/material/TableRow/TableRow';
 import { useFormikContext } from 'formik';
+import { PolioCampaignValues } from 'plugins/polio/js/src/constants/types';
 import { DeleteIconButton } from 'Iaso/components/Buttons/DeleteIconButton';
 import { LinkTo } from 'Iaso/components/nav/LinkTo';
-import { PolioCampaignValues } from 'plugins/polio/js/src/constants/types';
 
 type Props = {
     campaignOption: {

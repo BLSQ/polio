@@ -1,7 +1,8 @@
 import React, { FunctionComponent, ReactNode } from 'react';
-import { Typography, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import FormControlMui from '@mui/material/FormControl';
-import { makeStyles } from '@mui/styles';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import classNames from 'classnames';
 
 const useStyles = makeStyles(theme => ({

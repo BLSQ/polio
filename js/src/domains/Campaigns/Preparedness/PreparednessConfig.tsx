@@ -1,14 +1,12 @@
 import React, { useCallback, FunctionComponent } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import {
-    Button,
-    CircularProgress,
-    Grid,
-    IconButton,
-    Tooltip,
-    Box,
-    Typography,
-} from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
+import Grid from '@mui/material/Grid/Grid';
+import IconButton from '@mui/material/IconButton/IconButton';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import { Field, useFormikContext } from 'formik';
 import moment from 'moment';

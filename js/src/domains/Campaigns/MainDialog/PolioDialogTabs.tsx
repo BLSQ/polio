@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react';
-import { Tabs, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Tabs from '@mui/material/Tabs/Tabs';
 import { SxStyles } from 'Iaso/types/general';
 import { Campaign } from '../../../constants/types';
 import { useStyles } from '../../../styles/theme';

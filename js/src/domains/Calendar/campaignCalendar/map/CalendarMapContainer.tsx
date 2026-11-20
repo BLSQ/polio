@@ -4,7 +4,7 @@ import React, {
     SetStateAction,
     useState,
 } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { LoadingSpinner } from 'bluesquare-components';
 import { useMapEvent } from 'react-leaflet';
 

@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
 import { textPlaceholder, useSafeIntl } from 'bluesquare-components';
 import moment from 'moment';
 import { Round } from '../../../../constants/types';

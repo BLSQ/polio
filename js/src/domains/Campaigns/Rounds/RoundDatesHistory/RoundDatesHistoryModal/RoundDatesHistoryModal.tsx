@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Divider } from '@mui/material';
+import Divider from '@mui/material/Divider/Divider';
 import { makeFullModal, useSafeIntl, AlertModal } from 'bluesquare-components';
 import MESSAGES from '../../../../../constants/messages';
 import { RoundDatesHistoryTable } from '../RoundDatesHistoryTable';

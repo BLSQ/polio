@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { textPlaceholder } from 'bluesquare-components';
 import moment from 'moment';
 import { Field } from '../types';

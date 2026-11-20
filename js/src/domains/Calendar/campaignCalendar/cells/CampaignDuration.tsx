@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { TableCell } from '@mui/material';
+import TableCell from '@mui/material/TableCell/TableCell';
 import { useSafeIntl } from 'bluesquare-components';
 import classnames from 'classnames';
 
