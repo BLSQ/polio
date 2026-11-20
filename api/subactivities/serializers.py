@@ -4,6 +4,7 @@ from rest_framework import serializers
 from iaso.models import Group
 from plugins.polio.api.shared_serializers import GroupSerializer
 from plugins.polio.models import Round, SubActivity, SubActivityScope
+from plugins.polio.models.base import VACCINES_BY_VIRUS, invalid_vaccines_for_virus
 
 
 class SubActivityScopeSerializer(serializers.ModelSerializer):
@@ -37,6 +38,33 @@ class SubActivityCreateUpdateSerializer(serializers.ModelSerializer):
             "im_ended_at",
             "im_started_at",
         ]
+
+    def _campaign_under_edit(self, data):
+        """The campaign this sub-activity belongs to, on create as well as on update."""
+        if self.instance is not None:
+            return self.instance.round.campaign
+        campaign = data.get("campaign")
+        round_number = data.get("round_number")
+        if campaign is None or round_number is None:
+            return None
+        the_round = Round.objects.filter(campaign__obr_name=campaign, number=round_number).first()
+        return the_round.campaign if the_round else None
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        campaign = self._campaign_under_edit(data)
+        if campaign is None:
+            return data
+
+        stored_vaccines = set(self.instance.scopes.values_list("vaccine", flat=True)) if self.instance else set()
+        submitted_vaccines = {scope["vaccine"] for scope in (data.get("scopes") or []) if scope.get("vaccine")}
+        invalid_vaccines = invalid_vaccines_for_virus(campaign.virus, submitted_vaccines - stored_vaccines)
+        if invalid_vaccines:
+            raise serializers.ValidationError(
+                f"Vaccine(s) {', '.join(invalid_vaccines)} cannot be used for virus {campaign.virus}. "
+                f"Allowed: {', '.join(VACCINES_BY_VIRUS[campaign.virus])}"
+            )
+        return data
 
     def create(self, validated_data):
         round_number = validated_data.pop("round_number", None)

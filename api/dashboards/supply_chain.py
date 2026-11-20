@@ -108,7 +108,7 @@ class VaccineRequestFormDashboardSerializer(serializers.ModelSerializer):
         next_campaign_start_date = None
 
         for campaign in campaigns_after_last_round:
-            if vaccine_stock.vaccine in campaign.single_vaccines_extended_list:
+            if vaccine_stock.vaccine in campaign.supply_chain_vaccines_list:
                 # Do something if the vaccine matches
                 next_campaign_start_date = (
                     Round.objects.filter(campaign=campaign)

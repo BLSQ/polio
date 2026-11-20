@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-29 09:29+0000\n"
+"POT-Creation-Date: 2026-11-11 09:06+0000\n"
 "PO-Revision-Date: 2025-02-05 14:43+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -206,6 +206,34 @@ msgstr "nOPV2 & bOPV"
 #: plugins/polio/models/base.py
 msgid "IPV"
 msgstr "IPV"
+
+#: plugins/polio/models/base.py
+msgid "fIPV"
+msgstr "fIPV"
+
+#: plugins/polio/models/base.py
+msgid "IPV & bOPV"
+msgstr "IPV & bOPV"
+
+#: plugins/polio/models/base.py
+msgid "fIPV & bOPV"
+msgstr "fIPV & bOPV"
+
+#: plugins/polio/models/base.py
+msgid "IPV & nOPV2"
+msgstr "IPV & nOPV"
+
+#: plugins/polio/models/base.py
+msgid "fIPV & nOPV2"
+msgstr "fIPV & nOPV2"
+
+#: plugins/polio/models/base.py
+msgid "IPV & nOPV2 & bOPV"
+msgstr "IPV & nOPV2 & bOPV"
+
+#: plugins/polio/models/base.py
+msgid "fIPV & nOPV2 & bOPV"
+msgstr "fIPV & nOPV2 & bOPV"
 
 #: plugins/polio/models/base.py
 msgid "WHO"

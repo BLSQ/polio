@@ -1,5 +1,7 @@
 import datetime
 
+from urllib.parse import urlencode
+
 from django.contrib.auth.models import AnonymousUser
 from django.utils.timezone import now
 
@@ -441,3 +443,125 @@ class VaccineRepositoryFormsAPITestCase(APITestCase, PolioTestCaseMixin):
         data = self.assertJSONResponse(response, 200)
         self.assertEqual(len(data["results"]), 2)
         self.assertTrue(all(result["campaign_obr_name"] != "Another Campaign" for result in data["results"]))
+
+    def repository_campaign(self, obr_name, scope_vaccine, vrf_vaccines):
+        """A campaign scoped on `scope_vaccine`, with one VRF per vaccine in `vrf_vaccines`."""
+        campaign, round_1, _, _, _, _ = self.create_campaign(
+            obr_name=obr_name,
+            account=self.account,
+            source_version=self.source_version_1,
+            country_ou_type=self.org_unit_type_country,
+            country_name=f"{obr_name}land",
+            district_ou_type=self.org_unit_type_district,
+            vaccine=scope_vaccine,
+        )
+        campaign.campaign_types.add(self.polio_type)
+        request_forms = []
+        for vrf_vaccine in vrf_vaccines:
+            request_form = pm.VaccineRequestForm.objects.create(
+                campaign=campaign,
+                vaccine_type=vrf_vaccine,
+                date_vrf_reception=self.now - datetime.timedelta(days=30),
+                date_vrf_signature=self.now - datetime.timedelta(days=20),
+                date_dg_approval=self.now - datetime.timedelta(days=10),
+                quantities_ordered_in_doses=500,
+            )
+            request_form.rounds.set([round_1])
+            request_forms.append(request_form)
+        return campaign, request_forms
+
+    def repository_rows(self, query=""):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(f"{BASE_URL}?{query}")
+        return self.assertJSONResponse(response, 200)["results"]
+
+    def test_fipv_scoped_campaign_is_listed_with_its_ipv_vrf(self):
+        """fIPV campaigns are supplied as IPV, so their IPV VRF must still match the row."""
+        campaign, [request_form] = self.repository_campaign("fIPV_Campaign", "fIPV", ["IPV"])
+
+        rows = self.repository_rows(f"campaign={campaign.obr_name}")
+
+        expected_vaccine_names = ["fIPV"]
+        received_vaccine_names = [row["vaccine_name"] for row in rows]
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+
+        expected_vrf_ids = [request_form.id]
+        received_vrf_ids = [vrf["id"] for vrf in rows[0]["vrf_data"]]
+        self.assertEqual(expected_vrf_ids, received_vrf_ids)
+
+    def test_combined_scoped_campaign_is_listed_with_both_of_its_vrfs(self):
+        """A combination gets one VRF per vaccine, and both belong to that scope's row."""
+        campaign, request_forms = self.repository_campaign("IPV_nOPV2_Campaign", "IPV & nOPV2", ["IPV", "nOPV2"])
+
+        rows = self.repository_rows(f"campaign={campaign.obr_name}")
+
+        expected_vaccine_names = ["IPV & nOPV2"]
+        received_vaccine_names = [row["vaccine_name"] for row in rows]
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+
+        expected_vrf_ids = sorted(request_form.id for request_form in request_forms)
+        received_vrf_ids = sorted(vrf["id"] for vrf in rows[0]["vrf_data"])
+        self.assertEqual(expected_vrf_ids, received_vrf_ids)
+
+    def test_filtering_by_ipv_returns_the_fipv_and_combined_scopes(self):
+        """An individual vaccine matches every scope containing it, fIPV read as IPV."""
+        self.repository_campaign("fIPV_Filter_Campaign", "fIPV", ["IPV"])
+        self.repository_campaign("IPV_nOPV2_Filter_Campaign", "IPV & nOPV2", ["IPV", "nOPV2"])
+
+        rows = self.repository_rows("vaccine_name=IPV")
+
+        expected_vaccine_names = ["IPV & nOPV2", "fIPV"]
+        received_vaccine_names = sorted(row["vaccine_name"] for row in rows)
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+
+    def test_filtering_by_fipv_returns_the_same_rows_as_ipv(self):
+        """fIPV is not a supply chain vaccine, so it is read as IPV before filtering."""
+        self.repository_campaign("fIPV_Alias_Campaign", "fIPV", ["IPV"])
+        self.repository_campaign("IPV_Alias_Campaign", "IPV", ["IPV"])
+
+        expected_vaccine_names = sorted(row["vaccine_name"] for row in self.repository_rows("vaccine_name=IPV"))
+        received_vaccine_names = sorted(row["vaccine_name"] for row in self.repository_rows("vaccine_name=fIPV"))
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+        self.assertEqual(["IPV", "fIPV"], received_vaccine_names)
+
+    def test_filtering_by_a_combined_vaccine_matches_that_scope_only(self):
+        """A combination is only ever a scope value, so it is matched as it is."""
+        self.repository_campaign("fIPV_Exact_Campaign", "fIPV", ["IPV"])
+        self.repository_campaign("IPV_nOPV2_Exact_Campaign", "IPV & nOPV2", ["IPV", "nOPV2"])
+
+        rows = self.repository_rows(urlencode({"vaccine_name": "IPV & nOPV2"}))
+
+        expected_vaccine_names = ["IPV & nOPV2"]
+        received_vaccine_names = [row["vaccine_name"] for row in rows]
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+
+    def test_filtering_by_mopv2_does_not_return_ipv_scopes(self):
+        """The token match must not turn into "any vaccine matches"."""
+        self.repository_campaign("fIPV_Negative_Campaign", "fIPV", ["IPV"])
+
+        rows = self.repository_rows("vaccine_name=mOPV2")
+
+        self.assertNotIn("fIPV", [row["vaccine_name"] for row in rows])
+        self.assertEqual({"mOPV2"}, {row["vaccine_name"] for row in rows})
+
+    def test_fipv_scoped_campaign_is_listed_from_its_ipv_form_a(self):
+        """A Form A is recorded against the IPV stock, and must keep the fIPV row too."""
+        campaign, _ = self.repository_campaign("fIPV_FormA_Campaign", "fIPV", [])
+        round_1 = campaign.rounds.get(number=1)
+        vaccine_stock = pm.VaccineStock.objects.create(account=self.account, country=campaign.country, vaccine="IPV")
+        pm.OutgoingStockMovement.objects.create(
+            campaign=campaign,
+            round=round_1,
+            vaccine_stock=vaccine_stock,
+            report_date=self.now,
+            form_a_reception_date=self.now,
+            usable_vials_used=10,
+            doses_per_vial=5,
+        )
+
+        rows = self.repository_rows(f"campaign={campaign.obr_name}")
+
+        expected_vaccine_names = ["fIPV"]
+        received_vaccine_names = [row["vaccine_name"] for row in rows]
+        self.assertEqual(expected_vaccine_names, received_vaccine_names)
+        self.assertEqual(1, len(rows[0]["form_a_data"]))

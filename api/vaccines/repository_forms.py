@@ -21,6 +21,12 @@ from plugins.polio.models import (
     VaccineRequestForm,
     VaccineRequestFormType,
 )
+from plugins.polio.models.base import (
+    INDIVIDUAL_VACCINES,
+    normalize_vaccine_for_supply_chain,
+    scope_vaccines_for_individual_vaccine,
+    supply_chain_vaccines_for_scope_vaccine,
+)
 
 
 class VaccineReportingFilterBackend(filters.BaseFilterBackend):
@@ -30,7 +36,11 @@ class VaccineReportingFilterBackend(filters.BaseFilterBackend):
         # Filter by vaccine name (single)
         vaccine_name = request.query_params.get("vaccine_name", None)
         if vaccine_name:
-            queryset = queryset.filter(vaccine_name=vaccine_name)
+            scope_vaccines = scope_vaccines_for_individual_vaccine(normalize_vaccine_for_supply_chain(vaccine_name))
+            if scope_vaccines:
+                queryset = queryset.filter(vaccine_name__in=scope_vaccines)
+            else:
+                queryset = queryset.filter(vaccine_name=vaccine_name)
 
         # Filter by country block
         country_block = request.query_params.get("country_block", None)
@@ -102,7 +112,9 @@ class VaccineRepositorySerializer(serializers.Serializer):
 
     def get_vrf_data(self, obj):
         vrfs = VaccineRequestForm.objects.filter(
-            campaign__id=obj["campaign__id"], rounds=obj["id"], vaccine_type=obj["vaccine_name"]
+            campaign__id=obj["campaign__id"],
+            rounds=obj["id"],
+            vaccine_type__in=supply_chain_vaccines_for_scope_vaccine(obj["vaccine_name"]),
         )
         return [
             {
@@ -119,7 +131,7 @@ class VaccineRepositorySerializer(serializers.Serializer):
         pre_alerts = VaccinePreAlert.objects.filter(
             request_form__campaign=obj["campaign__id"],
             request_form__rounds=obj["id"],
-            request_form__vaccine_type=obj["vaccine_name"],
+            request_form__vaccine_type__in=supply_chain_vaccines_for_scope_vaccine(obj["vaccine_name"]),
             request_form__deleted_at__isnull=True,
         )
         return [
@@ -133,7 +145,9 @@ class VaccineRepositorySerializer(serializers.Serializer):
 
     def get_form_a_data(self, obj):
         form_as = OutgoingStockMovement.objects.filter(
-            campaign=obj["campaign__id"], round=obj["id"], vaccine_stock__vaccine=obj["vaccine_name"]
+            campaign=obj["campaign__id"],
+            round=obj["id"],
+            vaccine_stock__vaccine__in=supply_chain_vaccines_for_scope_vaccine(obj["vaccine_name"]),
         )
         return [
             {
@@ -324,12 +338,19 @@ class VaccineRepositoryFormsViewSet(GenericViewSet, ListModelMixin):
                 output_field=CharField(),
             )
         )
-        # Keep only lines that will have inputs from Vaccine Module in them, i.e. either form A or VRF
-        vrf_subquery = VaccineRequestForm.objects.filter(vaccine_type=OuterRef("vaccine_name"), rounds=OuterRef("id"))
-        forma_subquery = OutgoingStockMovement.objects.filter(
-            vaccine_stock__vaccine=OuterRef("vaccine_name"), round=OuterRef("id")
-        )
+        # Keep only lines that will have inputs from Vaccine Module in them, i.e. either form A or VRF.
+        # A row's vaccine_name is a scope value, so it can be a combination ("IPV & nOPV2")
+        # or fIPV, while a VRF type and a stock are always one individual vaccine. So each
+        # individual vaccine is matched against the scope values that contain it, instead of
+        # comparing the scope value itself (section 5.3).
+        has_vaccine_module_input = Q()
+        for vaccine, _label in INDIVIDUAL_VACCINES:
+            vrf_subquery = VaccineRequestForm.objects.filter(vaccine_type=vaccine, rounds=OuterRef("id"))
+            forma_subquery = OutgoingStockMovement.objects.filter(vaccine_stock__vaccine=vaccine, round=OuterRef("id"))
+            has_vaccine_module_input |= Q(vaccine_name__in=scope_vaccines_for_individual_vaccine(vaccine)) & (
+                Q(Exists(vrf_subquery)) | Q(Exists(forma_subquery))
+            )
 
-        rounds_queryset = rounds_queryset.filter(Q(Exists(vrf_subquery)) | Q(Exists(forma_subquery)))
+        rounds_queryset = rounds_queryset.filter(has_vaccine_module_input)
 
         return rounds_queryset

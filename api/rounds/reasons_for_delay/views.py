@@ -31,7 +31,7 @@ class ReasonForDelayViewSet(AuditMixin, ModelViewSet):
     # TODO annotate to be able to sort on time_selected
     def get_queryset(self):
         account = self.request.user.iaso_profile.account
-        return ReasonForDelay.objects.filter(deleted_at__isnull=True).filter(account=account)
+        return ReasonForDelay.objects.filter(deleted_at__isnull=True).filter(account=account).order_by("id")
 
     # This endpoint is to populate the dropdown choices for regular polio users
     @action(
