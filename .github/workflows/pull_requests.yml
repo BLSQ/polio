@@ -43,6 +43,6 @@ jobs:
       plugin_name: polio
 
   dco:
-    uses: BLSQ/iaso-ci/.github/workflows/dco.yml@IA-5660_require-dco-for-external-contribs
+    uses: BLSQ/iaso-ci/.github/workflows/dco.yml@main
     permissions:
       contents: read
