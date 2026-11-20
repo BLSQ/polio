@@ -1,6 +1,8 @@
 import React, { FunctionComponent } from 'react';
-import { Button, useMediaQuery, useTheme } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Button from '@mui/material/Button/Button';
+import useTheme from '@mui/material/styles/useTheme';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import { useSafeIntl } from 'bluesquare-components';
 import classNames from 'classnames';
 import MESSAGES from '../../../constants/messages';

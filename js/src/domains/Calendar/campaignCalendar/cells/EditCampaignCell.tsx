@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import EditIcon from '@mui/icons-material/Settings';
-import { Box, Tooltip, IconButton } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import IconButton from '@mui/material/IconButton/IconButton';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useRedirectTo, useSafeIntl } from 'bluesquare-components';
 import { SxStyles } from '../../../../../../../../hat/assets/js/apps/Iaso/types/general';
 import MESSAGES from '../../../../constants/messages';

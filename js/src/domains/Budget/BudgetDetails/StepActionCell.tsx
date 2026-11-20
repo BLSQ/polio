@@ -1,5 +1,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { useMediaQuery, useTheme, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import useTheme from '@mui/material/styles/useTheme';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import { Paginated } from 'bluesquare-components';
 import moment from 'moment';
 import { CreateBudgetStepIcon } from '../CreateBudgetStep/CreateBudgetStep';

@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Tooltip, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { Theme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import {
     useSafeIntl,
     IconButton,

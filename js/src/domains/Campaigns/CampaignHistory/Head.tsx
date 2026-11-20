@@ -1,7 +1,9 @@
 import React, { FunctionComponent } from 'react';
 
-import { TableHead, TableRow, TableCell } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableHead from '@mui/material/TableHead/TableHead';
+import TableRow from '@mui/material/TableRow/TableRow';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl } from 'bluesquare-components';
 
 import MESSAGES from '../../../constants/messages';

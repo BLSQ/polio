@@ -1,5 +1,5 @@
 import React, { Fragment, FunctionComponent, useMemo, useState } from 'react';
-import { TableRow } from '@mui/material';
+import TableRow from '@mui/material/TableRow/TableRow';
 import classNames from 'classnames';
 import { StaticFieldsCells } from './cells/StaticFields';
 import { StaticSubactivitiesFields } from './cells/StaticSubactivitiesFields';

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
-import { Button } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Button from '@mui/material/Button/Button';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl } from 'bluesquare-components';
 import domToPdf from 'dom-to-pdf';
 import MESSAGES from '../../../constants/messages';

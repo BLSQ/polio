@@ -4,7 +4,7 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { Table, useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../../../../constants/messages';
 import { floatToPercentString } from '../../../../utils';

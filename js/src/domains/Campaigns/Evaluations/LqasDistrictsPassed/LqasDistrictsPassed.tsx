@@ -1,5 +1,8 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Divider from '@mui/material/Divider/Divider';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import { Nullable } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import MESSAGES from '../../../../constants/messages';

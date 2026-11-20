@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import EditIcon from '@mui/icons-material/Settings';
-import { Button } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Button from '@mui/material/Button/Button';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import classnames from 'classnames';
 import { useStyles } from '../Styles';
 import { useIconLabel } from './hooks';

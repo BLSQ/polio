@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 
-import { Box, TableCell, TableSortLabel } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableSortLabel from '@mui/material/TableSortLabel/TableSortLabel';
 import {
     getOrderArray,
     getSort,

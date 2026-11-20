@@ -1,8 +1,11 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
-import { Pagination } from '@mui/lab';
-import { Box, Collapse, useMediaQuery, useTheme } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Pagination from '@mui/lab/Pagination/Pagination';
+import Box from '@mui/material/Box/Box';
+import Collapse from '@mui/material/Collapse/Collapse';
+import useTheme from '@mui/material/styles/useTheme';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import {
     LoadingSpinner,
     useRedirectToReplace,

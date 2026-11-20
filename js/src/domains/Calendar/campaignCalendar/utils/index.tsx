@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { SxProps } from '@mui/material';
+import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import { Moment } from 'moment';
 
 import { EmptyCell } from '../cells/Empty';

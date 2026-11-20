@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Box, SxProps, TableCell } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import TableCell from '@mui/material/TableCell/TableCell';
+import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import classnames from 'classnames';
 import { useStaticFields } from '../../hooks/useStaticFields';
 import { colSpanTitle } from '../constants';

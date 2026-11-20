@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 
-import { Box, TableCell } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import TableCell from '@mui/material/TableCell/TableCell';
 import { useSafeIntl } from 'bluesquare-components';
 import classnames from 'classnames';
 

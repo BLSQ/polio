@@ -1,5 +1,8 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Grid, useMediaQuery, useTheme } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import { UrlParams, useSafeIntl } from 'bluesquare-components';
 import InputComponent from '../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import { SearchButton } from '../../../../../../../hat/assets/js/apps/Iaso/components/SearchButton';

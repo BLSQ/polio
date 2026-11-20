@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { Box, Divider } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Divider from '@mui/material/Divider/Divider';
 import Step from '@mui/material/Step';
 import StepLabel from '@mui/material/StepLabel';
 import Stepper from '@mui/material/Stepper';

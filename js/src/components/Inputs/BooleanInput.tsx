@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Checkbox } from '@mui/material';
+import Checkbox from '@mui/material/Checkbox/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 type Props = {

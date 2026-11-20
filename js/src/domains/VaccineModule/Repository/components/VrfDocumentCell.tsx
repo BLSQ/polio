@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { textPlaceholder, useSafeIntl } from 'bluesquare-components';
 import { DateCell } from 'Iaso/components/Cells/DateTimeCell';
 import { PdfPreview } from 'Iaso/components/files/pdf/PdfPreview';

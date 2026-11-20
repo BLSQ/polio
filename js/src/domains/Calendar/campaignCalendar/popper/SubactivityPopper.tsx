@@ -1,7 +1,11 @@
 import React, { FunctionComponent } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Grid, IconButton, Paper, Popper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import IconButton from '@mui/material/IconButton/IconButton';
+import Paper from '@mui/material/Paper/Paper';
+import Popper from '@mui/material/Popper/Popper';
 import { useSafeIntl } from 'bluesquare-components';
 
 import { SxStyles } from '../../../../../../../../hat/assets/js/apps/Iaso/types/general';

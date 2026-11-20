@@ -1,5 +1,8 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { Box, FormControlLabel, FormGroup, Switch } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import FormControlLabel from '@mui/material/FormControlLabel/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup/FormGroup';
+import Switch from '@mui/material/Switch/Switch';
 import { useRedirectToReplace, useSafeIntl } from 'bluesquare-components';
 import { LqasUrlParams } from '../..';
 import MESSAGES from '../../../../../constants/messages';

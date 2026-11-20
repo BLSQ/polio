@@ -5,7 +5,8 @@ import React, {
     useState,
 } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import {
     Select,
     useSafeIntl,

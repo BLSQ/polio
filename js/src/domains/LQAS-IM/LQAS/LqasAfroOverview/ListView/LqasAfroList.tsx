@@ -6,18 +6,16 @@ import React, {
     useState,
 } from 'react';
 import MapIcon from '@mui/icons-material/Map';
-import {
-    TableContainer,
-    Table as MuiTable,
-    TableCell,
-    TableBody,
-    TablePagination,
-    TableRow,
-    TableHead,
-    Box,
-    Typography,
-} from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import MuiTable from '@mui/material/Table/Table';
+import TableBody from '@mui/material/TableBody/TableBody';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableContainer from '@mui/material/TableContainer/TableContainer';
+import TableHead from '@mui/material/TableHead/TableHead';
+import TablePagination from '@mui/material/TablePagination/TablePagination';
+import TableRow from '@mui/material/TableRow/TableRow';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl } from 'bluesquare-components';
 import { cloneDeep, sortBy } from 'lodash';
 import MESSAGES from '../../../../../constants/messages';

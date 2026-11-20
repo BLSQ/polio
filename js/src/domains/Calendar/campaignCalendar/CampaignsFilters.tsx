@@ -6,7 +6,11 @@ import React, {
     useState,
 } from 'react';
 import FiltersIcon from '@mui/icons-material/FilterList';
-import { Box, Button, Grid, useMediaQuery, useTheme } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
+import Grid from '@mui/material/Grid/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import { useRedirectToReplace } from 'bluesquare-components';
 import { FormattedMessage } from 'react-intl';
 import { useBoundState } from 'Iaso/hooks/useBoundState';

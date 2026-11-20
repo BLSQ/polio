@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import LocationDisabledIcon from '@mui/icons-material/LocationDisabled';
-import { Tooltip, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useSafeIntl } from 'bluesquare-components';
 import { defineMessages } from 'react-intl';
 import ShapeSvg from 'Iaso/components/svg/ShapeSvgComponent';
