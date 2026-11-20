@@ -11,7 +11,7 @@ from iaso.models import Account
 from iaso.permissions.core_permissions import CORE_FORMS_PERMISSION
 from iaso.test import APITestCase
 from plugins.polio.export_utils import format_date
-from plugins.polio.models import Campaign, ReasonForDelay, Round, RoundScope
+from plugins.polio.models import Campaign, CampaignType, ReasonForDelay, Round, RoundScope
 from plugins.polio.preparedness.spreadsheet_manager import *
 
 
@@ -205,6 +205,51 @@ class CalendarXLSXExportAPITestCase(APITestCase):
 
         data_dict = excel_data.to_dict()
         self.assertEqual(len(data_dict["COUNTRY"]), 0)
+
+    def test_create_calendar_xlsx_sheet_filters_by_campaign_type(self):
+        """The calendar's type filter (`campaignType`, slugs) reaches the XLSX export.
+
+        The sheet has one row per country, so each campaign sits in its own country.
+        """
+        polio, _ = CampaignType.objects.get_or_create(name=CampaignType.POLIO)
+        measles, _ = CampaignType.objects.get_or_create(name=CampaignType.MEASLES)
+
+        polio_country = m.OrgUnit.objects.create(
+            id=5455, name="Polio country", org_unit_type=self.jedi_squad, version=self.star_wars.default_version
+        )
+        measles_country = m.OrgUnit.objects.create(
+            id=5456, name="Measles country", org_unit_type=self.jedi_squad, version=self.star_wars.default_version
+        )
+
+        polio_campaign = Campaign.objects.create(
+            country_id=polio_country.id, obr_name="polio campaign", account=self.account
+        )
+        polio_campaign.campaign_types.set([polio])
+        polio_campaign.rounds.create(number=1, started_at=datetime.date(2022, 1, 1), ended_at=datetime.date(2022, 1, 2))
+
+        measles_campaign = Campaign.objects.create(
+            country_id=measles_country.id, obr_name="measles campaign", account=self.account
+        )
+        measles_campaign.campaign_types.set([measles])
+        measles_campaign.rounds.create(
+            number=1, started_at=datetime.date(2022, 1, 1), ended_at=datetime.date(2022, 1, 2)
+        )
+
+        def countries(campaign_type=None):
+            params = {"currentDate": "2022-10-01"}
+            # xlsx_file_name() already puts campaignType in the file and sheet name.
+            sheet_name = "calendar_2022-10-01"
+            if campaign_type:
+                params["campaignType"] = campaign_type
+                sheet_name += f"_{campaign_type}"
+            response = self.client.get("/api/polio/campaigns/create_calendar_xlsx_sheet/", params)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get("Content-Disposition"), f"attachment; filename={sheet_name}.xlsx")
+            return pd.read_excel(response.content, engine="openpyxl", sheet_name=sheet_name)["COUNTRY"].tolist()
+
+        self.assertCountEqual(countries(), ["Polio country", "Measles country"])
+        self.assertEqual(countries("polio"), ["Polio country"])
+        self.assertEqual(countries("measles"), ["Measles country"])
 
     def test_create_calendar_xlsx_sheet_with_separate_scopes_per_round(self):
         """
