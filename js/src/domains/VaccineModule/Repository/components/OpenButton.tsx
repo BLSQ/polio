@@ -1,9 +1,9 @@
 import React, { FunctionComponent } from 'react';
 import Box from '@mui/material/Box/Box';
 import { useSafeIntl } from 'bluesquare-components';
-import { DateAsString } from 'plugins/polio/js/src/constants/types';
 import { DateCell } from 'Iaso/components/Cells/DateTimeCell';
 import PdfSvgComponent from 'Iaso/components/svg/PdfSvgComponent';
+import { DateAsString } from 'plugins/polio/js/src/constants/types';
 import MESSAGES from '../messages';
 
 type Props = {

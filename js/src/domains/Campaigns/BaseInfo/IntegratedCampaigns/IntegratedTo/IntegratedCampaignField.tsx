@@ -3,8 +3,8 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import Box from '@mui/material/Box/Box';
 import Grid from '@mui/material/Grid/Grid';
 import { IntlMessage } from 'bluesquare-components';
-import { IntegratedCampaign } from 'plugins/polio/js/src/constants/types';
 import { LinkTo } from 'Iaso/components/nav/LinkTo';
+import { IntegratedCampaign } from 'plugins/polio/js/src/constants/types';
 import { CampaignAsyncSelect } from '../../../CampaignsAsyncSelect/CampaignsAsyncSelect';
 
 type Props = {
