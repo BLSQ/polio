@@ -6,12 +6,12 @@ import React, {
     useMemo,
 } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
-import { SxProps } from '@mui/material';
 import Autocomplete, {
     AutocompleteRenderGetTagProps,
 } from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
-import { makeStyles } from '@mui/styles';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
+import type { SxProps } from '@mui/system/styleFunctionSx/styleFunctionSx';
 import {
     DropdownOptions,
     IntlMessage,

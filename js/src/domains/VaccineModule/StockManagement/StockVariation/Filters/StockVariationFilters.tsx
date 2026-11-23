@@ -5,7 +5,8 @@ import React, {
     useMemo,
     useState,
 } from 'react';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { DatePicker, useRedirectTo, useSafeIntl } from 'bluesquare-components';
 import { isEqual } from 'lodash';
 import InputComponent from '../../../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';

@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
-import { Box, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { blue } from '@mui/material/colors';
+import Typography from '@mui/material/Typography/Typography';
 import {
     Bar,
     BarChart,

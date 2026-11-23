@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Table, TableContainer } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Table from '@mui/material/Table/Table';
+import TableContainer from '@mui/material/TableContainer/TableContainer';
 import { LoadingSpinner } from 'bluesquare-components';
 import { Moment } from 'moment';
 import { Body } from './Body';

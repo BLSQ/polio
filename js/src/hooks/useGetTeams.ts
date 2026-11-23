@@ -1,4 +1,4 @@
-import { useApiTeamsDropdownList } from '../../../../../hat/assets/js/apps/Iaso/api/teams';
+import { useApiTeamsDropdownList } from 'Iaso/api/teams/endpoints/teams/teams';
 
 export const useUserHasTeam = (userId?: number): boolean => {
     const { data } = useApiTeamsDropdownList(
@@ -8,7 +8,7 @@ export const useUserHasTeam = (userId?: number): boolean => {
               }
             : {},
         {
-            query : {
+            query: {
                 enabled: !!userId,
             },
         },

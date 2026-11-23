@@ -1,6 +1,8 @@
 import React, { FunctionComponent, useCallback, useMemo, useRef } from 'react';
 import RestoreFromTrashIcon from '@mui/icons-material/RestoreFromTrash';
-import { Box, Grid, Paper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Paper from '@mui/material/Paper/Paper';
 import { IconButton, useSafeIntl } from 'bluesquare-components';
 import classNames from 'classnames';
 import { Field, useFormikContext } from 'formik';

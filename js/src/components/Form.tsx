@@ -1,5 +1,5 @@
 import React, { FunctionComponent, ReactNode } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { useStyles } from '../styles/theme';
 
 type Props = {

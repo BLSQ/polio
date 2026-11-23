@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { Box, Divider } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Divider from '@mui/material/Divider/Divider';
 import {
     AddButton,
     ConfirmCancelModal,

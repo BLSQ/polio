@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { IntlMessage } from 'bluesquare-components';
 import { LinkTo } from 'Iaso/components/nav/LinkTo';
 import { IntegratedCampaign } from 'plugins/polio/js/src/constants/types';

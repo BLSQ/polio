@@ -1,7 +1,8 @@
 import React, { FunctionComponent, useMemo } from 'react';
 import AddIcon from '@mui/icons-material/Add';
-import { Box, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl, IconButton } from 'bluesquare-components';
 import classNames from 'classnames';
 import { useFormikContext } from 'formik';

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { Column, useSafeIntl } from 'bluesquare-components';
 import moment from 'moment';
 import { LinkTo } from 'Iaso/components/nav/LinkTo';

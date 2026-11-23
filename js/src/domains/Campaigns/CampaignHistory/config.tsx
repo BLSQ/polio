@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { IntlFormatMessage, useSafeIntl } from 'bluesquare-components';
 import { upperCase } from 'lodash';
 import moment from 'moment';

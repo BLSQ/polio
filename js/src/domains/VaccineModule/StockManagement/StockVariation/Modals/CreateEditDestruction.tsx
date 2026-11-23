@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { Alert, Box } from '@mui/material';
+import Alert from '@mui/material/Alert/Alert';
+import Box from '@mui/material/Box/Box';
 import {
     AddButton,
     ConfirmCancelModal,

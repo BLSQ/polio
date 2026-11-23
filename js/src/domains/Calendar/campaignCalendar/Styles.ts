@@ -1,5 +1,5 @@
 import { red } from '@mui/material/colors';
-import { makeStyles } from '@mui/styles';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 
 export const cellHeight = 50;
 export const smallCellHeight = 25;

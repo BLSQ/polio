@@ -1,7 +1,8 @@
 import React, { FunctionComponent } from 'react';
 import Add from '@mui/icons-material/Add';
-import { Box, Grid } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { commonStyles, LinkButton, useSafeIntl } from 'bluesquare-components';
 import { CsvButton } from '../../../../../../../hat/assets/js/apps/Iaso/components/Buttons/CsvButton';
 import { userHasPermission } from '../../../../../../../hat/assets/js/apps/Iaso/domains/users/utils';

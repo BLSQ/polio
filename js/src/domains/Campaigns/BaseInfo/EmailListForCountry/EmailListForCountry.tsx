@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { CircularProgress, Tooltip, Typography } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../../../../constants/messages';
 import { useCountryUsersGroup } from '../../../Config/CountryNotification/requests';

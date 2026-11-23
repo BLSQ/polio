@@ -1,5 +1,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { Box, Divider, Paper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Divider from '@mui/material/Divider/Divider';
+import Paper from '@mui/material/Paper/Paper';
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';
 import { Campaign, Side } from '../../../../constants/types';
 import { baseUrls } from '../../../../constants/urls';

@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { ToggleButton, ToggleButtonGroup } from '@mui/material';
+import ToggleButton from '@mui/material/ToggleButton/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup/ToggleButtonGroup';
 import { useRedirectToReplace } from 'bluesquare-components';
 import { useGetPeriodTypes } from '../hooks/useGetPeriodTypes';
 import { CalendarParams, PeriodType } from './types';

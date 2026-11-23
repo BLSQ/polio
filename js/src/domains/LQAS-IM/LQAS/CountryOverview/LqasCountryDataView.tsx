@@ -1,6 +1,7 @@
 import React, { FunctionComponent, useMemo } from 'react';
 
-import { Divider, Paper } from '@mui/material';
+import Divider from '@mui/material/Divider/Divider';
+import Paper from '@mui/material/Paper/Paper';
 import { DropdownOptions } from 'Iaso/types/utils';
 import { Campaign, MapShapes, Side } from '../../../../constants/types';
 import { LIST, MAP, paperElevation } from '../../shared/constants';

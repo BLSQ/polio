@@ -1,5 +1,8 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { Box, Divider, Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Divider from '@mui/material/Divider/Divider';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import { Field, useFormikContext } from 'formik';
 import { DateInput, NumberInput } from '../../../components/Inputs';
