@@ -247,6 +247,8 @@ class CampaignViewSet(ModelViewSet):
                 self: a self
                 roundStartFrom: a date
                 roundStartTo: a date
+                campaignType: campaign type slugs or ids, comma-separated (e.g. polio,measles);
+                    also accepted as campaign_types
             returns:
                 it generates a csv file export
         """
@@ -527,8 +529,24 @@ class CampaignViewSet(ModelViewSet):
         countries = params.get("countries") if params.get("countries") is not None else None
         campaign_groups = params.get("campaignGroups") if params.get("campaignGroups") is not None else None
         campaign_category = params.get("campaignCategory") if params.get("campaignCategory") is not None else None
+        # The calendar UI sends `campaignType`; the campaigns list uses `campaign_types`.
+        campaign_types = params.get("campaignType") or params.get("campaign_types")
+
         search = params.get("search")
         org_unit_groups = params.get("orgUnitGroups") if params.get("orgUnitGroups") is not None else None
+
+        if campaign_types:
+            campaign_types_list = campaign_types.split(",")
+            lookup = (
+                "campaign_types__id__in"
+                if all(t.isdigit() for t in campaign_types_list)
+                else "campaign_types__slug__in"
+            )
+            # Subquery, not a join: a campaign with two requested types would otherwise
+            # list each round twice. Campaign.objects is unfiltered (polio_objects is not).
+            rounds = rounds.filter(
+                campaign_id__in=Campaign.objects.filter(**{lookup: campaign_types_list}).values("id")
+            )
 
         # Filter out rounds on hold if requested
         if exclude_test_rounds:
