@@ -539,6 +539,7 @@
     "iaso.polio.label.Health_worker": "Health worker",
     "iaso.polio.label.healthCentreToDistrict": "Health centers to district",
     "iaso.polio.label.helpTextEditVaccineViaScope": "The list of vaccines comes from the scope",
+    "iaso.polio.label.availableVaccinesForVirus": "Available for this virus: {vaccines}",
     "iaso.polio.label.hideSubactivities": "Hide sub-activities",
     "iaso.polio.label.historyForRound": "History for round {roundNumber}",
     "iaso.polio.label.house_not_visited": "House not visited",

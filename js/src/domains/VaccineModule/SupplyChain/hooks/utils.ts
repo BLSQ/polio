@@ -12,12 +12,6 @@ import {
     VRF as VRFType,
 } from '../types';
 
-export const dosesPerVial = {
-    nOPV2: 50,
-    bOPV: 20,
-    mOPV2: 20,
-};
-
 const areArrayElementsChanged = (
     newElements: Array<Partial<PreAlert>> | Array<Partial<VARType>>,
 ): boolean => {

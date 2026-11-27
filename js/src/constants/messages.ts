@@ -122,6 +122,10 @@ const MESSAGES = defineMessages({
         defaultMessage: 'The list of vaccines comes from the scope',
         id: 'iaso.polio.label.helpTextEditVaccineViaScope',
     },
+    availableVaccinesForVirus: {
+        defaultMessage: 'Available for this virus: {vaccines}',
+        id: 'iaso.polio.label.availableVaccinesForVirus',
+    },
     org_units: {
         defaultMessage: 'Org units',
         id: 'iaso.label.orgUnit',

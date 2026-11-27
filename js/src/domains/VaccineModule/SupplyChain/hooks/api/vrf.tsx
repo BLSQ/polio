@@ -56,6 +56,14 @@ const defaults = {
     pageSize: 20,
     page: 1,
 };
+
+const roundUsesVaccine = (roundVaccines: string[], vaccine: string): boolean =>
+    roundVaccines.some(scopeVaccine =>
+        scopeVaccine
+            .split('&')
+            .map(token => token.trim())
+            .includes(vaccine),
+    );
 const getVrfList = (
     params: FormattedApiParams,
 ): Promise<{ results: VRF[] }> => {
