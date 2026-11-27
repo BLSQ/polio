@@ -1,5 +1,6 @@
 import React from 'react';
-import { Typography, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Typography from '@mui/material/Typography/Typography';
 import { BAR_HEIGHT } from './constants';
 
 export const determineColor = (data, palette, treshold): string => {

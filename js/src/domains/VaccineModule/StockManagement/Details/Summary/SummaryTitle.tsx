@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { IconButton } from 'bluesquare-components';
 import { DisplayIfUserHasPerm } from '../../../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';
 

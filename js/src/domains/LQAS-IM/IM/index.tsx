@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Grid, Box, Paper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Paper from '@mui/material/Paper/Paper';
 import { useSafeIntl } from 'bluesquare-components';
 import { UseQueryResult } from 'react-query';
 import TopBar from 'Iaso/components/nav/TopBarComponent';

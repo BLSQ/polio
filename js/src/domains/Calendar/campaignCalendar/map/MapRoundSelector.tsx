@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { ConfirmCancelModal, makeFullModal } from 'bluesquare-components';
 import InputComponent from '../../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import { DropdownOptions } from '../../../../../../../../hat/assets/js/apps/Iaso/types/utils';

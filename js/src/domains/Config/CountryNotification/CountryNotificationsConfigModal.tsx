@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import { isEqual } from 'lodash';
-import { useApiTeamsDropdownList } from 'Iaso/api/teams';
+import { useApiTeamsDropdownList } from 'Iaso/api/teams/endpoints/teams/teams';
 import ConfirmCancelDialogComponent from 'Iaso/components/dialogs/ConfirmCancelDialogComponent';
 import { UserAsyncSelect } from 'Iaso/components/filters/UserAsyncSelect';
 import InputComponent from 'Iaso/components/forms/InputComponent';

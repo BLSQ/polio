@@ -1,5 +1,5 @@
 import React, { FocusEventHandler, FunctionComponent, ReactNode } from 'react';
-import { CircularProgress } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress/CircularProgress';
 import TextField from '@mui/material/TextField';
 import { textPlaceholder } from 'bluesquare-components';
 import { FormControl } from './FormControl';

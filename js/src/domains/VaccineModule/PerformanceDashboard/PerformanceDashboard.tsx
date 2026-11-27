@@ -1,5 +1,8 @@
 import React, { FunctionComponent, useEffect } from 'react';
-import { Box, Container, Typography, Paper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Container from '@mui/material/Container/Container';
+import Paper from '@mui/material/Paper/Paper';
+import Typography from '@mui/material/Typography/Typography';
 import { ExternalLink, useSafeIntl } from 'bluesquare-components';
 import TopBar from 'Iaso/components/nav/TopBarComponent';
 import { useDomainName } from '../../../../../../../hat/assets/js/apps/Iaso/domains/app/hooks/useDomainName';

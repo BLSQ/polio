@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { ConfirmCancelModal, makeFullModal } from 'bluesquare-components';
 import { useFormikContext } from 'formik';
 import MESSAGES from '../../../../../constants/messages';

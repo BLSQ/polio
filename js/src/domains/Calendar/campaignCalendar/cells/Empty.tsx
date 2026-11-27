@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { TableCell } from '@mui/material';
+import TableCell from '@mui/material/TableCell/TableCell';
 import classnames from 'classnames';
 
 import { useStyles } from '../Styles';

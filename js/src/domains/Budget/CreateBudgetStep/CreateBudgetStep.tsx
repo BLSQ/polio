@@ -4,8 +4,11 @@ import React, {
     useEffect,
     useMemo,
 } from 'react';
-import { Box, Chip, Divider, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Chip from '@mui/material/Chip/Chip';
+import Divider from '@mui/material/Divider/Divider';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import {
     useSafeIntl,
     ConfirmCancelModal,
@@ -15,7 +18,7 @@ import {
 } from 'bluesquare-components';
 import { useFormik, FormikProvider } from 'formik';
 import { isEqual } from 'lodash';
-import { useApiTeamsDropdownList } from '../../../../../../../hat/assets/js/apps/Iaso/api/teams';
+import { useApiTeamsDropdownList } from 'Iaso/api/teams/endpoints/teams/teams';
 import InputComponent from '../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import {
     useApiErrorValidation,

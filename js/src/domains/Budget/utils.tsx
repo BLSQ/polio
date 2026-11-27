@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import Typography from '@mui/material/Typography/Typography';
 import { Link } from 'react-router-dom';
 import {
     Nullable,
@@ -22,7 +22,6 @@ export const formatRoundNumber = (roundNumber: number | string): string => {
 export const formatRoundNumbers = (roundNumbers: Round[]): string => {
     return roundNumbers.map(i => formatRoundNumber(i.number)).join(', ');
 };
-
 
 export const extractFileName = (fileUrl: string): string => {
     let trimmedLeft = '';

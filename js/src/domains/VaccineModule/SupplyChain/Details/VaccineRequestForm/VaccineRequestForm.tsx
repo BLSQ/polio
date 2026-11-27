@@ -4,7 +4,9 @@ import React, {
     useEffect,
     useMemo,
 } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import { Field, useFormikContext } from 'formik';
 import { useSkipEffectUntilValue } from 'Iaso/hooks/useSkipEffectUntilValue';
@@ -15,7 +17,6 @@ import { NumberInput } from '../../../../../components/Inputs';
 import { DateInput } from '../../../../../components/Inputs/DateInput';
 import { MultiSelect } from '../../../../../components/Inputs/MultiSelect';
 import { SingleSelect } from '../../../../../components/Inputs/SingleSelect';
-import { IPV_VACCINE } from '../../constants';
 import {
     renderRoundTag,
     useCampaignDropDowns,
@@ -56,7 +57,6 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
         vaccines,
         rounds,
         isFetching: isFetchingDropDowns,
-        isFipvCampaign,
     } = useCampaignDropDowns({
         countryId: values?.vrf?.country,
         campaign: values?.vrf?.campaign,
@@ -100,24 +100,6 @@ export const VaccineRequestForm: FunctionComponent<Props> = ({
     useSkipEffectUntilValue(values?.vrf?.country, resetOnCountryChange);
     useSkipEffectUntilValue(values?.vrf?.campaign, resetOnCampaignChange);
     useSkipEffectUntilValue(values?.vrf?.vaccine_type, resetOnVaccineChange);
-
-    useEffect(() => {
-        if (
-            !values?.vrf?.campaign ||
-            isFieldDisabledEdit(vrfData) ||
-            !isFipvCampaign ||
-            values?.vrf?.vaccine_type
-        ) {
-            return;
-        }
-        setFieldValue('vrf.vaccine_type', IPV_VACCINE);
-    }, [
-        isFipvCampaign,
-        setFieldValue,
-        values?.vrf?.campaign,
-        values?.vrf?.vaccine_type,
-        vrfData,
-    ]);
 
     const isNormalType = values?.vrf?.vrf_type === 'Normal';
 

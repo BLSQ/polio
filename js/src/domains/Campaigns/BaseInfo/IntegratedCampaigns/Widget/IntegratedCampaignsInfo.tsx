@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react';
-import { Table, TableBody } from '@mui/material';
+import Table from '@mui/material/Table/Table';
+import TableBody from '@mui/material/TableBody/TableBody';
 import { IntegratedCampaignRow } from './IntegratedCampaignRow';
 
 type Props = { integratedCampaigns?: any[] };

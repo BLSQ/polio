@@ -1,6 +1,8 @@
 import React, { FunctionComponent } from 'react';
 
-import { Box, Table, TableBody } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Table from '@mui/material/Table/Table';
+import TableBody from '@mui/material/TableBody/TableBody';
 import { useSafeIntl, LoadingSpinner } from 'bluesquare-components';
 
 import ErrorPaperComponent from '../../../../../../../hat/assets/js/apps/Iaso/components/papers/ErrorPaperComponent';

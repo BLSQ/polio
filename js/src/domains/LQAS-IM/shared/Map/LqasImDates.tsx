@@ -1,7 +1,8 @@
 import React, { FunctionComponent } from 'react';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import { Grid, Tooltip } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Grid from '@mui/material/Grid/Grid';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../../../../constants/messages';
 import { OK_COLOR, FAIL_COLOR } from '../../../../styles/constants';

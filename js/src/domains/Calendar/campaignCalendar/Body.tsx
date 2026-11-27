@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react';
 
-import { TableBody } from '@mui/material';
+import TableBody from '@mui/material/TableBody/TableBody';
 
 import { CampaignRows } from './CampaignRows';
 import { RoundPopperContextProvider } from './contexts/RoundPopperContext';

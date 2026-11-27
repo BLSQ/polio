@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Typography, Chip, Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Chip from '@mui/material/Chip/Chip';
+import Typography from '@mui/material/Typography/Typography';
 import { useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../../../../constants/messages';
 import { LqasImCampaign } from '../../types';

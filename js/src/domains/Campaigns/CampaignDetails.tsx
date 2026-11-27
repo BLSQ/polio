@@ -4,7 +4,9 @@ import React, {
     useEffect,
     useRef,
 } from 'react';
-import { Box, Button, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
+import Grid from '@mui/material/Grid/Grid';
 import {
     LoadingSpinner,
     useGoBack,
