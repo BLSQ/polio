@@ -1,4 +1,6 @@
+import functools
 import math
+import operator
 
 from django.db.models import Model
 from django.http import HttpResponse
@@ -65,12 +67,12 @@ class PublicVaccineStockViewset(ViewSet):
 
     def _get_json_data(self, queryset, usable):
         all_entries = [stock.usable_vials() if usable else stock.unusable_vials() for stock in queryset]
-        all_entries = sum(all_entries, [])
+        all_entries = functools.reduce(operator.iadd, all_entries, [])
         return all_entries
 
     def _get_earmarked_totals(self, queryset):
         earmarked = [stock.earmarked_vials() for stock in queryset]
-        earmarked = sum(earmarked, [])
+        earmarked = functools.reduce(operator.iadd, earmarked, [])
         return self._compute_totals(earmarked)
 
     def _apply_filter_and_sort(self, json_data, request):

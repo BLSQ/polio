@@ -47,7 +47,7 @@ def _backfill_model(Model, model_name):
         try:
             md5 = calculate_md5(instance.file)
         except (FileNotFoundError, OSError) as e:
-            print(f"there was an error while calculating file md5 - {str(e)}")
+            print(f"there was an error while calculating file md5 - {e!s}")
             continue
 
         if md5:

@@ -43,7 +43,7 @@ _NATIONAL_SCHEMA = {
         "status_score": _SCORE_VALUE_SCHEMA,
         "round": {"type": "string"},
     },
-    "required": INDICATOR_KEYS + ["status_score", "round"],
+    "required": [*INDICATOR_KEYS, "status_score", "round"],
 }
 
 _REGION_SCHEMA = {
@@ -52,7 +52,7 @@ _REGION_SCHEMA = {
         **dict.fromkeys(INDICATOR_KEYS, _INDICATOR_VALUE_SCHEMA),
         "status_score": _SCORE_VALUE_SCHEMA,
     },
-    "required": INDICATOR_KEYS + ["status_score"],
+    "required": [*INDICATOR_KEYS, "status_score"],
 }
 
 # Districts always carry the section scores + a region, but indicators are optional
@@ -64,7 +64,7 @@ _DISTRICT_SCHEMA = {
         "region": {"type": "string"},
         **dict.fromkeys(INDICATOR_KEYS, _INDICATOR_VALUE_SCHEMA),
     },
-    "required": DISTRICT_SCORE_KEYS + ["region"],
+    "required": [*DISTRICT_SCORE_KEYS, "region"],
 }
 
 _TOTALS_SCHEMA = {

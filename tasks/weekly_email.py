@@ -136,7 +136,7 @@ Ci-dessous un résumé des informations de la campagne {obr_name} disponibles da
 Pour des conseils sur la mise à jour : contactez l'équipe RRT Carolyne Gathenji gathenjic@who.int et Myk Mwanza mwanza@who.int
 
 Message automatisé du suivi chronologique.
-    """
+    """  # noqa: RUF001
     # Portuguese
     elif lang == "pt":
         email_text = f"""Prezado(a) coordenador(a) da GPEI – {country.name},
@@ -159,7 +159,7 @@ Segue em baixo um resumo das informações da campanha {obr_name} disponíveis n
 Para orientações sobre atualizações: entre em contato com a equipe RRT, Carolyne Gathenji gathenjic@who.int e Myk Mwanza mwanza@who.int
 
 Mensagem automatizada do rastreador de cronograma.
-    """
+    """  # noqa: RUF001
     # English
     else:
         email_text = f"""Dear GPEI coordinator – {country.name},
@@ -183,7 +183,7 @@ If there are missing data or dates; visit {url} to update
 For guidance on updating: contact RRT team Carolyne Gathenji gathenjic@who.int and Myk Mwanza mwanza@who.int
 
 Timeline tracker Automated message.
-    """
+    """  # noqa: RUF001
 
     logger.info(f"Sending to {len(emails)} recipients")
 

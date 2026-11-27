@@ -624,7 +624,7 @@ class CampaignViewSet(ModelViewSet):
                         row["rounds"][str(month)].append(self.get_round(round, campaign, country))
                         data_row.append(row)
                     else:
-                        row = [sub for sub in data_row if sub["country_id"] == country.id][0]
+                        row = next(sub for sub in data_row if sub["country_id"] == country.id)
                         row_index = data_row.index(row)
                         if row is not None:
                             month = round.started_at.month
@@ -696,7 +696,7 @@ to ensure optimal coordination of activities. The information should be updated 
 For more follow up: contact RRT team.
 
 Timeline tracker Automated message
-    """
+    """  # noqa: RUF001
 
     @action(methods=["POST"], detail=True, serializer_class=serializers.Serializer)
     def send_notification_email(self, request, pk, **kwargs):
