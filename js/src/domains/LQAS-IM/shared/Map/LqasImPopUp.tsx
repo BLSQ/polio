@@ -1,6 +1,7 @@
 import React, { useRef, FunctionComponent } from 'react';
-import { Card, CardContent } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Card from '@mui/material/Card/Card';
+import CardContent from '@mui/material/CardContent/CardContent';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import {
     commonStyles,
     mapPopupStyles,

@@ -1,5 +1,6 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Button } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
 import { useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../messages';
 import { TabValue } from '../types';

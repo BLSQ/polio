@@ -1,8 +1,8 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { PlaylistAdd } from '@mui/icons-material';
+import PlaylistAdd from '@mui/icons-material/PlaylistAdd';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import { Tooltip } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { useSafeIntl } from 'bluesquare-components';
 import classNames from 'classnames';
 import MESSAGES from '../../../constants/messages';

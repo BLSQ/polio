@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Tab, Tabs } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Tab from '@mui/material/Tab/Tab';
+import Tabs from '@mui/material/Tabs/Tabs';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { commonStyles, useSafeIntl } from 'bluesquare-components';
 import MESSAGES from '../../../../constants/messages';
 import { LIST, MAP } from '../constants';

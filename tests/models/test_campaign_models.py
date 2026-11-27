@@ -1,3 +1,6 @@
+import re
+
+from pathlib import Path
 from unittest.mock import patch
 
 from django.db import IntegrityError
@@ -17,6 +20,27 @@ from plugins.polio.models.base import (
 )
 from plugins.polio.permissions import POLIO_BUDGET_PERMISSION
 from plugins.polio.tests.api.test import PolioTestCaseMixin
+
+
+VIRUS_CONSTANTS_TS_PATH = Path(__file__).resolve().parents[2] / "js" / "src" / "constants" / "virus.ts"
+
+
+def read_frontend_vaccines_by_virus():
+    """`VACCINES_BY_VIRUS` as the frontend declares it, read out of its TypeScript literal.
+
+    The matrix is duplicated on purpose: the backend validates scopes against it and the
+    frontend filters the vaccine pickers with it, and neither imports the other. Parsing the
+    source is the only thing that keeps the two copies from drifting apart.
+    """
+    source = VIRUS_CONSTANTS_TS_PATH.read_text(encoding="utf-8")
+    literal = re.search(r"export const VACCINES_BY_VIRUS[^{]*\{(.*?)\n\};", source, re.DOTALL)
+    if not literal:
+        raise AssertionError(f"no VACCINES_BY_VIRUS literal found in {VIRUS_CONSTANTS_TS_PATH}")
+    entries = re.findall(r"'?([A-Za-z0-9 &]+?)'?\s*:\s*\[([^\]]*)\]", literal.group(1), re.DOTALL)
+    return {
+        virus.strip(): [vaccine.strip().strip("'\"") for vaccine in vaccines.split(",") if vaccine.strip()]
+        for virus, vaccines in entries
+    }
 
 
 class CampaignTestCase(TestCase, PolioTestCaseMixin):
@@ -747,6 +771,19 @@ class VaccineMatrixTestCase(TestCase):
             with self.subTest(virus=virus):
                 self.assertIn("IPV", allowed_vaccines)
                 self.assertIn("fIPV", allowed_vaccines)
+
+    def test_matrix_matches_the_frontend_copy(self):
+        """The frontend mirror must stay identical, values and order: it decides what the pickers
+        offer, and this matrix is what then rejects a submission (section 3)."""
+        expected_matrix = VACCINES_BY_VIRUS
+        received_matrix = read_frontend_vaccines_by_virus()
+
+        # A regex that stopped matching would otherwise make this test pass on an empty dict.
+        self.assertTrue(received_matrix, f"the frontend matrix parsed as empty from {VIRUS_CONSTANTS_TS_PATH}")
+        self.assertEqual(sorted(expected_matrix), sorted(received_matrix))
+        for virus, expected_vaccines in expected_matrix.items():
+            with self.subTest(virus=virus):
+                self.assertEqual(expected_vaccines, received_matrix[virus])
 
     def test_invalid_vaccines_for_virus_reports_the_rejected_vaccines_sorted(self):
         expected_vaccines = ["bOPV", "mOPV2"]

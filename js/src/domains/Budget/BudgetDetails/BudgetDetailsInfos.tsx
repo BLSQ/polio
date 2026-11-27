@@ -1,15 +1,13 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableRow,
-    useMediaQuery,
-    useTheme,
-    Box,
-    Grid,
-} from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import useTheme from '@mui/material/styles/useTheme';
+import Table from '@mui/material/Table/Table';
+import TableBody from '@mui/material/TableBody/TableBody';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableRow from '@mui/material/TableRow/TableRow';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
+import useMediaQuery from '@mui/system/useMediaQuery/useMediaQuery';
 import { useSafeIntl, Paginated } from 'bluesquare-components';
 import classnames from 'classnames';
 import { DisplayIfUserHasPerm } from '../../../../../../../hat/assets/js/apps/Iaso/components/DisplayIfUserHasPerm';

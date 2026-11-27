@@ -378,13 +378,20 @@ class RoundQuerySet(models.QuerySet):
         return data
 
     def filter_by_vaccine_name(self, vaccine_name):
+        requested_vaccines = supply_chain_vaccines_for_scope_vaccine(vaccine_name)
+        if not requested_vaccines:
+            return self.none()
+        scope_vaccines = set(scope_vaccines_for_individual_vaccine(requested_vaccines[0]))
+        for requested_vaccine in requested_vaccines[1:]:
+            scope_vaccines &= set(scope_vaccines_for_individual_vaccine(requested_vaccine))
         return (
             self.select_related("campaign")
             .prefetch_related("scopes", "campaign__scopes")
             .filter(
-                (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine=vaccine_name))
-                | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine=vaccine_name))
+                (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine__in=scope_vaccines))
+                | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine__in=scope_vaccines))
             )
+            .distinct()
         )
 
     def filter_for_user(self: QuerySet, user: Union[User, AnonymousUser]):
@@ -711,13 +718,7 @@ class CampaignQuerySet(models.QuerySet):
 
 class PolioCampaignManager(models.Manager):
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .prefetch_related("campaign_types")
-            # Ugly patch to allow fIPV campaigns to be launched. This needs to be fixed, fIPV is not a campaign type, it's a vaccine type for polio campaigns.
-            .filter(campaign_types__name__in=[CampaignType.POLIO, "fIPV"])
-        )
+        return super().get_queryset().prefetch_related("campaign_types").filter(campaign_types__name=CampaignType.POLIO)
 
 
 class Campaign(SoftDeletableModel):

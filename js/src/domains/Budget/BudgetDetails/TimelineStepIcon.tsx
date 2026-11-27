@@ -1,8 +1,8 @@
 import React, { FunctionComponent } from 'react';
-import { CheckCircleOutline } from '@mui/icons-material';
+import CheckCircleOutline from '@mui/icons-material/CheckCircleOutline';
 import ClearIcon from '@mui/icons-material/Clear';
 import FastForwardIcon from '@mui/icons-material/FastForward';
-import { Tooltip } from '@mui/material';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { useSafeIntl } from 'bluesquare-components';
 import classnames from 'classnames';
 import MESSAGES from '../../../constants/messages';

@@ -7,17 +7,11 @@ from plugins.polio.models import (
     SubActivity,
     SubActivityScope,
 )
+from plugins.polio.models.base import normalize_vaccine_for_supply_chain
 from plugins.polio.tests.api.campaigns.dropdown.common import CampaignDropdownAPIBase
 
 
 class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropdownAPIBase):
-    """What `CampaignDropdownOptionSerializer` and `RoundDropdownOptionSerializer` put in the payload.
-
-    The vaccine lists are the interesting part: they reproduce `Campaign.single_vaccines_extended_list`
-    and `Round.single_vaccine_list_extended` off prefetched scope rows, since the model properties
-    each cost a query per object.
-    """
-
     def test_payload_matches_the_swagger_schema(self):
         self.client.force_authenticate(self.user)
 
@@ -137,9 +131,48 @@ class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropd
         expected = sorted([VACCINES[1][0], VACCINES[2][0]])
         self.assertEqual(expected, received["vaccines"])
 
+    def test_fipv_scopes_are_advertised_as_ipv(self):
+        """fIPV is not a VRF type nor a stock: the pickers this payload fills would reject it."""
+        self.client.force_authenticate(self.user)
+        self.campaign.scopes.all().delete()
+        fipv_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine="fIPV")
+        fipv_scope.group.org_units.add(self.district)
+
+        received = self.get_campaign_payload()
+
+        expected = ["IPV"]
+        self.assertEqual(expected, received["vaccines"])
+        self.assertEqual([expected, expected, expected], [round["vaccines"] for round in received["rounds"]])
+
+    def test_combined_fipv_scopes_are_advertised_as_their_supply_chain_vaccines(self):
+        self.client.force_authenticate(self.user)
+        self.campaign.scopes.all().delete()
+        combined_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine="fIPV & nOPV2")
+        combined_scope.group.org_units.add(self.district)
+
+        received = self.get_campaign_payload()
+
+        expected = sorted(["IPV", "nOPV2"])
+        self.assertEqual(expected, received["vaccines"])
+        self.assertEqual([expected, expected, expected], [round["vaccines"] for round in received["rounds"]])
+
+    def test_ipv_is_advertised_once_when_both_ipv_and_fipv_are_scoped(self):
+        """Normalizing makes the two scopes collapse onto the single vaccine that supplies them."""
+        self.client.force_authenticate(self.user)
+        self.campaign.scopes.all().delete()
+        for vaccine in ["IPV", "fIPV & bOPV"]:
+            scope = CampaignScope.objects.create(campaign=self.campaign, vaccine=vaccine)
+            scope.group.org_units.add(self.district)
+
+        received = self.get_campaign_payload()
+
+        expected = sorted(["IPV", "bOPV"])
+        self.assertEqual(expected, received["vaccines"])
+
     def test_vaccines_match_the_model_properties(self):
         """The payload against the properties it replaces, over a mix of campaign, round and
-        sub-activity scopes, a combined vaccine and a scope whose group holds no org unit."""
+        sub-activity scopes, a combined vaccine, an fIPV combination and a scope whose group
+        holds no org unit."""
         self.client.force_authenticate(self.user)
 
         for separate_scopes_per_round in [False, True]:
@@ -157,6 +190,8 @@ class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropd
                 campaign_scope.group.org_units.add(self.district)
                 combined_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[3][0])
                 combined_scope.group.org_units.add(self.district)
+                fipv_scope = CampaignScope.objects.create(campaign=self.campaign, vaccine="fIPV & nOPV2")
+                fipv_scope.group.org_units.add(self.district)
                 CampaignScope.objects.create(campaign=self.campaign, vaccine=VACCINES[2][0])
 
                 round_scope = RoundScope.objects.create(round=self.round_2, vaccine=VACCINES[1][0])
@@ -170,13 +205,17 @@ class CampaignDropdownSerializersAPITestCase(SwaggerTestCaseMixin, CampaignDropd
                 received = self.get_campaign_payload()
                 campaign = Campaign.objects.get(pk=self.campaign.pk)
 
-                self.assertEqual(campaign.single_vaccines_extended_list, received["vaccines"])
+                self.assertEqual(campaign.supply_chain_vaccines_list, received["vaccines"])
                 self.assertTrue(received["vaccines"])
+                self.assertNotIn("fIPV", received["vaccines"])
 
                 rounds_by_number = {round["number"]: round for round in received["rounds"]}
                 for round in campaign.rounds.all():
                     with self.subTest(round=round.number):
-                        self.assertEqual(
-                            round.single_vaccine_list_extended,
-                            rounds_by_number[round.number]["vaccines"],
+                        expected_vaccines = sorted(
+                            {
+                                normalize_vaccine_for_supply_chain(vaccine)
+                                for vaccine in round.single_vaccine_list_extended
+                            }
                         )
+                        self.assertEqual(expected_vaccines, rounds_by_number[round.number]["vaccines"])

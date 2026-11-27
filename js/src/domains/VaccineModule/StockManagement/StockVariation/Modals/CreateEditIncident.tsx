@@ -1,13 +1,11 @@
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import {
-    Box,
-    FormControl,
-    FormControlLabel,
-    FormLabel,
-    Radio,
-    RadioGroup,
-    Typography,
-} from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import FormControl from '@mui/material/FormControl/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel/FormControlLabel';
+import FormLabel from '@mui/material/FormLabel/FormLabel';
+import Radio from '@mui/material/Radio/Radio';
+import RadioGroup from '@mui/material/RadioGroup/RadioGroup';
+import Typography from '@mui/material/Typography/Typography';
 import {
     AddButton,
     ConfirmCancelModal,

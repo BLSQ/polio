@@ -1,16 +1,14 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { PlaylistAdd } from '@mui/icons-material';
+import PlaylistAdd from '@mui/icons-material/PlaylistAdd';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
-import {
-    Box,
-    Card,
-    CardActionArea,
-    CardContent,
-    Divider,
-    Grid,
-    Typography,
-} from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Card from '@mui/material/Card/Card';
+import CardActionArea from '@mui/material/CardActionArea/CardActionArea';
+import CardContent from '@mui/material/CardContent/CardContent';
+import Divider from '@mui/material/Divider/Divider';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { formatThousand, useSafeIntl } from 'bluesquare-components';
 import classNames from 'classnames';
 import moment from 'moment';

@@ -5,8 +5,12 @@ import React, {
     useState,
     useCallback,
 } from 'react';
-import { TabContext, TabList, TabPanel } from '@mui/lab';
-import { Box, Grid, Tab } from '@mui/material';
+import TabContext from '@mui/lab/TabContext/TabContext';
+import TabList from '@mui/lab/TabList/TabList';
+import TabPanel from '@mui/lab/TabPanel/TabPanel';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Tab from '@mui/material/Tab/Tab';
 import {
     useSafeIntl,
     useSkipEffectOnMount,

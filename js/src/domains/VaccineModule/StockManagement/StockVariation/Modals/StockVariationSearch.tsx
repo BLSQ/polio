@@ -4,7 +4,8 @@ import React, {
     useEffect,
     useState,
 } from 'react';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { useRedirectTo, useSafeIntl } from 'bluesquare-components';
 import InputComponent from '../../../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';
 import { SearchButton } from '../../../../../../../../../hat/assets/js/apps/Iaso/components/SearchButton';

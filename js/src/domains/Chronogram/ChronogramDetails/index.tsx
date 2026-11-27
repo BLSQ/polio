@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 
 import { LoadingSpinner, useGoBack, useSafeIntl } from 'bluesquare-components';
 

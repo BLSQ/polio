@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { Box, Grid } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
 import { useSafeIntl, useRedirectToReplace } from 'bluesquare-components';
 import { useLocation } from 'react-router-dom';
 import TopBar from '../../../../../../../../hat/assets/js/apps/Iaso/components/nav/TopBarComponent';

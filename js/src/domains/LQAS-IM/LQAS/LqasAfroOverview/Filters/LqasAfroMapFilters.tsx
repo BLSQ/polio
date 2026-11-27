@@ -1,5 +1,9 @@
 import React, { FunctionComponent, useCallback, useState } from 'react';
-import { Box, FormControlLabel, FormGroup, Grid, Switch } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import FormControlLabel from '@mui/material/FormControlLabel/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup/FormGroup';
+import Grid from '@mui/material/Grid/Grid';
+import Switch from '@mui/material/Switch/Switch';
 import { useSafeIntl, InputWithInfos } from 'bluesquare-components';
 import DatesRange from '../../../../../../../../../hat/assets/js/apps/Iaso/components/filters/DatesRange';
 import InputComponent from '../../../../../../../../../hat/assets/js/apps/Iaso/components/forms/InputComponent';

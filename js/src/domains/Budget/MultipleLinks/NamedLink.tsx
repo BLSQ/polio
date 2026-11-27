@@ -1,8 +1,9 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import ClearIcon from '@mui/icons-material/Clear';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { Grid, IconButton } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Grid from '@mui/material/Grid/Grid';
+import IconButton from '@mui/material/IconButton/IconButton';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import {
     // @ts-ignore
     useSafeIntl,

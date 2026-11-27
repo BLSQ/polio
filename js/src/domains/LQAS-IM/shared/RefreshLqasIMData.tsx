@@ -5,7 +5,8 @@ import React, {
     useState,
 } from 'react';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import { Box, Button } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
 import { useSafeIntl, LoadingSpinner } from 'bluesquare-components';
 import moment from 'moment';
 import { useQueryClient } from 'react-query';

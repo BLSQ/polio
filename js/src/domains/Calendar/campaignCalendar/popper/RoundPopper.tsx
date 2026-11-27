@@ -1,6 +1,11 @@
 import React, { FunctionComponent, useCallback } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
-import { Box, Button, Grid, IconButton, Paper, Popper } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
+import Grid from '@mui/material/Grid/Grid';
+import IconButton from '@mui/material/IconButton/IconButton';
+import Paper from '@mui/material/Paper/Paper';
+import Popper from '@mui/material/Popper/Popper';
 import {
     getTableUrl,
     textPlaceholder,

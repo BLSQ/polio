@@ -5,8 +5,11 @@ import React, {
     useCallback,
 } from 'react';
 
-import { Box, Grid, Theme, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import type { Theme } from '@mui/material/styles';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import {
     useSafeIntl,
     commonStyles,

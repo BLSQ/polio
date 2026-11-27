@@ -5,7 +5,11 @@ import React, {
     useEffect,
     useState,
 } from 'react';
-import { Box, FormControlLabel, FormGroup, Grid, Switch } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import FormControlLabel from '@mui/material/FormControlLabel/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup/FormGroup';
+import Grid from '@mui/material/Grid/Grid';
+import Switch from '@mui/material/Switch/Switch';
 import { LoadingSpinner, useSafeIntl } from 'bluesquare-components';
 import { FieldProps, useField } from 'formik';
 import cloneDeep from 'lodash/cloneDeep';

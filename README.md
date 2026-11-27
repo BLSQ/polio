@@ -248,3 +248,8 @@ This way doesn't require the task worker to be running.
 - Call the url `/tasks/launch_task/plugins.polio.tasks.weekly_email.send_email/polio_cron_task_user/`
 - in the terminal launch the task worker **tasks_worker**, run`docker compose run iaso manage tasks_worker`
 - The output should show you an email with no errors (see screenshot). Such emails are printed out in the console, but not sent. If the list of errors is not empty, there's a bug in this PR.
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute, including the
+required DCO sign-off on every commit.

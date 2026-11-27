@@ -1,6 +1,7 @@
 import React, { FunctionComponent } from 'react';
-import { Box, Pagination } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import Box from '@mui/material/Box/Box';
+import Pagination from '@mui/material/Pagination/Pagination';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { Paginated } from 'bluesquare-components';
 import { BudgetEventCard } from '../../cards/BudgetEventCard';
 import { BudgetStep } from '../../types';

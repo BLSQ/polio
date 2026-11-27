@@ -1,7 +1,10 @@
 import React, { FunctionComponent } from 'react';
 
-import { TableRow, TableCell, Theme, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import type { Theme } from '@mui/material/styles';
+import TableCell from '@mui/material/TableCell/TableCell';
+import TableRow from '@mui/material/TableRow/TableRow';
+import Typography from '@mui/material/Typography/Typography';
+import makeStyles from '@mui/styles/makeStyles/makeStyles';
 import { commonStyles } from 'bluesquare-components';
 
 import classNames from 'classnames';

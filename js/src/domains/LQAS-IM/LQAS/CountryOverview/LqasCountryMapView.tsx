@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { LoadingSpinner, useSafeIntl } from 'bluesquare-components';
 import { GreyHashedPattern } from 'Iaso/components/maps/HashedPatterns/GreyHashedPattern';
 import MESSAGES from '../../../../constants/messages';

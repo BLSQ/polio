@@ -1,13 +1,11 @@
 import React, { FunctionComponent } from 'react';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
-    Box,
-    Grid,
-    Typography,
-} from '@mui/material';
+import Accordion from '@mui/material/Accordion/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary/AccordionSummary';
+import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid/Grid';
+import Typography from '@mui/material/Typography/Typography';
 import { IntlMessage } from 'bluesquare-components';
 import { FormattedMessage } from 'react-intl';
 import MESSAGES from '../../../constants/messages';

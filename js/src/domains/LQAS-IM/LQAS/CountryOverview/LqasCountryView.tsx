@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useCallback } from 'react';
-import { Box } from '@mui/material';
+import Box from '@mui/material/Box/Box';
 import { useRedirectToReplace } from 'bluesquare-components';
 import { UseQueryResult } from 'react-query';
 import { LqasUrlParams } from '..';

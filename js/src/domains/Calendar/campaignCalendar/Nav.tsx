@@ -4,7 +4,11 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import ChevronLeft from '@mui/icons-material/ChevronLeft';
 import ChevronRight from '@mui/icons-material/ChevronRight';
 import Today from '@mui/icons-material/Today';
-import { Box, Button, ClickAwayListener, Popper, Tooltip } from '@mui/material';
+import Box from '@mui/material/Box/Box';
+import Button from '@mui/material/Button/Button';
+import { ClickAwayListener } from '@mui/material/ClickAwayListener/ClickAwayListener';
+import Popper from '@mui/material/Popper/Popper';
+import Tooltip from '@mui/material/Tooltip/Tooltip';
 import { DesktopDatePicker as DatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
 import {
     useSafeIntl,
