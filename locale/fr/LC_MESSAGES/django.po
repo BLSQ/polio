@@ -221,7 +221,7 @@ msgstr "fIPV & bOPV"
 
 #: plugins/polio/models/base.py
 msgid "IPV & nOPV2"
-msgstr "IPV & nOPV"
+msgstr "IPV & nOPV2"
 
 #: plugins/polio/models/base.py
 msgid "fIPV & nOPV2"
