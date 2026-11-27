@@ -12,7 +12,7 @@ class LqasDataStoreViewSet(DataStoreViewSet):
         try:
             manager.parse_json_and_create_lqas_activities(serializer.validated_data["data"])
         except Exception as e:
-            raise ValidationError(f"LQAS parsing failed: {str(e)}")
+            raise ValidationError(f"LQAS parsing failed: {e!s}")
 
         return instance
 
@@ -23,6 +23,6 @@ class LqasDataStoreViewSet(DataStoreViewSet):
         try:
             manager.parse_json_and_update_lqas_activities(serializer.validated_data["data"])
         except Exception as e:
-            raise ValidationError(f"LQAS parsing failed: {str(e)}")
+            raise ValidationError(f"LQAS parsing failed: {e!s}")
 
         return instance

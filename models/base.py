@@ -236,7 +236,7 @@ class RoundDateHistoryEntry(models.Model):
             return f"Round date history {self.pk}"
         round_label = format_round_campaign_obr_name(self.round, empty="?")
         number = self.round.number if self.round.number is not None else "?"
-        return f"{round_label} – Round {number} ({self.created_at:%Y-%m-%d})"
+        return f"{round_label} - Round {number} ({self.created_at:%Y-%m-%d})"
 
 
 class ReasonForDelay(SoftDeletableModel):
@@ -453,7 +453,7 @@ class Round(models.Model):
         if self.number is not None:
             obr_name = format_round_campaign_obr_name(self, empty=None)
             if obr_name:
-                return f"{obr_name} – Round {self.number}"
+                return f"{obr_name} - Round {self.number}"
         return f"Round {self.pk}"
 
     def delete(self, *args, **kwargs):

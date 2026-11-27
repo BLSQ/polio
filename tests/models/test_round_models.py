@@ -142,7 +142,7 @@ class RoundModelTestCase(APITestCase, PolioTestCaseMixin):
         )
 
     def test_str_with_campaign_and_number(self):
-        self.assertEqual(str(self.rnd1), f"{self.obr_name} – Round {self.rnd1.number}")
+        self.assertEqual(str(self.rnd1), f"{self.obr_name} - Round {self.rnd1.number}")
 
     def test_str_without_campaign(self):
         round_without_campaign = pm.Round.objects.create(number=99)

@@ -7,10 +7,10 @@ __all__ = [
     "Chronogram",
     "ChronogramTask",
     "ChronogramTemplateTask",
-    "NotificationImport",
-    "VaccineRequestForm",
-    "OutgoingStockMovement",
     "DestructionReport",
     "IncidentReport",
+    "NotificationImport",
+    "OutgoingStockMovement",
     "VaccinePreAlert",
+    "VaccineRequestForm",
 ]

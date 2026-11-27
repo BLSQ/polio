@@ -26,8 +26,8 @@ from plugins.polio.api.vaccines.stock_management.vaccine_stock import (
 __all__ = [
     "CampaignCategory",
     "DestructionReportViewSet",
-    "EmbeddedVaccineStockManagementViewset",
     "EarmarkedStockViewSet",
+    "EmbeddedVaccineStockManagementViewset",
     "IncidentReportViewSet",
     "OutgoingStockMovementPatchSerializer",
     "OutgoingStockMovementSerializer",

@@ -174,7 +174,8 @@ class NestedVaccinePreAlertSerializerForPatch(NestedVaccinePreAlertSerializerFor
     can_edit = serializers.SerializerMethodField()
 
     class Meta(NestedVaccinePreAlertSerializerForPost.Meta):
-        fields = NestedVaccinePreAlertSerializerForPost.Meta.fields + [
+        fields = [
+            *NestedVaccinePreAlertSerializerForPost.Meta.fields,
             "id",
             "can_edit",
         ]
@@ -292,7 +293,8 @@ class NestedVaccineArrivalReportSerializerForPatch(NestedVaccineArrivalReportSer
     can_edit = serializers.SerializerMethodField()
 
     class Meta(NestedVaccineArrivalReportSerializerForPost.Meta):
-        fields = NestedVaccineArrivalReportSerializerForPost.Meta.fields + [
+        fields = [
+            *NestedVaccineArrivalReportSerializerForPost.Meta.fields,
             "id",
             "can_edit",
         ]

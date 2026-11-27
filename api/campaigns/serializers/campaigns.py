@@ -154,7 +154,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                 source_version_ids = set([ou.version_id for ou in org_units])
                 if len(source_version_ids) != 1:
                     raise serializers.ValidationError("All orgunit should be in the same source version")
-                source_version_id = list(source_version_ids)[0]
+                source_version_id = next(iter(source_version_ids))
             if not scope.group:
                 scope.group = Group.objects.create(name=name, source_version_id=source_version_id)
             else:
@@ -183,7 +183,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                     source_version_ids = set([ou.version_id for ou in org_units])
                     if len(source_version_ids) != 1:
                         raise serializers.ValidationError("All orgunit should be in the same source version")
-                    source_version_id = list(source_version_ids)[0]
+                    source_version_id = next(iter(source_version_ids))
                 scope, _ = round.scopes.get_or_create(vaccine=vaccine)
                 name = f"scope {scope.id} for round {round.number} campaign {campaign.obr_name}" + (
                     f" - {vaccine}" if vaccine else ""
@@ -258,7 +258,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                     source_version_ids = set([ou.version_id for ou in org_units])
                     if len(source_version_ids) != 1:
                         raise serializers.ValidationError("All orgunit should be in the same source version")
-                    source_version_id = list(source_version_ids)[0]
+                    source_version_id = next(iter(source_version_ids))
                 if not scope.group:
                     scope.group = Group.objects.create(name=name, source_version_id=source_version_id)
                 else:
@@ -318,7 +318,7 @@ class CampaignSerializer(serializers.ModelSerializer):
                         source_version_ids = set([ou.version_id for ou in org_units])
                         if len(source_version_ids) != 1:
                             raise serializers.ValidationError("All orgunit should be in the same source version")
-                        source_version_id = list(source_version_ids)[0]
+                        source_version_id = next(iter(source_version_ids))
                     name = f"scope for round {round_instance.number} campaign {instance.obr_name}" + (
                         f" - {vaccine}" if vaccine else ""
                     )

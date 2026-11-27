@@ -14,7 +14,7 @@ UNUSABLE_DATA_KEYS = ["vials_in", "vials_out"]
 
 
 def get_sheet_configs():
-    data_keys = ["country", "vaccine"] + COMMON_DATA_KEYS
+    data_keys = ["country", "vaccine", *COMMON_DATA_KEYS]
 
     variants_columns_keys = {
         "Usable": {
@@ -267,7 +267,7 @@ def download_xlsx_public_stock_variants(
 ):
     workbook = Workbook()
 
-    common_keys = ["country_name", "vaccine_type"] + COMMON_DATA_KEYS
+    common_keys = ["country_name", "vaccine_type", *COMMON_DATA_KEYS]
 
     for idx, sheet_name in enumerate(["usable", "unusable"]):
         if idx == 0:
