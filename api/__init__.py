@@ -1,4 +1,4 @@
-from plugins.polio.api.urls import router as router
+from plugins.polio.api.urls import router
 
 
 __all__ = ["router"]
