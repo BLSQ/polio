@@ -5,7 +5,11 @@ from django.core.management.base import BaseCommand
 from django.db.models import Q
 
 from plugins.polio.models import Round, VaccineStock
-from plugins.polio.models.base import VACCINES, VaccineStockHistory
+from plugins.polio.models.base import (
+    INDIVIDUAL_VACCINES,
+    VaccineStockHistory,
+    scope_vaccines_for_individual_vaccine,
+)
 from plugins.polio.tasks.archive_vaccine_stock_for_rounds import archive_stock_for_round
 
 
@@ -22,13 +26,14 @@ class Command(BaseCommand):
             .order_by("ended_at")
         )
 
-        vaccines = [v[0] for v in VACCINES]
+        vaccines = [v[0] for v in INDIVIDUAL_VACCINES]
 
         for vaccine in vaccines:
+            scope_vaccines = scope_vaccines_for_individual_vaccine(vaccine)
             rounds_for_vaccine = rounds_to_update.filter(
-                (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine=vaccine))
-                | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine=vaccine))
-            )
+                (Q(campaign__separate_scopes_per_round=False) & Q(campaign__scopes__vaccine__in=scope_vaccines))
+                | (Q(campaign__separate_scopes_per_round=True) & Q(scopes__vaccine__in=scope_vaccines))
+            ).distinct()
             for round_to_update in rounds_for_vaccine:
                 vaccine_stock_qs = VaccineStock.objects.filter(
                     vaccine=vaccine, country=round_to_update.campaign.country
