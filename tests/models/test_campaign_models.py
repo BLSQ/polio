@@ -1,3 +1,6 @@
+import re
+
+from pathlib import Path
 from unittest.mock import patch
 
 from django.db import IntegrityError
@@ -6,8 +9,38 @@ from django.test import TestCase
 from iaso.models import OrgUnit, OrgUnitType
 from iaso.test import TestCase
 from plugins.polio.models import VACCINES, Campaign, CampaignType
+from plugins.polio.models.base import (
+    INDIVIDUAL_VACCINES,
+    VACCINES_BY_VIRUS,
+    VIRUSES,
+    invalid_vaccines_for_virus,
+    normalize_vaccine_for_supply_chain,
+    scope_vaccines_for_individual_vaccine,
+    supply_chain_vaccines_for_scope_vaccine,
+)
 from plugins.polio.permissions import POLIO_BUDGET_PERMISSION
 from plugins.polio.tests.api.test import PolioTestCaseMixin
+
+
+VIRUS_CONSTANTS_TS_PATH = Path(__file__).resolve().parents[2] / "js" / "src" / "constants" / "virus.ts"
+
+
+def read_frontend_vaccines_by_virus():
+    """`VACCINES_BY_VIRUS` as the frontend declares it, read out of its TypeScript literal.
+
+    The matrix is duplicated on purpose: the backend validates scopes against it and the
+    frontend filters the vaccine pickers with it, and neither imports the other. Parsing the
+    source is the only thing that keeps the two copies from drifting apart.
+    """
+    source = VIRUS_CONSTANTS_TS_PATH.read_text(encoding="utf-8")
+    literal = re.search(r"export const VACCINES_BY_VIRUS[^{]*\{(.*?)\n\};", source, re.DOTALL)
+    if not literal:
+        raise AssertionError(f"no VACCINES_BY_VIRUS literal found in {VIRUS_CONSTANTS_TS_PATH}")
+    entries = re.findall(r"'?([A-Za-z0-9 &]+?)'?\s*:\s*\[([^\]]*)\]", literal.group(1), re.DOTALL)
+    return {
+        virus.strip(): [vaccine.strip().strip("'\"") for vaccine in vaccines.split(",") if vaccine.strip()]
+        for virus, vaccines in entries
+    }
 
 
 class CampaignTestCase(TestCase, PolioTestCaseMixin):
@@ -579,3 +612,190 @@ class CampaignSaveMethodTest(TestCase, PolioTestCaseMixin):
         campaign.refresh_from_db()
         self.assertEqual(campaign.obr_name, "Test Campaign")
         self.assertEqual(campaign.country, self.country)
+
+
+class VaccineMatrixTestCase(TestCase):
+    """The vaccine constants and helpers of IPV_VACCINE_TYPE_PLAN sections 2, 3 and 5.3.
+
+    These are pure functions, but they are the ones the plan calls the biggest
+    silent-failure risk: "IPV" is a substring of "fIPV", so any comparison that
+    is not token based matches the wrong vaccine.
+    """
+
+    def test_legacy_vaccine_values_keep_their_position(self):
+        """Tests and stored data index VACCINES positionally, so the 4 legacy values must not move."""
+        expected_vaccines = ["mOPV2", "nOPV2", "bOPV", "nOPV2 & bOPV"]
+        received_vaccines = [value for value, _label in VACCINES[:4]]
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_split_combined_vaccines_is_unchanged_for_the_legacy_values(self):
+        """The generic splitter must return exactly what the old code did for pre-IPV data."""
+        expected_splits = {
+            "mOPV2": {"mOPV2"},
+            "nOPV2": {"nOPV2"},
+            "bOPV": {"bOPV"},
+            "nOPV2 & bOPV": {"nOPV2", "bOPV"},
+        }
+        for vaccine, expected_single_vaccines in expected_splits.items():
+            with self.subTest(vaccine=vaccine):
+                received_single_vaccines = Campaign.split_combined_vaccines([vaccine])
+                self.assertEqual(expected_single_vaccines, received_single_vaccines)
+
+    def test_split_combined_vaccines_splits_the_new_values(self):
+        expected_splits = {
+            "IPV": {"IPV"},
+            "fIPV": {"fIPV"},
+            "IPV & bOPV": {"IPV", "bOPV"},
+            "fIPV & bOPV": {"fIPV", "bOPV"},
+            "IPV & nOPV2": {"IPV", "nOPV2"},
+            "fIPV & nOPV2": {"fIPV", "nOPV2"},
+            "IPV & nOPV2 & bOPV": {"IPV", "nOPV2", "bOPV"},
+            "fIPV & nOPV2 & bOPV": {"fIPV", "nOPV2", "bOPV"},
+        }
+        for vaccine, expected_single_vaccines in expected_splits.items():
+            with self.subTest(vaccine=vaccine):
+                received_single_vaccines = Campaign.split_combined_vaccines([vaccine])
+                self.assertEqual(expected_single_vaccines, received_single_vaccines)
+
+    def test_split_combined_vaccines_never_reads_fipv_as_ipv(self):
+        """Scope and display logic keeps the raw tokens: fIPV is not IPV outside the supply chain."""
+        received_single_vaccines = Campaign.split_combined_vaccines(["fIPV", "fIPV & bOPV"])
+        self.assertEqual({"fIPV", "bOPV"}, received_single_vaccines)
+        self.assertNotIn("IPV", received_single_vaccines)
+
+    def test_split_combined_vaccines_covers_every_vaccine_value(self):
+        """No VACCINES value splits into something that is not an individual vaccine."""
+        individual_vaccines = {value for value, _label in INDIVIDUAL_VACCINES} | {"fIPV"}
+        for vaccine, _label in VACCINES:
+            with self.subTest(vaccine=vaccine):
+                self.assertTrue(Campaign.split_combined_vaccines([vaccine]) <= individual_vaccines)
+
+    def test_normalize_vaccine_for_supply_chain_maps_fipv_to_ipv(self):
+        expected_normalizations = {"fIPV": "IPV", "IPV": "IPV", "bOPV": "bOPV", "nOPV2": "nOPV2", "mOPV2": "mOPV2"}
+        for vaccine, expected_vaccine in expected_normalizations.items():
+            with self.subTest(vaccine=vaccine):
+                self.assertEqual(expected_vaccine, normalize_vaccine_for_supply_chain(vaccine))
+
+    def test_scope_vaccines_for_ipv_cover_every_ipv_and_fipv_scope(self):
+        """An IPV stock or VRF must be found from an fIPV or combined scope too (section 5.3)."""
+        expected_vaccines = [
+            "IPV",
+            "fIPV",
+            "IPV & bOPV",
+            "fIPV & bOPV",
+            "IPV & nOPV2",
+            "fIPV & nOPV2",
+            "IPV & nOPV2 & bOPV",
+            "fIPV & nOPV2 & bOPV",
+        ]
+        received_vaccines = scope_vaccines_for_individual_vaccine("IPV")
+        self.assertEqual(sorted(expected_vaccines), sorted(received_vaccines))
+
+    def test_scope_vaccines_for_bopv_cover_the_combinations(self):
+        expected_vaccines = [
+            "bOPV",
+            "nOPV2 & bOPV",
+            "IPV & bOPV",
+            "fIPV & bOPV",
+            "IPV & nOPV2 & bOPV",
+            "fIPV & nOPV2 & bOPV",
+        ]
+        received_vaccines = scope_vaccines_for_individual_vaccine("bOPV")
+        self.assertEqual(sorted(expected_vaccines), sorted(received_vaccines))
+
+    def test_scope_vaccines_for_mopv2_stay_alone(self):
+        expected_vaccines = ["mOPV2"]
+        received_vaccines = scope_vaccines_for_individual_vaccine("mOPV2")
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_scope_vaccines_for_fipv_are_empty(self):
+        """fIPV is never a supply chain vaccine: callers must normalize before looking up."""
+        self.assertEqual([], scope_vaccines_for_individual_vaccine("fIPV"))
+
+    def test_every_individual_vaccine_has_scope_vaccines(self):
+        for vaccine, _label in INDIVIDUAL_VACCINES:
+            with self.subTest(vaccine=vaccine):
+                self.assertIn(vaccine, scope_vaccines_for_individual_vaccine(vaccine))
+
+    def test_supply_chain_vaccines_for_scope_vaccine_maps_a_scope_onto_its_stocks(self):
+        """What a scope value is supplied by: one VRF and one stock per vaccine."""
+        expected_supply_chain_vaccines = {
+            "mOPV2": ["mOPV2"],
+            "nOPV2 & bOPV": ["bOPV", "nOPV2"],
+            "IPV": ["IPV"],
+            "fIPV": ["IPV"],
+            "fIPV & bOPV": ["IPV", "bOPV"],
+            "IPV & nOPV2": ["IPV", "nOPV2"],
+            "fIPV & nOPV2 & bOPV": ["IPV", "bOPV", "nOPV2"],
+        }
+        for scope_vaccine, expected_vaccines in expected_supply_chain_vaccines.items():
+            with self.subTest(scope_vaccine=scope_vaccine):
+                received_vaccines = supply_chain_vaccines_for_scope_vaccine(scope_vaccine)
+                self.assertEqual(sorted(expected_vaccines), received_vaccines)
+
+    def test_supply_chain_vaccines_never_return_fipv(self):
+        """No VRF type and no stock is ever fIPV, whatever the scope says (section 5.3)."""
+        for vaccine, _label in VACCINES:
+            with self.subTest(vaccine=vaccine):
+                self.assertNotIn("fIPV", supply_chain_vaccines_for_scope_vaccine(vaccine))
+
+    def test_supply_chain_vaccines_of_every_scope_value_are_individual_vaccines(self):
+        individual_vaccines = {value for value, _label in INDIVIDUAL_VACCINES}
+        for vaccine, _label in VACCINES:
+            with self.subTest(vaccine=vaccine):
+                received_vaccines = supply_chain_vaccines_for_scope_vaccine(vaccine)
+                self.assertEqual([], sorted(set(received_vaccines) - individual_vaccines))
+
+    def test_supply_chain_vaccines_of_no_scope_vaccine_are_empty(self):
+        for scope_vaccine in [None, ""]:
+            with self.subTest(scope_vaccine=scope_vaccine):
+                self.assertEqual([], supply_chain_vaccines_for_scope_vaccine(scope_vaccine))
+
+    def test_supply_chain_vaccines_round_trip_with_scope_vaccines(self):
+        """The two helpers are each other's reverse, which is what the queries rely on."""
+        for vaccine, _label in INDIVIDUAL_VACCINES:
+            for scope_vaccine in scope_vaccines_for_individual_vaccine(vaccine):
+                with self.subTest(vaccine=vaccine, scope_vaccine=scope_vaccine):
+                    self.assertIn(vaccine, supply_chain_vaccines_for_scope_vaccine(scope_vaccine))
+
+    def test_matrix_only_allows_real_vaccine_and_virus_values(self):
+        vaccine_values = {value for value, _label in VACCINES}
+        virus_values = {value for value, _label in VIRUSES}
+        for virus, allowed_vaccines in VACCINES_BY_VIRUS.items():
+            with self.subTest(virus=virus):
+                self.assertIn(virus, virus_values)
+                self.assertEqual([], sorted(set(allowed_vaccines) - vaccine_values))
+
+    def test_matrix_allows_ipv_and_fipv_for_every_virus(self):
+        for virus, allowed_vaccines in VACCINES_BY_VIRUS.items():
+            with self.subTest(virus=virus):
+                self.assertIn("IPV", allowed_vaccines)
+                self.assertIn("fIPV", allowed_vaccines)
+
+    def test_matrix_matches_the_frontend_copy(self):
+        """The frontend mirror must stay identical, values and order: it decides what the pickers
+        offer, and this matrix is what then rejects a submission (section 3)."""
+        expected_matrix = VACCINES_BY_VIRUS
+        received_matrix = read_frontend_vaccines_by_virus()
+
+        # A regex that stopped matching would otherwise make this test pass on an empty dict.
+        self.assertTrue(received_matrix, f"the frontend matrix parsed as empty from {VIRUS_CONSTANTS_TS_PATH}")
+        self.assertEqual(sorted(expected_matrix), sorted(received_matrix))
+        for virus, expected_vaccines in expected_matrix.items():
+            with self.subTest(virus=virus):
+                self.assertEqual(expected_vaccines, received_matrix[virus])
+
+    def test_invalid_vaccines_for_virus_reports_the_rejected_vaccines_sorted(self):
+        expected_vaccines = ["bOPV", "mOPV2"]
+        received_vaccines = invalid_vaccines_for_virus("cVDPV2", {"mOPV2", "nOPV2", "bOPV"})
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_invalid_vaccines_for_virus_accepts_what_the_matrix_allows(self):
+        self.assertEqual([], invalid_vaccines_for_virus("cVDPV2", {"nOPV2", "IPV", "fIPV & nOPV2"}))
+
+    def test_invalid_vaccines_for_virus_constrains_nothing_without_a_matrix_row(self):
+        """No virus, or a virus left out of the matrix on purpose (PV2), constrains nothing."""
+        self.assertNotIn("PV2", VACCINES_BY_VIRUS)
+        for virus in [None, "", "PV2"]:
+            with self.subTest(virus=virus):
+                self.assertEqual([], invalid_vaccines_for_virus(virus, {"mOPV2", "bOPV"}))

@@ -152,6 +152,9 @@ def format_date(date: str, with_year: bool = False) -> str:
     return formatted_date
 
 
+OTHER_VACCINE_COLOR = "ea8418"
+
+
 def polio_vaccines(vaccine: str) -> Optional[str]:
     """
     returns a vaccine color
@@ -159,13 +162,11 @@ def polio_vaccines(vaccine: str) -> Optional[str]:
         parameters:
             vaccine (str): a vaccine string
         returns:
-            None when the color vaccine doesn't exist or the matching color when the vaccine exists
+            the matching color, or the shared "Other" color for any vaccine without one
     """
     vaccine_color = {"nOPV2": "00b0f0", "mOPV2": "66ff66", "bOPV": "ffff00", "nOPV2 & bOPV": "b04ccf"}
-    if vaccine not in vaccine_color.keys():
-        return None
 
-    return vaccine_color[vaccine]
+    return vaccine_color.get(vaccine, OTHER_VACCINE_COLOR)
 
 
 def cell_dimension_pattern_fill(

@@ -6,6 +6,7 @@ from plugins.polio.models import (
     Campaign,
     Round,
 )
+from plugins.polio.models.base import normalize_vaccine_for_supply_chain
 
 
 VACCINE_LIST_SCHEMA = serializers.ListField(child=serializers.CharField(), read_only=True)
@@ -17,7 +18,9 @@ def single_vaccines_of(scopes, *, only_with_org_units: bool = False):
         for scope in scopes
         if scope.vaccine and (not only_with_org_units or getattr(scope, "group_has_org_units", True))
     }
-    return sorted(Campaign.split_combined_vaccines(vaccines))
+    return sorted(
+        {normalize_vaccine_for_supply_chain(vaccine) for vaccine in Campaign.split_combined_vaccines(vaccines)}
+    )
 
 
 class RoundDropdownOptionSerializer(serializers.ModelSerializer):

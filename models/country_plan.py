@@ -47,7 +47,7 @@ class CountryPlan(SoftDeletableModel):
         on_delete=models.PROTECT,
         related_name="country_plans",
     )
-    vaccine = models.CharField(max_length=20, choices=VACCINES)
+    vaccine = models.CharField(max_length=30, choices=VACCINES)
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="country_plans", null=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

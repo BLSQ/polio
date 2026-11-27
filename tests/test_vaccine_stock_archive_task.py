@@ -716,3 +716,78 @@ class TestVaccineStockArchive(TaskAPITestCase):
             round_id=self.campaign_rdc_1_round_1, vaccine_stock__vaccine=pm.VACCINES[0][0]
         ).first()
         self.assertIsNotNone(archived_round)
+
+    def archive_campaign_with_scope(self, obr_name, vaccine, stock_vaccines):
+        """A DRC campaign with one finished round and one campaign level scope, plus its stocks."""
+        campaign = pm.Campaign.objects.create(
+            obr_name=obr_name,
+            country=self.org_unit_DRC,
+            account=self.account,
+            separate_scopes_per_round=False,
+        )
+        scope_group = m.Group.objects.create(name=f"{obr_name}_scope", source_version=self.source_version_1)
+        scope_group.org_units.set([self.org_unit_DRC])
+        pm.CampaignScope.objects.create(campaign=campaign, vaccine=vaccine, group=scope_group)
+        round_1 = pm.Round.objects.create(
+            campaign=campaign,
+            started_at=datetime.date(2021, 1, 1),
+            ended_at=datetime.date(2021, 1, 10),
+            number=1,
+        )
+        for stock_vaccine in stock_vaccines:
+            pm.VaccineStock.objects.get_or_create(
+                country=self.org_unit_DRC, vaccine=stock_vaccine, account=self.account
+            )
+        return round_1
+
+    def run_archive_task(self, campaign_name):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.post(
+            "/api/tasks/create/archivevaccinestock/",
+            # No vaccine given, so the task iterates the individual vaccines.
+            {"campaign": campaign_name, "date": "2021-01-26"},  # round 1 ended more than 14 days before
+            format="json",
+        )
+        self.assertJSONResponse(response, 200)
+        task = self.assertValidTaskAndInDB(response.json()["task"], status="QUEUED", name="archive_vaccine_stock")
+        self.runAndValidateTask(task, "SUCCESS")
+
+    def archived_vaccines(self, round):
+        return sorted(
+            pm.VaccineStockHistory.objects.filter(round=round).values_list("vaccine_stock__vaccine", flat=True)
+        )
+
+    def test_combined_fipv_round_archives_against_ipv_and_bopv_stocks(self):
+        """An "fIPV & bOPV" round archives against the IPV stock and the bOPV stock."""
+        round_1 = self.archive_campaign_with_scope("RDC_CAMPAIGN_FIPV_BOPV", "fIPV & bOPV", ["IPV", "bOPV"])
+        self.run_archive_task("RDC_CAMPAIGN_FIPV_BOPV")
+
+        expected_vaccines = ["IPV", "bOPV"]
+        received_vaccines = self.archived_vaccines(round_1)
+        self.assertEqual(sorted(expected_vaccines), received_vaccines)
+
+    def test_fipv_round_archives_against_the_ipv_stock(self):
+        """fIPV has no stock of its own: an fIPV round is archived under IPV (section 5.3)."""
+        round_1 = self.archive_campaign_with_scope("RDC_CAMPAIGN_FIPV", "fIPV", ["IPV"])
+        self.run_archive_task("RDC_CAMPAIGN_FIPV")
+
+        expected_vaccines = ["IPV"]
+        received_vaccines = self.archived_vaccines(round_1)
+        self.assertEqual(expected_vaccines, received_vaccines)
+
+    def test_combined_ipv_round_archives_against_ipv_and_nopv2_stocks(self):
+        """A combination produces one supply chain entry per vaccine, so one history row each."""
+        round_1 = self.archive_campaign_with_scope("RDC_CAMPAIGN_IPV_NOPV2", "IPV & nOPV2", ["IPV", "nOPV2"])
+        self.run_archive_task("RDC_CAMPAIGN_IPV_NOPV2")
+
+        expected_vaccines = ["IPV", "nOPV2"]
+        received_vaccines = self.archived_vaccines(round_1)
+        self.assertEqual(sorted(expected_vaccines), received_vaccines)
+
+    def test_no_fipv_stock_is_ever_created_by_the_task(self):
+        """The task iterates INDIVIDUAL_VACCINES, which holds no fIPV (section 5.3)."""
+        round_1 = self.archive_campaign_with_scope("RDC_CAMPAIGN_FIPV_NO_STOCK", "fIPV & bOPV", ["IPV", "bOPV"])
+        self.run_archive_task("RDC_CAMPAIGN_FIPV_NO_STOCK")
+
+        self.assertNotIn("fIPV", self.archived_vaccines(round_1))
+        self.assertFalse(pm.VaccineStock.objects.filter(vaccine="fIPV").exists())
